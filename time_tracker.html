@@ -160,9 +160,25 @@ function dbLoad() {
   }));
 }
 
-// --- Service Worker registration ---
+// --- Service Worker registration + auto-update ---
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js');
+  navigator.serviceWorker.register('./sw.js').then(reg => {
+    // Check for updates every 30 seconds
+    setInterval(() => reg.update(), 30000);
+    reg.addEventListener('updatefound', () => {
+      const nw = reg.installing;
+      nw.addEventListener('statechange', () => {
+        if (nw.state === 'activated') {
+          // New SW activated — reload to get fresh content
+          location.reload();
+        }
+      });
+    });
+  });
+  // Also reload when a new SW takes control
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    location.reload();
+  });
 }
 if (navigator.storage && navigator.storage.persist) {
   navigator.storage.persist();
