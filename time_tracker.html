@@ -25,6 +25,20 @@ header{
 padding:15px;
 background:#222;
 font-size:20px;
+position:relative;
+}
+
+.update-btn{
+position:absolute;
+right:10px;
+top:50%;
+transform:translateY(-50%);
+background:none;
+border:1px solid #555;
+color:#888;
+font-size:11px;
+padding:4px 8px;
+border-radius:4px;
 }
 
 .container{
@@ -105,6 +119,7 @@ font-size:14px;
 
 <header>
 Time Tracker  | 137.03
+<button class="update-btn" onclick="checkUpdate()">↻</button>
 </header>
 
 <div class="timer" id="timer"></div>
@@ -158,6 +173,20 @@ function dbLoad() {
     req.onsuccess = () => { db.close(); resolve(req.result || null); };
     req.onerror = () => { db.close(); reject(req.error); };
   }));
+}
+
+// --- Manual update ---
+function checkUpdate(){
+  caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))).then(() => {
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.getRegistration().then(reg => {
+        if (reg) reg.unregister().then(() => location.reload());
+        else location.reload();
+      });
+    } else {
+      location.reload();
+    }
+  });
 }
 
 // --- Service Worker registration + auto-update ---
