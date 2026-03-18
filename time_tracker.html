@@ -116,6 +116,8 @@ max-width:400px;
 }
 
 .rec-row{
+display:flex;
+align-items:center;
 padding:5px 0;
 border-bottom:1px solid rgba(255,255,255,0.06);
 font-size:11px;
@@ -128,16 +130,25 @@ color:rgba(255,255,255,0.45);
 font-size:9px;
 opacity:0.6;
 white-space:nowrap;
+margin-right:8px;
 }
 
 .rec-name{
 white-space:nowrap;
 font-weight:500;
+min-width:0;
+overflow:hidden;
+text-overflow:ellipsis;
+flex:1;
 }
 
 .rec-times{
 font-size:10px;
 white-space:nowrap;
+margin:0 8px;
+min-width:90px;
+flex-shrink:0;
+text-align:center;
 }
 
 .rec-times b{font-weight:600}
@@ -146,6 +157,9 @@ white-space:nowrap;
 white-space:nowrap;
 font-variant-numeric:tabular-nums;
 font-weight:600;
+text-align:right;
+min-width:62px;
+flex-shrink:0;
 }
 
 .rec-dur.live{color:#0a84ff}
@@ -180,20 +194,22 @@ border-radius:50%;
 
 .week-day.today{background:#0a84ff;color:white;font-weight:600}
 
-.work-grid{font-size:13px}
-
-/* --- Universal aligned rows --- */
-.ac-row{
-display:flex;
+.work-grid{
+display:grid;
+grid-template-columns:56px auto 18px auto auto;
+justify-content:center;
+row-gap:6px;
+column-gap:6px;
 align-items:center;
+font-size:13px;
 }
 
-.work-lbl{color:rgba(255,255,255,0.5);font-size:12px;white-space:nowrap}
-.work-val{font-variant-numeric:tabular-nums;white-space:nowrap}
-.work-from{color:rgba(255,255,255,0.35);font-size:11px;white-space:nowrap}
-.work-tgt{white-space:nowrap}
+.work-lbl{color:rgba(255,255,255,0.5);font-size:12px}
+.work-val{font-variant-numeric:tabular-nums}
+.work-from{color:rgba(255,255,255,0.35);font-size:11px}
+.work-tgt{}
 .work-target{color:#FF2FFF;font-weight:700}
-.work-pctcol{color:rgba(255,255,255,0.4);font-size:11px;white-space:nowrap}
+.work-pctcol{text-align:right;color:rgba(255,255,255,0.4);font-size:11px}
 
 .work-week-val{
 text-decoration:underline;
@@ -317,19 +333,30 @@ padding:8px 12px;
 
 .week-detail-dates{font-size:14px;color:rgba(255,255,255,0.7)}
 
-.wd-row{padding:8px 0;font-size:13px}
-.wd-row.wd-day-row{border-bottom:1px solid rgba(255,255,255,0.06)}
-.wd-row.wd-total-row{
-margin-top:8px;padding-top:8px;
-border-top:1px solid rgba(255,255,255,0.15);
-font-weight:600;font-size:14px;
+.wd-grid{
+display:grid;
+grid-template-columns:42px 35% 30% 1fr;
+align-items:center;
+padding:8px 0;
+font-size:13px;
 }
-.wd-day{font-weight:500;white-space:nowrap}
-.wd-val{font-variant-numeric:tabular-nums;white-space:nowrap}
-.wd-tgt{white-space:nowrap}
-.wd-tgt-inner{color:#FF2FFF;font-weight:700}
-.wd-tgt-from{color:rgba(255,255,255,0.35);font-size:11px}
-.wd-pct{color:rgba(255,255,255,0.5);white-space:nowrap}
+
+.wd-grid.wd-day-row{border-bottom:1px solid rgba(255,255,255,0.06)}
+
+.wd-grid.wd-total-row{
+margin-top:8px;
+padding-top:8px;
+border-top:1px solid rgba(255,255,255,0.15);
+font-weight:600;
+font-size:14px;
+}
+
+.wd-grid .wd-day{font-weight:500}
+.wd-grid .wd-val{text-align:left;font-variant-numeric:tabular-nums}
+.wd-grid .wd-tgt{text-align:left;white-space:nowrap}
+.wd-grid .wd-tgt-inner{color:#FF2FFF;font-weight:700}
+.wd-grid .wd-tgt-from{color:rgba(255,255,255,0.35);font-size:11px}
+.wd-grid .wd-pct{text-align:right;color:rgba(255,255,255,0.5)}
 
 /* --- Burger menu --- */
 
@@ -545,21 +572,17 @@ color:rgba(255,255,255,0.8);
   <div class="recent-records" id="recentRecords"></div>
   <div class="work-tracker">
     <div class="week-days" id="weekDays"></div>
-    <div class="work-grid" id="workGrid">
-      <div class="ac-row" style="margin-bottom:6px">
-        <span class="work-lbl">Сегодня</span>
-        <span class="work-val" id="workToday">0ч 0м</span>
-        <span class="work-from">из</span>
-        <span class="work-tgt"><span class="work-target">10ч</span></span>
-        <span class="work-pctcol" id="workTodayPct"></span>
-      </div>
-      <div class="ac-row">
-        <span class="work-lbl">Неделя</span>
-        <span class="work-val"><span class="work-week-val" id="workWeek" onclick="openWeekDetail(0)">0ч 0м</span></span>
-        <span class="work-from">из</span>
-        <span class="work-tgt"><span class="work-target">70ч</span></span>
-        <span class="work-pctcol" id="workWeekPct"></span>
-      </div>
+    <div class="work-grid">
+      <span class="work-lbl">Сегодня</span>
+      <span class="work-val" id="workToday">0ч 0м</span>
+      <span class="work-from">из</span>
+      <span class="work-tgt"><span class="work-target">10ч</span></span>
+      <span class="work-pctcol" id="workTodayPct"></span>
+      <span class="work-lbl">Неделя</span>
+      <span class="work-val"><span class="work-week-val" id="workWeek" onclick="openWeekDetail(0)">0ч 0м</span></span>
+      <span class="work-from">из</span>
+      <span class="work-tgt"><span class="work-target">70ч</span></span>
+      <span class="work-pctcol" id="workWeekPct"></span>
     </div>
   </div>
 </div>
@@ -600,8 +623,8 @@ color:rgba(255,255,255,0.8);
       <div class="burger-item-desc">Вставить запись в прошлом</div>
     </button>
     <button class="burger-item" onclick="closeBurger();checkUpdate()">
-      Обновить кеш HTML
-      <div class="burger-item-desc">Сбросить кеш HTML и перезагрузить</div>
+      Обновить кеш
+      <div class="burger-item-desc">Сбросить кеш и перезагрузить</div>
     </button>
     <button class="burger-item" onclick="closeBurger();openJsonView()">
       Просмотр JSON
@@ -862,51 +885,6 @@ function save(){
   dbSave(state).catch(()=>{});
 }
 
-// --- Universal column alignment ---
-function alignColumns(container){
-  const rows=Array.from(container.querySelectorAll('.ac-row'));
-  if(!rows.length)return;
-  const numCols=rows[0].children.length;
-  if(numCols<2)return;
-  // Reset
-  rows.forEach(row=>Array.from(row.children).forEach(c=>{
-    c.style.width='';c.style.flex='';c.style.marginLeft='';c.style.minWidth='';
-    c.style.overflow='';c.style.textOverflow='';c.style.textAlign='';
-  }));
-  // Find flex column (gets remaining space)
-  let flexIdx=-1;
-  Array.from(rows[0].children).forEach((c,i)=>{if(c.classList.contains('ac-flex'))flexIdx=i});
-  // Measure max natural width per column
-  const maxW=new Array(numCols).fill(0);
-  rows.forEach(row=>Array.from(row.children).forEach((c,i)=>{
-    if(i!==flexIdx)maxW[i]=Math.max(maxW[i],c.scrollWidth);
-  }));
-  const totalW=container.clientWidth;
-  const fixedSum=maxW.reduce((a,b)=>a+b,0);
-  if(flexIdx<0){
-    // All columns fixed: equal gaps fill remaining space
-    const gap=Math.max(6,Math.floor((totalW-fixedSum)/(numCols-1)));
-    rows.forEach(row=>Array.from(row.children).forEach((c,i)=>{
-      c.style.width=maxW[i]+'px';c.style.flexShrink='0';
-      c.style.textAlign=i===numCols-1?'right':'left';
-      if(i>0)c.style.marginLeft=gap+'px';
-    }));
-  } else {
-    // Has flex column: fixed cols measured, equal gaps, flex fills rest
-    const gap=Math.max(6,Math.floor((totalW-fixedSum)/(numCols-1)));
-    rows.forEach(row=>Array.from(row.children).forEach((c,i)=>{
-      if(i===flexIdx){
-        c.style.flex='1';c.style.minWidth='0';
-        c.style.overflow='hidden';c.style.textOverflow='ellipsis';c.style.whiteSpace='nowrap';
-      } else {
-        c.style.width=maxW[i]+'px';c.style.flexShrink='0';
-      }
-      c.style.textAlign=i===numCols-1?'right':'left';
-      if(i>0)c.style.marginLeft=gap+'px';
-    }));
-  }
-}
-
 // --- Build record row HTML element ---
 function shortDate(iso){
   if(!iso)return '';
@@ -923,24 +901,19 @@ function hmsFromMs(ms){
 
 function buildRecRow(r, isCurrent, showDate){
   const row=document.createElement('div');
-  row.className='ac-row rec-row'+(isCurrent?' cur':'');
+  row.className='rec-row'+(isCurrent?' cur':'');
 
-  if(showDate!==false){
-    const dateEl=document.createElement('span');
-    dateEl.className='rec-date';
-    dateEl.innerText=shortDate(r.start);
-    row.appendChild(dateEl);
-  }
+  const dateEl=document.createElement('span');
+  dateEl.className='rec-date';
+  dateEl.innerText=showDate!==false?shortDate(r.start):'';
 
   const name=document.createElement('span');
-  name.className='rec-name ac-flex';
+  name.className='rec-name';
   name.innerText=getGrpName(r.activity)+' | '+getActName(r.activity);
-  row.appendChild(name);
 
   const times=document.createElement('span');
   times.className='rec-times';
   times.innerHTML='<b>'+toMSK(r.start)+'</b> — <b>'+(r.end?toMSK(r.end):'...')+'</b>';
-  row.appendChild(times);
 
   const dur=document.createElement('span');
   dur.className='rec-dur';
@@ -951,6 +924,10 @@ function buildRecRow(r, isCurrent, showDate){
     const ms=r.end?(new Date(r.end)-new Date(r.start)):0;
     dur.innerText=r.end?durationStr(ms):'...';
   }
+
+  row.appendChild(dateEl);
+  row.appendChild(name);
+  row.appendChild(times);
   row.appendChild(dur);
   return row;
 }
@@ -1035,8 +1012,6 @@ function renderMain(){
   const completed=state.records.filter(r=>r.end!==null).slice(-3);
   splitAtMidnights(completed).reverse().forEach(r=>c.appendChild(buildRecRow(r,false,true)));
   renderWeekDays();
-  alignColumns(c);
-  alignColumns(document.getElementById('workGrid'));
 }
 
 function renderWeekDays(){
@@ -1092,11 +1067,10 @@ function renderWeekDetail(){
   let tot=0;
   for(let i=0;i<7;i++){
     const ds=ws+i*86400000,ms=calcWorkMs(ds,ds+86400000);tot+=ms;
-    h+='<div class="ac-row wd-row wd-day-row"><span class="wd-day">'+DAY_NAMES[i]+'</span><span class="wd-val">'+hmFromMs(ms)+'</span><span class="wd-tgt"><span class="wd-tgt-from">из </span><span class="wd-tgt-inner">10ч</span></span><span class="wd-pct">('+(ms/36000000*100).toFixed(1)+'%)</span></div>';
+    h+='<div class="wd-grid wd-day-row"><span class="wd-day">'+DAY_NAMES[i]+'</span><span class="wd-val">'+hmFromMs(ms)+'</span><span class="wd-tgt"><span class="wd-tgt-from">из </span><span class="wd-tgt-inner">10ч</span></span><span class="wd-pct">('+(ms/36000000*100).toFixed(1)+'%)</span></div>';
   }
-  h+='<div class="ac-row wd-row wd-total-row"><span class="wd-day">Итого</span><span class="wd-val">'+hmFromMs(tot)+'</span><span class="wd-tgt"><span class="wd-tgt-from">из </span><span class="wd-tgt-inner">70ч</span></span><span class="wd-pct">('+(tot/252000000*100).toFixed(1)+'%)</span></div>';
+  h+='<div class="wd-grid wd-total-row"><span class="wd-day">Итого</span><span class="wd-val">'+hmFromMs(tot)+'</span><span class="wd-tgt"><span class="wd-tgt-from">из </span><span class="wd-tgt-inner">70ч</span></span><span class="wd-pct">('+(tot/252000000*100).toFixed(1)+'%)</span></div>';
   c.innerHTML=h;
-  alignColumns(c);
 }
 
 // --- Burger ---
@@ -1275,7 +1249,6 @@ function showHistory(){
       h.appendChild(buildRecRow(r,r.end===null,false));
     });
   });
-  alignColumns(h);
 }
 
 function exportData(){
