@@ -34,21 +34,7 @@ header{
 padding:15px;
 background:#222;
 font-size:20px;
-position:relative;
 text-align:center;
-}
-
-.update-btn{
-position:absolute;
-right:10px;
-top:50%;
-transform:translateY(-50%);
-background:none;
-border:1px solid #555;
-color:#888;
-font-size:11px;
-padding:4px 8px;
-border-radius:4px;
 }
 
 /* --- Главный экран --- */
@@ -96,9 +82,7 @@ font-size:14px;
 font-weight:600;
 }
 
-.start-btn:active{
-background:rgba(10,132,255,0.2);
-}
+.start-btn:active{background:rgba(10,132,255,0.2)}
 
 .parallel-btn{
 width:52px;
@@ -114,9 +98,7 @@ text-align:center;
 padding:4px;
 }
 
-.parallel-btn:active{
-background:rgba(255,159,10,0.2);
-}
+.parallel-btn:active{background:rgba(255,159,10,0.2)}
 
 .recent-records{
 width:100%;
@@ -159,11 +141,7 @@ justify-content:center;
 border-radius:50%;
 }
 
-.week-day.today{
-background:#0a84ff;
-color:white;
-font-weight:600;
-}
+.week-day.today{background:#0a84ff;color:white;font-weight:600}
 
 .work-row{
 display:flex;
@@ -220,7 +198,7 @@ font-size:16px;
 padding:8px;
 }
 
-/* --- Picker (выбор задач) --- */
+/* --- Picker inline layout --- */
 
 .picker-hint{
 padding:0 15px 8px;
@@ -229,7 +207,7 @@ color:rgba(255,255,255,0.4);
 }
 
 .picker-confirm{
-margin:0 15px 16px;
+margin:0 15px 20px;
 padding:13px;
 border:none;
 border-radius:10px;
@@ -240,47 +218,33 @@ text-align:center;
 transition:opacity 0.15s;
 }
 
-.picker-confirm.single{
-background:#0a84ff;
-color:white;
-}
+.picker-confirm.single{background:#0a84ff;color:white}
+.picker-confirm.parallel{background:#ff9f0a;color:#000}
+.picker-confirm.disabled{opacity:0.25;pointer-events:none}
 
-.picker-confirm.parallel{
-background:#ff9f0a;
-color:#000;
-}
-
-.picker-confirm.disabled{
-opacity:0.25;
-pointer-events:none;
-}
-
-.group{
-padding:0 15px;
-margin-bottom:10px;
-}
-
-.group-title{
-font-size:13px;
-padding:6px 10px;
-margin-bottom:6px;
-opacity:0.45;
-text-transform:uppercase;
-letter-spacing:1px;
-border:1px solid rgba(255,255,255,0.15);
-border-radius:8px;
-}
-
-.group-activities{
+.picker-group{
 display:flex;
 flex-wrap:wrap;
+align-items:center;
 gap:6px;
-padding-left:8px;
+padding:0 15px;
+margin-bottom:14px;
+}
+
+.picker-group-label{
+display:inline-block;
+padding:6px 12px;
+border:2px solid rgba(255,255,255,0.7);
+border-radius:8px;
+font-size:13px;
+font-weight:600;
+color:rgba(255,255,255,0.85);
+white-space:nowrap;
 }
 
 .activity{
 display:inline-block;
-padding:8px 14px;
+padding:7px 13px;
 border:none;
 background:#222;
 color:white;
@@ -294,9 +258,7 @@ border-radius:8px;
 
 /* --- Week detail overlay --- */
 
-.week-detail{
-padding:15px;
-}
+.week-detail{padding:15px}
 
 .week-detail-nav{
 display:flex;
@@ -313,10 +275,7 @@ font-size:20px;
 padding:8px 12px;
 }
 
-.week-detail-dates{
-font-size:14px;
-color:rgba(255,255,255,0.7);
-}
+.week-detail-dates{font-size:14px;color:rgba(255,255,255,0.7)}
 
 .week-detail-row{
 display:flex;
@@ -336,13 +295,172 @@ display:flex;
 justify-content:space-between;
 }
 
+/* --- Burger menu --- */
+
+.burger-list{
+padding:15px;
+}
+
+.burger-item{
+display:block;
+width:100%;
+padding:16px;
+margin-bottom:8px;
+border:none;
+background:#1a1a1a;
+color:white;
+font-size:15px;
+border-radius:10px;
+text-align:left;
+}
+
+.burger-item:active{background:#222}
+
+.burger-item-desc{
+font-size:11px;
+color:rgba(255,255,255,0.4);
+margin-top:4px;
+}
+
+/* --- Add activity form --- */
+
+.form-section{
+padding:15px;
+}
+
+.form-label{
+font-size:12px;
+color:rgba(255,255,255,0.5);
+margin-bottom:6px;
+}
+
+.form-input{
+width:100%;
+padding:12px;
+background:#1a1a1a;
+border:1px solid rgba(255,255,255,0.15);
+border-radius:8px;
+color:white;
+font-size:15px;
+margin-bottom:16px;
+}
+
+.form-input:focus{outline:none;border-color:#0a84ff}
+
+.form-existing-groups{
+display:flex;
+flex-wrap:wrap;
+gap:6px;
+margin-bottom:16px;
+}
+
+.form-group-chip{
+padding:6px 12px;
+border:1px solid rgba(255,255,255,0.25);
+border-radius:8px;
+background:none;
+color:rgba(255,255,255,0.7);
+font-size:13px;
+}
+
+.form-group-chip.picked{
+border-color:#0a84ff;
+color:#0a84ff;
+}
+
+.form-group-chip:active{background:rgba(255,255,255,0.05)}
+
+.form-submit{
+width:100%;
+padding:14px;
+border:none;
+border-radius:10px;
+background:#0a84ff;
+color:white;
+font-size:15px;
+font-weight:600;
+}
+
+.form-submit.disabled{opacity:0.25;pointer-events:none}
+
+/* --- Retro entry --- */
+
+.retro-section{
+padding:15px;
+}
+
+.retro-mode-row{
+display:flex;
+gap:8px;
+margin-bottom:16px;
+}
+
+.retro-mode-btn{
+flex:1;
+padding:10px;
+border:1px solid rgba(255,255,255,0.2);
+border-radius:8px;
+background:none;
+color:rgba(255,255,255,0.5);
+font-size:13px;
+text-align:center;
+}
+
+.retro-mode-btn.active{border-color:#0a84ff;color:#0a84ff}
+
+.retro-time-row{
+display:flex;
+gap:10px;
+margin-bottom:16px;
+align-items:center;
+}
+
+.retro-time-row label{
+font-size:12px;
+color:rgba(255,255,255,0.5);
+min-width:28px;
+}
+
+.retro-time-row input[type="date"],
+.retro-time-row input[type="time"]{
+padding:10px;
+background:#1a1a1a;
+border:1px solid rgba(255,255,255,0.15);
+border-radius:8px;
+color:white;
+font-size:15px;
+-webkit-appearance:none;
+flex:1;
+}
+
+.retro-time-row input:focus{outline:none;border-color:#0a84ff}
+
+.retro-act-label{
+font-size:12px;
+color:rgba(255,255,255,0.5);
+margin-bottom:8px;
+}
+
+.retro-picker{margin-bottom:16px}
+
+/* --- JSON viewer --- */
+
+.json-view{
+padding:15px;
+font-size:12px;
+white-space:pre-wrap;
+word-break:break-all;
+color:rgba(255,255,255,0.7);
+font-family:monospace;
+max-height:calc(100vh - 80px);
+overflow-y:auto;
+}
+
 /* --- Нижняя панель --- */
 
 .bottom{
 position:fixed;
-bottom:0;
-left:0;
-right:0;
+bottom:0;left:0;right:0;
 background:#222;
 padding:8px 10px;
 padding-bottom:max(8px,env(safe-area-inset-bottom));
@@ -358,7 +476,7 @@ border:none;
 background:#333;
 color:white;
 border-radius:6px;
-font-size:12px;
+font-size:13px;
 }
 
 /* --- История --- */
@@ -383,10 +501,7 @@ color:rgba(255,255,255,0.8);
 
 <body>
 
-<header>
-Учёт времени
-<button class="update-btn" onclick="checkUpdate()">↻</button>
-</header>
+<header>Учёт времени</header>
 
 <div class="main-screen" id="main">
   <div class="current-activity" id="currentActivity"></div>
@@ -396,8 +511,7 @@ color:rgba(255,255,255,0.8);
     <button class="parallel-btn" onclick="openPicker(true)">ПУСК<br>×2</button>
   </div>
   <div class="recent-records" id="recentRecords"></div>
-
-  <div class="work-tracker" id="workTracker">
+  <div class="work-tracker">
     <div class="week-days" id="weekDays"></div>
     <div class="work-row">
       <span class="work-label">Сегодня</span>
@@ -410,6 +524,7 @@ color:rgba(255,255,255,0.8);
   </div>
 </div>
 
+<!-- Picker -->
 <div class="overlay" id="picker">
   <div class="overlay-header">
     <span id="pickerTitle">Задача</span>
@@ -420,6 +535,7 @@ color:rgba(255,255,255,0.8);
   <div id="pickerList"></div>
 </div>
 
+<!-- Week detail -->
 <div class="overlay" id="weekOverlay">
   <div class="overlay-header">
     <span>Рабочие часы</span>
@@ -428,14 +544,98 @@ color:rgba(255,255,255,0.8);
   <div class="week-detail" id="weekDetail"></div>
 </div>
 
+<!-- Burger -->
+<div class="overlay" id="burgerOverlay">
+  <div class="overlay-header">
+    <span>Меню</span>
+    <button class="overlay-close" onclick="closeBurger()">Закрыть</button>
+  </div>
+  <div class="burger-list">
+    <button class="burger-item" onclick="closeBurger();openAddActivity()">
+      Добавить задачу
+      <div class="burger-item-desc">Новая задача и/или группа</div>
+    </button>
+    <button class="burger-item" onclick="closeBurger();openRetroEntry()">
+      Запись задним числом
+      <div class="burger-item-desc">Вставить запись в прошлом</div>
+    </button>
+    <button class="burger-item" onclick="closeBurger();checkUpdate()">
+      Обновить кеш
+      <div class="burger-item-desc">Сбросить кеш и перезагрузить</div>
+    </button>
+    <button class="burger-item" onclick="closeBurger();openJsonView()">
+      Просмотр JSON
+      <div class="burger-item-desc">Задачи, группы и лог</div>
+    </button>
+    <button class="burger-item" onclick="closeBurger();exportData()">
+      Экспорт JSON
+      <div class="burger-item-desc">Скачать файл данных</div>
+    </button>
+    <button class="burger-item" onclick="closeBurger();importData()">
+      Импорт JSON
+      <div class="burger-item-desc">Загрузить из файла</div>
+    </button>
+  </div>
+</div>
+
+<!-- Add activity -->
+<div class="overlay" id="addActivityOverlay">
+  <div class="overlay-header">
+    <span>Новая задача</span>
+    <button class="overlay-close" onclick="closeAddActivity()">Закрыть</button>
+  </div>
+  <div class="form-section">
+    <div class="form-label">Название задачи</div>
+    <input class="form-input" id="newActName" placeholder="Например: Чтение">
+    <div class="form-label">Группа — выберите или создайте</div>
+    <div class="form-existing-groups" id="existingGroups"></div>
+    <input class="form-input" id="newGroupName" placeholder="Или введите новую группу">
+    <button class="form-submit" id="addActSubmit" onclick="submitAddActivity()">Добавить</button>
+  </div>
+</div>
+
+<!-- Retro entry -->
+<div class="overlay" id="retroOverlay">
+  <div class="overlay-header">
+    <span>Запись задним числом</span>
+    <button class="overlay-close" onclick="closeRetro()">Закрыть</button>
+  </div>
+  <div class="retro-section">
+    <div class="retro-mode-row">
+      <button class="retro-mode-btn active" id="retroModeSingle" onclick="setRetroMode('single')">Единственная</button>
+      <button class="retro-mode-btn" id="retroModeParallel" onclick="setRetroMode('parallel')">Параллельная</button>
+    </div>
+    <div class="retro-time-row">
+      <label>С</label>
+      <input type="date" id="retroStartDate">
+      <input type="time" id="retroStartTime">
+    </div>
+    <div class="retro-time-row">
+      <label>До</label>
+      <input type="date" id="retroEndDate">
+      <input type="time" id="retroEndTime">
+    </div>
+    <div class="retro-act-label">Выберите задачу</div>
+    <div class="retro-picker" id="retroPicker"></div>
+    <button class="form-submit" id="retroSubmit" onclick="submitRetro()">Вставить запись</button>
+  </div>
+</div>
+
+<!-- JSON viewer -->
+<div class="overlay" id="jsonOverlay">
+  <div class="overlay-header">
+    <span>Данные JSON</span>
+    <button class="overlay-close" onclick="closeJsonView()">Закрыть</button>
+  </div>
+  <div class="json-view" id="jsonContent"></div>
+</div>
+
 <div id="history"></div>
 
 <div class="bottom">
-<button onclick="showMain()">Главная</button>
-<button onclick="showHistory()">История</button>
-<button onclick="addActivity()">Добавить</button>
-<button onclick="exportData()">Экспорт</button>
-<button onclick="importData()">Импорт</button>
+  <button onclick="showMain()">Главная</button>
+  <button onclick="showHistory()">Лог задач</button>
+  <button onclick="openBurger()">☰</button>
 </div>
 
 <script>
@@ -453,467 +653,431 @@ function unlockScroll(){
   window.scrollTo(0,scrollY);
 }
 
-// --- IndexedDB wrapper ---
-const DB_NAME = 'timetracker';
-const DB_STORE = 'state';
-
-function dbOpen() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, 1);
-    req.onupgradeneeded = () => req.result.createObjectStore(DB_STORE);
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
+// --- IndexedDB ---
+const DB_NAME='timetracker', DB_STORE='state';
+function dbOpen(){
+  return new Promise((res,rej)=>{
+    const r=indexedDB.open(DB_NAME,1);
+    r.onupgradeneeded=()=>r.result.createObjectStore(DB_STORE);
+    r.onsuccess=()=>res(r.result);
+    r.onerror=()=>rej(r.error);
   });
 }
-
-function dbSave(data) {
-  return dbOpen().then(db => new Promise((resolve, reject) => {
-    const tx = db.transaction(DB_STORE, 'readwrite');
-    tx.objectStore(DB_STORE).put(data, 'main');
-    tx.oncomplete = () => { db.close(); resolve(); };
-    tx.onerror = () => { db.close(); reject(tx.error); };
+function dbSave(d){
+  return dbOpen().then(db=>new Promise((res,rej)=>{
+    const tx=db.transaction(DB_STORE,'readwrite');
+    tx.objectStore(DB_STORE).put(d,'main');
+    tx.oncomplete=()=>{db.close();res()};
+    tx.onerror=()=>{db.close();rej(tx.error)};
+  }));
+}
+function dbLoad(){
+  return dbOpen().then(db=>new Promise((res,rej)=>{
+    const tx=db.transaction(DB_STORE,'readonly');
+    const r=tx.objectStore(DB_STORE).get('main');
+    r.onsuccess=()=>{db.close();res(r.result||null)};
+    r.onerror=()=>{db.close();rej(r.error)};
   }));
 }
 
-function dbLoad() {
-  return dbOpen().then(db => new Promise((resolve, reject) => {
-    const tx = db.transaction(DB_STORE, 'readonly');
-    const req = tx.objectStore(DB_STORE).get('main');
-    req.onsuccess = () => { db.close(); resolve(req.result || null); };
-    req.onerror = () => { db.close(); reject(req.error); };
-  }));
-}
-
-// --- Manual update ---
+// --- Cache update ---
 function checkUpdate(){
-  caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))).then(() => {
-    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-      navigator.serviceWorker.getRegistration().then(reg => {
-        if (reg) reg.unregister().then(() => location.reload());
+  caches.keys().then(k=>Promise.all(k.map(x=>caches.delete(x)))).then(()=>{
+    if(navigator.serviceWorker&&navigator.serviceWorker.controller){
+      navigator.serviceWorker.getRegistration().then(r=>{
+        if(r)r.unregister().then(()=>location.reload());
         else location.reload();
       });
-    } else {
-      location.reload();
-    }
+    } else location.reload();
   });
 }
 
-// --- Service Worker registration ---
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').then(reg => {
-    setInterval(() => reg.update(), 30000);
-    reg.addEventListener('updatefound', () => {
-      const nw = reg.installing;
-      nw.addEventListener('statechange', () => {
-        if (nw.state === 'activated') location.reload();
-      });
+// --- SW ---
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js').then(reg=>{
+    setInterval(()=>reg.update(),30000);
+    reg.addEventListener('updatefound',()=>{
+      const nw=reg.installing;
+      nw.addEventListener('statechange',()=>{if(nw.state==='activated')location.reload()});
     });
   });
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    location.reload();
-  });
+  navigator.serviceWorker.addEventListener('controllerchange',()=>location.reload());
 }
-if (navigator.storage && navigator.storage.persist) {
-  navigator.storage.persist();
-}
+if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();
 
-// --- Default state ---
-const DEFAULT_STATE = {
-groups:[
-{id:1,name:"Работа"},
-{id:2,name:"Отдых"},
-{id:3,name:"Быт"},
-{id:4,name:"Сон"}
-],
-activities:[
-{id:1,name:"Кодинг",group:1},
-{id:2,name:"Анализ",group:1},
-{id:3,name:"YouTube",group:2},
-{id:4,name:"Готовка",group:3},
-{id:5,name:"Сон",group:4}
-],
-records:[],
-active:[]
+// --- State ---
+const DEFAULT_STATE={
+  groups:[{id:1,name:"Работа"},{id:2,name:"Отдых"},{id:3,name:"Быт"},{id:4,name:"Сон"}],
+  activities:[{id:1,name:"Кодинг",group:1},{id:2,name:"Анализ",group:1},{id:3,name:"YouTube",group:2},{id:4,name:"Готовка",group:3},{id:5,name:"Сон",group:4}],
+  records:[],
+  active:[]
 };
+let state=DEFAULT_STATE;
 
-let state = DEFAULT_STATE;
-
-const DAY_NAMES = ['ПН','ВТ','СР','ЧТ','ПТ','СБ','ВС'];
-const WORK_GROUP_NAME = 'Работа';
+const DAY_NAMES=['ПН','ВТ','СР','ЧТ','ПТ','СБ','ВС'];
+const WORK_GROUP_NAME='Работа';
 
 // --- Helpers ---
-function mskNow(){
-  return new Date(new Date().toLocaleString('en-US',{timeZone:'Europe/Moscow'}));
-}
-
-function mskDayStartUTC(year, month, day){
-  const str = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}T00:00:00+03:00`;
-  return new Date(str).getTime();
-}
-
-function getMondayMSK(mskD){
-  const d = new Date(mskD);
-  let dow = d.getDay();
-  if(dow===0) dow=7;
-  d.setDate(d.getDate()-(dow-1));
-  d.setHours(0,0,0,0);
-  return d;
-}
+function mskNow(){return new Date(new Date().toLocaleString('en-US',{timeZone:'Europe/Moscow'}))}
+function mskDayStartUTC(y,m,d){return new Date(`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}T00:00:00+03:00`).getTime()}
+function getMondayMSK(mskD){const d=new Date(mskD);let dow=d.getDay();if(dow===0)dow=7;d.setDate(d.getDate()-(dow-1));d.setHours(0,0,0,0);return d}
 
 function toMSK(iso){
-  if(!iso) return '...';
+  if(!iso)return '...';
   return new Date(iso).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Moscow'});
 }
-
 function toMSKDate(iso){
-  if(!iso) return '';
-  const d = new Date(new Date(iso).toLocaleString('en-US',{timeZone:'Europe/Moscow'}));
-  const dow = d.getDay();
-  const dayName = DAY_NAMES[dow===0?6:dow-1];
-  const dd = String(d.getDate()).padStart(2,'0');
-  const mm = String(d.getMonth()+1).padStart(2,'0');
-  return dayName+' | '+dd+'.'+mm;
+  if(!iso)return '';
+  const d=new Date(new Date(iso).toLocaleString('en-US',{timeZone:'Europe/Moscow'}));
+  const dow=d.getDay();
+  return DAY_NAMES[dow===0?6:dow-1]+' | '+String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0');
 }
-
-function formatTime(iso){
-  if(!iso) return '...';
-  return toMSK(iso)+' ('+toMSKDate(iso)+')';
-}
-
-function hhmmFromMs(ms){
-  if(ms<=0) return '00:00';
-  const h=Math.floor(ms/3600000);
-  const m=Math.floor((ms%3600000)/60000);
-  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
-}
-
-function durationStr(ms){
-  if(ms<=0) return '0м';
-  const h=Math.floor(ms/3600000);
-  const m=Math.floor((ms%3600000)/60000);
-  if(h>0) return h+'ч '+m+'м';
-  return m+'м';
-}
-
-function getActivityName(id){
-  const a=state.activities.find(x=>x.id==id);
-  return a?a.name:'?';
-}
-
-function getGroupName(actId){
-  const a=state.activities.find(x=>x.id==actId);
-  if(!a) return '?';
-  const g=state.groups.find(x=>x.id==a.group);
-  return g?g.name:'?';
-}
-
-function isWorkActivity(actId){
-  const a=state.activities.find(x=>x.id==actId);
-  if(!a) return false;
-  const g=state.groups.find(x=>x.id==a.group);
-  return g && g.name===WORK_GROUP_NAME;
-}
+function formatTime(iso){return iso?toMSK(iso)+' ('+toMSKDate(iso)+')':'...'}
+function hhmmFromMs(ms){if(ms<=0)return'00:00';const h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000);return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')}
+function durationStr(ms){if(ms<=0)return'0м';const h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000);return h>0?h+'ч '+m+'м':m+'м'}
+function getAct(id){return state.activities.find(x=>x.id==id)}
+function getActName(id){const a=getAct(id);return a?a.name:'?'}
+function getGrpName(actId){const a=getAct(actId);if(!a)return'?';const g=state.groups.find(x=>x.id==a.group);return g?g.name:'?'}
+function isWork(actId){const a=getAct(actId);if(!a)return false;const g=state.groups.find(x=>x.id==a.group);return g&&g.name===WORK_GROUP_NAME}
 
 function formatRecord(r){
-  const grp=getGroupName(r.activity);
-  const act=getActivityName(r.activity);
-  const from=formatTime(r.start);
-  const to=r.end?formatTime(r.end):'...';
-  const ms=r.end?(new Date(r.end)-new Date(r.start)):0;
-  const dur=r.end?durationStr(ms):'...';
-  return grp+' | '+act+': с '+from+' до '+to+' — '+dur;
+  return getGrpName(r.activity)+' | '+getActName(r.activity)+': с '+formatTime(r.start)+' до '+formatTime(r.end)+' — '+(r.end?durationStr(new Date(r.end)-new Date(r.start)):'...');
 }
 
-function getActive(){
-  return state.records.filter(r=>r.end===null);
-}
+function getActive(){return state.records.filter(r=>r.end===null)}
+function closeAll(now){state.records.forEach(r=>{if(r.end===null)r.end=now});state.active=[]}
 
-function closeAll(now){
-  state.records.forEach(r=>{if(r.end===null) r.end=now});
-  state.active=[];
-}
-
-// --- Calculate work ms (merged intervals) ---
-function calcWorkMs(fromUTC, toUTC){
-  const intervals=[];
+function calcWorkMs(from,to){
+  const iv=[];
   state.records.forEach(r=>{
-    if(!isWorkActivity(r.activity)) return;
-    const rs=new Date(r.start).getTime();
-    const re=r.end?new Date(r.end).getTime():Date.now();
-    const s=Math.max(rs,fromUTC);
-    const e=Math.min(re,toUTC);
-    if(e>s) intervals.push([s,e]);
+    if(!isWork(r.activity))return;
+    const rs=new Date(r.start).getTime(),re=r.end?new Date(r.end).getTime():Date.now();
+    const s=Math.max(rs,from),e=Math.min(re,to);
+    if(e>s)iv.push([s,e]);
   });
-  if(!intervals.length) return 0;
-  intervals.sort((a,b)=>a[0]-b[0]);
-  const merged=[[...intervals[0]]];
-  for(let i=1;i<intervals.length;i++){
-    const last=merged[merged.length-1];
-    if(intervals[i][0]<=last[1]) last[1]=Math.max(last[1],intervals[i][1]);
-    else merged.push([...intervals[i]]);
-  }
-  let total=0;
-  merged.forEach(iv=>total+=iv[1]-iv[0]);
-  return total;
+  if(!iv.length)return 0;
+  iv.sort((a,b)=>a[0]-b[0]);
+  const m=[[...iv[0]]];
+  for(let i=1;i<iv.length;i++){const l=m[m.length-1];if(iv[i][0]<=l[1])l[1]=Math.max(l[1],iv[i][1]);else m.push([...iv[i]])}
+  let t=0;m.forEach(x=>t+=x[1]-x[0]);return t;
 }
 
-// --- Migrate ---
-function migrateState(data){
-  if(data.active && !Array.isArray(data.active)) data.active=[];
-  else if(!data.active) data.active=[];
-  return data;
-}
+function migrateState(d){if(d.active&&!Array.isArray(d.active))d.active=[];else if(!d.active)d.active=[];return d}
 
 // --- Init ---
-(async function init() {
-  let data = null;
-  try { data = await dbLoad(); } catch(e) {}
-  if (!data) {
-    const ls = localStorage.getItem("timedata");
-    if (ls) {
-      data = JSON.parse(ls);
-      try { await dbSave(data); } catch(e) {}
-    }
-  }
-  state = data ? migrateState(data) : DEFAULT_STATE;
-  state.active = state.records.filter(r=>r.end===null).map(r=>r.id);
-  renderMain();
-  updateTimer();
-  updateWorkTracker();
+(async function(){
+  let d=null;
+  try{d=await dbLoad()}catch(e){}
+  if(!d){const ls=localStorage.getItem("timedata");if(ls){d=JSON.parse(ls);try{await dbSave(d)}catch(e){}}}
+  state=d?migrateState(d):DEFAULT_STATE;
+  state.active=state.records.filter(r=>r.end===null).map(r=>r.id);
+  renderMain();updateTimer();updateWorkTracker();
 })();
 
 function save(){
-  state.active = state.records.filter(r=>r.end===null).map(r=>r.id);
+  state.active=state.records.filter(r=>r.end===null).map(r=>r.id);
   localStorage.setItem("timedata",JSON.stringify(state));
   dbSave(state).catch(()=>{});
 }
 
-// --- Unified Picker ---
-let pickerParallel = false;
-let pickerSelected = [];
-
-function openPicker(parallel){
-  pickerParallel = parallel;
-  pickerSelected = [];
-  const btn = document.getElementById('pickerConfirm');
-  document.getElementById('pickerTitle').innerText = parallel ? 'Параллельные задачи' : 'Задача';
-  document.getElementById('pickerHint').innerText = parallel ? 'Выберите 2 задачи' : 'Выберите 1 задачу';
-  btn.className = 'picker-confirm '+(parallel?'parallel':'single')+' disabled';
-  btn.innerText = 'Запустить';
-  renderPickerList();
-  lockScroll();
-  document.getElementById('picker').classList.add('open');
-}
-
-function renderPickerList(){
-  const list=document.getElementById('pickerList');
-  list.innerHTML='';
+// --- Render picker list (inline: group + activities in one row) ---
+function renderInlinePicker(container, selected, parallel){
+  container.innerHTML='';
   state.groups.forEach(g=>{
-    const div=document.createElement('div');
-    div.className='group';
-    const title=document.createElement('div');
-    title.className='group-title';
-    title.innerText=g.name;
-    div.appendChild(title);
-    const wrap=document.createElement('div');
-    wrap.className='group-activities';
+    const row=document.createElement('div');
+    row.className='picker-group';
+    const label=document.createElement('span');
+    label.className='picker-group-label';
+    label.innerText=g.name;
+    row.appendChild(label);
     state.activities.filter(a=>a.group==g.id).forEach(a=>{
       const btn=document.createElement('button');
       btn.className='activity';
       btn.innerText=a.name;
-      if(pickerSelected.includes(a.id)){
-        btn.classList.add(pickerParallel?'selected':'active');
-      }
+      if(selected.includes(a.id))btn.classList.add(parallel?'selected':'active');
       btn.onclick=()=>onPickerSelect(a.id);
-      wrap.appendChild(btn);
+      row.appendChild(btn);
     });
-    div.appendChild(wrap);
-    list.appendChild(div);
+    container.appendChild(row);
   });
 }
 
-function onPickerSelect(actId){
-  const max = pickerParallel ? 2 : 1;
-  const idx = pickerSelected.indexOf(actId);
-  if(idx>=0){
-    pickerSelected.splice(idx,1);
-  } else {
-    if(pickerSelected.length>=max){
-      // Replace last for single, ignore for parallel
-      if(!pickerParallel) pickerSelected=[actId];
-      else return;
-    } else {
-      pickerSelected.push(actId);
-    }
-  }
+// --- Picker ---
+let pickerParallel=false, pickerSelected=[];
+
+function openPicker(parallel){
+  pickerParallel=parallel;pickerSelected=[];
+  document.getElementById('pickerTitle').innerText=parallel?'Параллельные задачи':'Задача';
+  document.getElementById('pickerHint').innerText=parallel?'Выберите 2 задачи':'Выберите 1 задачу';
   updateConfirmBtn();
-  renderPickerList();
+  renderInlinePicker(document.getElementById('pickerList'),pickerSelected,parallel);
+  lockScroll();
+  document.getElementById('picker').classList.add('open');
+}
+
+function onPickerSelect(actId){
+  const max=pickerParallel?2:1;
+  const idx=pickerSelected.indexOf(actId);
+  if(idx>=0)pickerSelected.splice(idx,1);
+  else if(pickerSelected.length>=max){if(!pickerParallel)pickerSelected=[actId];else return}
+  else pickerSelected.push(actId);
+  updateConfirmBtn();
+  renderInlinePicker(document.getElementById('pickerList'),pickerSelected,pickerParallel);
 }
 
 function updateConfirmBtn(){
   const btn=document.getElementById('pickerConfirm');
-  const ready = pickerParallel ? pickerSelected.length===2 : pickerSelected.length===1;
+  const ready=pickerParallel?pickerSelected.length===2:pickerSelected.length===1;
   btn.className='picker-confirm '+(pickerParallel?'parallel':'single')+(ready?'':' disabled');
-  if(pickerSelected.length===0){
-    btn.innerText='Запустить';
-  } else if(pickerParallel && pickerSelected.length===2){
-    btn.innerText='Запустить: '+getActivityName(pickerSelected[0])+' + '+getActivityName(pickerSelected[1]);
-  } else if(pickerParallel && pickerSelected.length===1){
-    btn.innerText='Запустить: '+getActivityName(pickerSelected[0])+' + ...';
-  } else {
-    btn.innerText='Запустить: '+getActivityName(pickerSelected[0]);
-  }
+  if(!pickerSelected.length)btn.innerText='Запустить';
+  else if(pickerParallel&&pickerSelected.length===2)btn.innerText='Запустить: '+getActName(pickerSelected[0])+' + '+getActName(pickerSelected[1]);
+  else if(pickerParallel)btn.innerText='Запустить: '+getActName(pickerSelected[0])+' + ...';
+  else btn.innerText='Запустить: '+getActName(pickerSelected[0]);
 }
 
 function confirmPicker(){
-  const ready = pickerParallel ? pickerSelected.length===2 : pickerSelected.length===1;
-  if(!ready) return;
+  const ready=pickerParallel?pickerSelected.length===2:pickerSelected.length===1;
+  if(!ready)return;
   const now=new Date().toISOString();
   closeAll(now);
   const ts=Date.now();
-  pickerSelected.forEach((actId,i)=>{
-    state.records.push({id:ts+i,activity:actId,start:now,end:null});
-  });
-  save();
-  renderMain();
-  closePicker();
+  pickerSelected.forEach((id,i)=>{state.records.push({id:ts+i,activity:id,start:now,end:null})});
+  save();renderMain();closePicker();
 }
 
-function closePicker(){
-  document.getElementById('picker').classList.remove('open');
-  unlockScroll();
-}
+function closePicker(){document.getElementById('picker').classList.remove('open');unlockScroll()}
 
-// --- Render main ---
+// --- Main screen ---
 function renderMain(){
   const cur=document.getElementById('currentActivity');
   const active=getActive();
-  if(active.length>1){
-    cur.innerText=active.map(r=>getGroupName(r.activity)+' | '+getActivityName(r.activity)).join('  +  ');
-  } else if(active.length===1){
-    cur.innerText=getGroupName(active[0].activity)+' | '+getActivityName(active[0].activity);
-  } else {
-    cur.innerText='Нет активности';
-  }
-  const container=document.getElementById('recentRecords');
-  container.innerHTML='';
-  active.forEach(r=>{
-    const div=document.createElement('div');
-    div.className='recent-record';
-    div.style.color='rgba(255,255,255,0.7)';
-    div.innerText=formatRecord(r);
-    container.appendChild(div);
-  });
-  const completed=state.records.filter(r=>r.end!==null);
-  completed.slice(-3).reverse().forEach(r=>{
-    const div=document.createElement('div');
-    div.className='recent-record';
-    div.innerText=formatRecord(r);
-    container.appendChild(div);
-  });
+  if(active.length>1)cur.innerText=active.map(r=>getGrpName(r.activity)+' | '+getActName(r.activity)).join('  +  ');
+  else if(active.length===1)cur.innerText=getGrpName(active[0].activity)+' | '+getActName(active[0].activity);
+  else cur.innerText='Нет активности';
+
+  const c=document.getElementById('recentRecords');c.innerHTML='';
+  active.forEach(r=>{const d=document.createElement('div');d.className='recent-record';d.style.color='rgba(255,255,255,0.7)';d.innerText=formatRecord(r);c.appendChild(d)});
+  state.records.filter(r=>r.end!==null).slice(-3).reverse().forEach(r=>{const d=document.createElement('div');d.className='recent-record';d.innerText=formatRecord(r);c.appendChild(d)});
   renderWeekDays();
 }
 
-// --- Week days row ---
 function renderWeekDays(){
-  const el=document.getElementById('weekDays');
-  el.innerHTML='';
-  const now=mskNow();
-  let todayDow=now.getDay();
-  if(todayDow===0) todayDow=7;
-  for(let i=1;i<=7;i++){
-    const d=document.createElement('div');
-    d.className='week-day';
-    d.innerText=DAY_NAMES[i-1];
-    if(i===todayDow) d.classList.add('today');
-    el.appendChild(d);
-  }
+  const el=document.getElementById('weekDays');el.innerHTML='';
+  const now=mskNow();let dow=now.getDay();if(dow===0)dow=7;
+  for(let i=1;i<=7;i++){const d=document.createElement('div');d.className='week-day';d.innerText=DAY_NAMES[i-1];if(i===dow)d.classList.add('today');el.appendChild(d)}
 }
 
-// --- Work tracker live update ---
 function updateWorkTracker(){
   const now=mskNow();
-  const todayStart=mskDayStartUTC(now.getFullYear(),now.getMonth()+1,now.getDate());
-  const todayEnd=todayStart+86400000;
-  const todayMs=calcWorkMs(todayStart,todayEnd);
-
+  const ts=mskDayStartUTC(now.getFullYear(),now.getMonth()+1,now.getDate());
+  const todayMs=calcWorkMs(ts,ts+86400000);
   document.getElementById('workToday').innerText=hhmmFromMs(todayMs);
-  const todayPct=(todayMs/36000000*100).toFixed(1);
-  document.getElementById('workTodayPct').innerText=' ('+todayPct+'%)';
+  document.getElementById('workTodayPct').innerText=' ('+(todayMs/36000000*100).toFixed(1)+'%)';
 
-  const monday=getMondayMSK(now);
-  const weekStart=mskDayStartUTC(monday.getFullYear(),monday.getMonth()+1,monday.getDate());
-  const weekEnd=weekStart+7*86400000;
-  const weekMs=calcWorkMs(weekStart,weekEnd);
-
+  const mon=getMondayMSK(now);
+  const ws=mskDayStartUTC(mon.getFullYear(),mon.getMonth()+1,mon.getDate());
+  const weekMs=calcWorkMs(ws,ws+604800000);
   document.getElementById('workWeek').innerText=hhmmFromMs(weekMs);
-  const weekPct=(weekMs/252000000*100).toFixed(1);
-  document.getElementById('workWeekPct').innerText=' ('+weekPct+'%)';
+  document.getElementById('workWeekPct').innerText=' ('+(weekMs/252000000*100).toFixed(1)+'%)';
 }
 
 function updateTimer(){
   const el=document.getElementById('timer');
   const active=getActive();
-  if(!active.length){el.innerText='00:00:00';return}
+  if(!active.length){el.innerText='00:00:00';updateWorkTracker();return}
   const earliest=Math.min(...active.map(r=>new Date(r.start).getTime()));
   const diff=(Date.now()-earliest)/1000;
-  const h=Math.floor(diff/3600);
-  const m=Math.floor(diff%3600/60);
-  const s=Math.floor(diff%60);
+  const h=Math.floor(diff/3600),m=Math.floor(diff%3600/60),s=Math.floor(diff%60);
   el.innerText=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
   updateWorkTracker();
 }
-
 setInterval(updateTimer,1000);
 
-// --- Week detail overlay ---
+// --- Week detail ---
 let weekDetailOffset=0;
-
-function openWeekDetail(offset){
-  weekDetailOffset=offset||0;
-  renderWeekDetail();
-  lockScroll();
-  document.getElementById('weekOverlay').classList.add('open');
-}
-
-function closeWeekDetail(){
-  document.getElementById('weekOverlay').classList.remove('open');
-  unlockScroll();
-}
-
+function openWeekDetail(o){weekDetailOffset=o||0;renderWeekDetail();lockScroll();document.getElementById('weekOverlay').classList.add('open')}
+function closeWeekDetail(){document.getElementById('weekOverlay').classList.remove('open');unlockScroll()}
 function renderWeekDetail(){
-  const container=document.getElementById('weekDetail');
-  const now=mskNow();
-  const monday=getMondayMSK(now);
-  monday.setDate(monday.getDate()+weekDetailOffset*7);
-  const weekStart=mskDayStartUTC(monday.getFullYear(),monday.getMonth()+1,monday.getDate());
-
-  const sunday=new Date(monday);
-  sunday.setDate(sunday.getDate()+6);
+  const c=document.getElementById('weekDetail');const now=mskNow();
+  const mon=getMondayMSK(now);mon.setDate(mon.getDate()+weekDetailOffset*7);
+  const ws=mskDayStartUTC(mon.getFullYear(),mon.getMonth()+1,mon.getDate());
+  const sun=new Date(mon);sun.setDate(sun.getDate()+6);
   const fmt=d=>String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0');
-
-  let html='<div class="week-detail-nav">';
-  html+='<button onclick="weekDetailOffset--;renderWeekDetail()">‹</button>';
-  html+='<span class="week-detail-dates">'+fmt(monday)+' — '+fmt(sunday)+'</span>';
-  if(weekDetailOffset<0) html+='<button onclick="weekDetailOffset++;renderWeekDetail()">›</button>';
-  else html+='<button style="visibility:hidden">›</button>';
-  html+='</div>';
-
-  let totalMs=0;
-  for(let i=0;i<7;i++){
-    const dayStart=weekStart+i*86400000;
-    const dayEnd=dayStart+86400000;
-    const ms=calcWorkMs(dayStart,dayEnd);
-    totalMs+=ms;
-    const pct=(ms/36000000*100).toFixed(1);
-    html+='<div class="week-detail-row"><span>'+DAY_NAMES[i]+'</span><span>+'+hhmmFromMs(ms)+' = +'+pct+'%</span></div>';
-  }
-
-  const totalPct=(totalMs/252000000*100).toFixed(1);
-  html+='<div class="week-detail-total"><span>Итого</span><span>'+hhmmFromMs(totalMs)+' / 70:00 ('+totalPct+'%)</span></div>';
-
-  container.innerHTML=html;
+  let h='<div class="week-detail-nav"><button onclick="weekDetailOffset--;renderWeekDetail()">‹</button><span class="week-detail-dates">'+fmt(mon)+' — '+fmt(sun)+'</span>';
+  h+=weekDetailOffset<0?'<button onclick="weekDetailOffset++;renderWeekDetail()">›</button>':'<button style="visibility:hidden">›</button>';
+  h+='</div>';
+  let tot=0;
+  for(let i=0;i<7;i++){const ds=ws+i*86400000,ms=calcWorkMs(ds,ds+86400000);tot+=ms;h+='<div class="week-detail-row"><span>'+DAY_NAMES[i]+'</span><span>+'+hhmmFromMs(ms)+' = +'+(ms/36000000*100).toFixed(1)+'%</span></div>'}
+  h+='<div class="week-detail-total"><span>Итого</span><span>'+hhmmFromMs(tot)+' / 70:00 ('+(tot/252000000*100).toFixed(1)+'%)</span></div>';
+  c.innerHTML=h;
 }
+
+// --- Burger ---
+function openBurger(){lockScroll();document.getElementById('burgerOverlay').classList.add('open')}
+function closeBurger(){document.getElementById('burgerOverlay').classList.remove('open');unlockScroll()}
+
+// --- Add Activity ---
+let pickedGroupId=null;
+function openAddActivity(){
+  pickedGroupId=null;
+  document.getElementById('newActName').value='';
+  document.getElementById('newGroupName').value='';
+  const gc=document.getElementById('existingGroups');gc.innerHTML='';
+  state.groups.forEach(g=>{
+    const btn=document.createElement('button');
+    btn.className='form-group-chip';
+    btn.innerText=g.name;
+    btn.onclick=()=>{
+      pickedGroupId=g.id;
+      document.getElementById('newGroupName').value='';
+      gc.querySelectorAll('.form-group-chip').forEach(b=>b.classList.remove('picked'));
+      btn.classList.add('picked');
+    };
+    gc.appendChild(btn);
+  });
+  lockScroll();document.getElementById('addActivityOverlay').classList.add('open');
+}
+function closeAddActivity(){document.getElementById('addActivityOverlay').classList.remove('open');unlockScroll()}
+
+function submitAddActivity(){
+  const name=document.getElementById('newActName').value.trim();
+  if(!name)return;
+  const newGrp=document.getElementById('newGroupName').value.trim();
+  let gId=pickedGroupId;
+  if(newGrp){
+    let g=state.groups.find(x=>x.name===newGrp);
+    if(!g){g={id:Date.now(),name:newGrp};state.groups.push(g)}
+    gId=g.id;
+  }
+  if(!gId)return;
+  state.activities.push({id:Date.now()+1,name:name,group:gId});
+  save();closeAddActivity();
+}
+
+// --- Retro entry ---
+let retroMode='single', retroActId=null;
+
+function openRetroEntry(){
+  retroMode='single';retroActId=null;
+  document.getElementById('retroModeSingle').classList.add('active');
+  document.getElementById('retroModeParallel').classList.remove('active');
+  // Default times: now-1h to now, MSK
+  const now=mskNow();
+  const h1=new Date(now.getTime()-3600000);
+  document.getElementById('retroStartDate').value=fmtDateVal(h1);
+  document.getElementById('retroStartTime').value=fmtTimeVal(h1);
+  document.getElementById('retroEndDate').value=fmtDateVal(now);
+  document.getElementById('retroEndTime').value=fmtTimeVal(now);
+  renderRetroPicker();
+  lockScroll();document.getElementById('retroOverlay').classList.add('open');
+}
+function closeRetro(){document.getElementById('retroOverlay').classList.remove('open');unlockScroll()}
+
+function fmtDateVal(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function fmtTimeVal(d){return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+
+function setRetroMode(m){
+  retroMode=m;retroActId=null;
+  document.getElementById('retroModeSingle').classList.toggle('active',m==='single');
+  document.getElementById('retroModeParallel').classList.toggle('active',m==='parallel');
+  renderRetroPicker();
+}
+
+function renderRetroPicker(){
+  const c=document.getElementById('retroPicker');c.innerHTML='';
+  state.groups.forEach(g=>{
+    const row=document.createElement('div');row.className='picker-group';
+    const label=document.createElement('span');label.className='picker-group-label';label.innerText=g.name;row.appendChild(label);
+    state.activities.filter(a=>a.group==g.id).forEach(a=>{
+      const btn=document.createElement('button');btn.className='activity';btn.innerText=a.name;
+      if(a.id===retroActId)btn.classList.add('active');
+      btn.onclick=()=>{retroActId=a.id;renderRetroPicker()};
+      row.appendChild(btn);
+    });
+    c.appendChild(row);
+  });
+}
+
+function submitRetro(){
+  if(!retroActId)return;
+  const sd=document.getElementById('retroStartDate').value;
+  const st=document.getElementById('retroStartTime').value;
+  const ed=document.getElementById('retroEndDate').value;
+  const et=document.getElementById('retroEndTime').value;
+  if(!sd||!st||!ed||!et)return;
+
+  // Parse as MSK (+03:00)
+  const startISO=sd+'T'+st+':00+03:00';
+  const endISO=ed+'T'+et+':00+03:00';
+  const startMs=new Date(startISO).getTime();
+  const endMs=new Date(endISO).getTime();
+  if(endMs<=startMs)return;
+
+  if(retroMode==='single'){
+    insertRecordSingle(retroActId, new Date(startMs).toISOString(), new Date(endMs).toISOString());
+  } else {
+    // Parallel: just insert alongside existing
+    state.records.push({id:Date.now(),activity:retroActId,start:new Date(startMs).toISOString(),end:new Date(endMs).toISOString()});
+    state.records.sort((a,b)=>new Date(a.start)-new Date(b.start));
+  }
+  save();renderMain();closeRetro();
+}
+
+// --- Insert single record (replaces overlapping) ---
+function insertRecordSingle(actId, startISO, endISO){
+  const ns=new Date(startISO).getTime(), ne=new Date(endISO).getTime();
+  const newRecs=[];
+  state.records.forEach(r=>{
+    const rs=new Date(r.start).getTime();
+    const re=r.end?new Date(r.end).getTime():null;
+    // Active record (no end) or no overlap
+    if(re===null){
+      // If active record overlaps with our range, split it
+      if(rs<ns){
+        // Left part
+        newRecs.push({...r, end:startISO, id:r.id});
+        // Right part: continues after our end
+        newRecs.push({...r, id:Date.now()+Math.random()*1000|0, start:endISO, end:null});
+      } else if(rs>=ns && rs<ne){
+        // Active starts within our range — push it after
+        newRecs.push({...r, start:endISO});
+      } else {
+        newRecs.push(r);
+      }
+      return;
+    }
+    // No overlap
+    if(re<=ns || rs>=ne){newRecs.push(r);return}
+    // Overlap — keep left part
+    if(rs<ns) newRecs.push({...r, end:startISO});
+    // Keep right part
+    if(re>ne) newRecs.push({...r, id:Date.now()+Math.random()*1000|0, start:endISO, end:r.end});
+    // Original record is replaced (dropped)
+  });
+  // Add new record
+  newRecs.push({id:Date.now(),activity:actId,start:startISO,end:endISO});
+  // Sort
+  newRecs.sort((a,b)=>new Date(a.start)-new Date(b.start));
+  // Merge adjacent same activity
+  const merged=[];
+  newRecs.forEach(r=>{
+    const last=merged[merged.length-1];
+    if(last && last.activity===r.activity && last.end===r.start){
+      last.end=r.end;
+    } else {
+      merged.push({...r});
+    }
+  });
+  state.records=merged;
+}
+
+// --- JSON viewer ---
+function openJsonView(){
+  const data={groups:state.groups,activities:state.activities,records:state.records};
+  document.getElementById('jsonContent').innerText=JSON.stringify(data,null,2);
+  lockScroll();document.getElementById('jsonOverlay').classList.add('open');
+}
+function closeJsonView(){document.getElementById('jsonOverlay').classList.remove('open');unlockScroll()}
 
 // --- Navigation ---
 function showMain(){
@@ -924,52 +1088,25 @@ function showMain(){
 
 function showHistory(){
   document.getElementById('main').style.display='none';
-  const h=document.getElementById('history');
-  h.style.display='block';
-  h.innerHTML='';
+  const h=document.getElementById('history');h.style.display='block';h.innerHTML='';
   state.records.slice().reverse().forEach(r=>{
-    const div=document.createElement('div');
-    div.className='record';
-    div.innerText=formatRecord(r);
-    h.appendChild(div);
+    const d=document.createElement('div');d.className='record';d.innerText=formatRecord(r);h.appendChild(d);
   });
 }
 
-function addActivity(){
-  const name=prompt('Название активности');
-  if(!name)return;
-  const group=prompt('Название группы');
-  let g=state.groups.find(x=>x.name==group);
-  if(!g){
-    g={id:Date.now(),name:group};
-    state.groups.push(g);
-  }
-  state.activities.push({id:Date.now()+1,name:name,group:g.id});
-  save();
-}
-
 function exportData(){
-  const blob=new Blob([JSON.stringify(state)],{type:'application/json'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='timedata.json';
-  a.click();
+  const b=new Blob([JSON.stringify(state)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='timedata.json';a.click();
 }
 
 function importData(){
-  const input=document.createElement('input');
-  input.type='file';
-  input.onchange=e=>{
-    const reader=new FileReader();
-    reader.onload=()=>{
-      state=migrateState(JSON.parse(reader.result));
-      state.active=state.records.filter(r=>r.end===null).map(r=>r.id);
-      save();
-      renderMain();
-    };
-    reader.readAsText(e.target.files[0]);
+  const inp=document.createElement('input');inp.type='file';
+  inp.onchange=e=>{
+    const rd=new FileReader();
+    rd.onload=()=>{state=migrateState(JSON.parse(rd.result));state.active=state.records.filter(r=>r.end===null).map(r=>r.id);save();renderMain()};
+    rd.readAsText(e.target.files[0]);
   };
-  input.click();
+  inp.click();
 }
 
 </script>
