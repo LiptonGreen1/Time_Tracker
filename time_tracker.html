@@ -24,6 +24,12 @@ color:white;
 overflow-x:hidden;
 }
 
+body.overlay-open{
+overflow:hidden;
+position:fixed;
+width:100%;
+}
+
 header{
 padding:15px;
 background:#222;
@@ -60,6 +66,7 @@ color:#0a84ff;
 margin-bottom:4px;
 min-height:18px;
 text-align:center;
+padding:0 10px;
 }
 
 .timer-display{
@@ -177,16 +184,17 @@ text-underline-offset:3px;
 cursor:pointer;
 }
 
-/* --- Оверлей выбора активности --- */
+/* --- Оверлей --- */
 
 .overlay{
 display:none;
 position:fixed;
 top:0;left:0;right:0;bottom:0;
-background:rgba(0,0,0,0.85);
+background:rgba(0,0,0,0.92);
 z-index:100;
 overflow-y:auto;
 -webkit-overflow-scrolling:touch;
+overscroll-behavior:contain;
 }
 
 .overlay.open{display:block}
@@ -196,6 +204,10 @@ padding:15px;
 display:flex;
 justify-content:space-between;
 align-items:center;
+position:sticky;
+top:0;
+background:rgba(0,0,0,0.95);
+z-index:1;
 }
 
 .overlay-header span{font-size:18px}
@@ -208,52 +220,72 @@ font-size:16px;
 padding:8px;
 }
 
-.parallel-hint{
-padding:0 15px 10px;
+/* --- Picker (выбор задач) --- */
+
+.picker-hint{
+padding:0 15px 8px;
 font-size:12px;
-color:#ff9f0a;
+color:rgba(255,255,255,0.4);
 }
 
-.parallel-confirm{
-display:none;
-margin:10px 15px;
-padding:14px;
+.picker-confirm{
+margin:0 15px 16px;
+padding:13px;
 border:none;
 border-radius:10px;
-background:#ff9f0a;
-color:#000;
-font-size:16px;
+font-size:15px;
 font-weight:600;
 width:calc(100% - 30px);
 text-align:center;
+transition:opacity 0.15s;
 }
 
-.parallel-confirm.visible{display:block}
+.picker-confirm.single{
+background:#0a84ff;
+color:white;
+}
+
+.picker-confirm.parallel{
+background:#ff9f0a;
+color:#000;
+}
+
+.picker-confirm.disabled{
+opacity:0.25;
+pointer-events:none;
+}
 
 .group{
 padding:0 15px;
-margin-bottom:15px;
+margin-bottom:10px;
 }
 
 .group-title{
-font-size:14px;
+font-size:13px;
+padding:6px 10px;
 margin-bottom:6px;
-opacity:0.5;
+opacity:0.45;
 text-transform:uppercase;
 letter-spacing:1px;
+border:1px solid rgba(255,255,255,0.15);
+border-radius:8px;
+}
+
+.group-activities{
+display:flex;
+flex-wrap:wrap;
+gap:6px;
+padding-left:8px;
 }
 
 .activity{
-display:block;
-width:100%;
-padding:14px;
-margin-bottom:5px;
+display:inline-block;
+padding:8px 14px;
 border:none;
 background:#222;
 color:white;
-font-size:16px;
-border-radius:10px;
-text-align:left;
+font-size:14px;
+border-radius:8px;
 }
 
 .activity:active{background:#333}
@@ -264,12 +296,6 @@ text-align:left;
 
 .week-detail{
 padding:15px;
-}
-
-.week-detail-title{
-font-size:16px;
-margin-bottom:12px;
-text-align:center;
 }
 
 .week-detail-nav{
@@ -322,6 +348,7 @@ padding:8px 10px;
 padding-bottom:max(8px,env(safe-area-inset-bottom));
 display:flex;
 gap:5px;
+z-index:50;
 }
 
 .bottom button{
@@ -385,11 +412,11 @@ color:rgba(255,255,255,0.8);
 
 <div class="overlay" id="picker">
   <div class="overlay-header">
-    <span id="pickerTitle">Выбрать</span>
+    <span id="pickerTitle">Задача</span>
     <button class="overlay-close" onclick="closePicker()">Закрыть</button>
   </div>
-  <div class="parallel-hint" id="parallelHint">Выберите 2 активности</div>
-  <button class="parallel-confirm" id="parallelConfirm" onclick="confirmParallel()">Запустить 2 задачи</button>
+  <div class="picker-hint" id="pickerHint">Выберите 1 задачу</div>
+  <button class="picker-confirm single disabled" id="pickerConfirm" onclick="confirmPicker()">Запустить</button>
   <div id="pickerList"></div>
 </div>
 
@@ -412,6 +439,19 @@ color:rgba(255,255,255,0.8);
 </div>
 
 <script>
+
+// --- Scroll lock ---
+let scrollY=0;
+function lockScroll(){
+  scrollY=window.scrollY;
+  document.body.classList.add('overlay-open');
+  document.body.style.top=-scrollY+'px';
+}
+function unlockScroll(){
+  document.body.classList.remove('overlay-open');
+  document.body.style.top='';
+  window.scrollTo(0,scrollY);
+}
 
 // --- IndexedDB wrapper ---
 const DB_NAME = 'timetracker';
@@ -502,29 +542,18 @@ const DAY_NAMES = ['ПН','ВТ','СР','ЧТ','ПТ','СБ','ВС'];
 const WORK_GROUP_NAME = 'Работа';
 
 // --- Helpers ---
-
-// Get current time in MSK as Date-like object helpers
 function mskNow(){
   return new Date(new Date().toLocaleString('en-US',{timeZone:'Europe/Moscow'}));
 }
 
-// Get MSK date for an ISO string (returns {year,month,day,dayOfWeek})
-function mskDate(iso){
-  const d = new Date(new Date(iso).toLocaleString('en-US',{timeZone:'Europe/Moscow'}));
-  return d;
-}
-
-// Get start of day in MSK (as UTC timestamp)
 function mskDayStartUTC(year, month, day){
-  // Create date string and parse as MSK
   const str = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}T00:00:00+03:00`;
   return new Date(str).getTime();
 }
 
-// Get Monday of the week containing a MSK date
 function getMondayMSK(mskD){
   const d = new Date(mskD);
-  let dow = d.getDay(); // 0=Sun
+  let dow = d.getDay();
   if(dow===0) dow=7;
   d.setDate(d.getDate()-(dow-1));
   d.setHours(0,0,0,0);
@@ -533,16 +562,17 @@ function getMondayMSK(mskD){
 
 function toMSK(iso){
   if(!iso) return '...';
-  const d = new Date(iso);
-  return d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Moscow'});
+  return new Date(iso).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Moscow'});
 }
 
 function toMSKDate(iso){
   if(!iso) return '';
-  const d = new Date(iso);
-  const day = d.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',timeZone:'Europe/Moscow'});
-  const dow = DAY_NAMES[(new Date(d.toLocaleString('en-US',{timeZone:'Europe/Moscow'}))).getDay()===0?6:(new Date(d.toLocaleString('en-US',{timeZone:'Europe/Moscow'}))).getDay()-1];
-  return dow+' | '+day;
+  const d = new Date(new Date(iso).toLocaleString('en-US',{timeZone:'Europe/Moscow'}));
+  const dow = d.getDay();
+  const dayName = DAY_NAMES[dow===0?6:dow-1];
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  return dayName+' | '+dd+'.'+mm;
 }
 
 function formatTime(iso){
@@ -603,10 +633,8 @@ function closeAll(now){
   state.active=[];
 }
 
-// --- Calculate work ms in a time range [startUTC, endUTC) ---
-// Merges overlapping intervals so parallel work tasks count as x1
+// --- Calculate work ms (merged intervals) ---
 function calcWorkMs(fromUTC, toUTC){
-  // Collect clipped intervals
   const intervals=[];
   state.records.forEach(r=>{
     if(!isWorkActivity(r.activity)) return;
@@ -617,7 +645,6 @@ function calcWorkMs(fromUTC, toUTC){
     if(e>s) intervals.push([s,e]);
   });
   if(!intervals.length) return 0;
-  // Merge overlapping
   intervals.sort((a,b)=>a[0]-b[0]);
   const merged=[[...intervals[0]]];
   for(let i=1;i<intervals.length;i++){
@@ -630,13 +657,10 @@ function calcWorkMs(fromUTC, toUTC){
   return total;
 }
 
-// --- Migrate old state format ---
+// --- Migrate ---
 function migrateState(data){
-  if(data.active && !Array.isArray(data.active)){
-    data.active=[];
-  } else if(!data.active){
-    data.active=[];
-  }
+  if(data.active && !Array.isArray(data.active)) data.active=[];
+  else if(!data.active) data.active=[];
   return data;
 }
 
@@ -664,24 +688,26 @@ function save(){
   dbSave(state).catch(()=>{});
 }
 
-// --- Picker ---
+// --- Unified Picker ---
 let pickerParallel = false;
-let parallelSelected = [];
+let pickerSelected = [];
 
 function openPicker(parallel){
   pickerParallel = parallel;
-  parallelSelected = [];
-  document.getElementById('parallelHint').style.display = parallel ? 'block' : 'none';
-  document.getElementById('parallelConfirm').classList.remove('visible');
-  document.getElementById('pickerTitle').innerText = parallel ? 'Параллельные задачи' : 'Выбрать';
+  pickerSelected = [];
+  const btn = document.getElementById('pickerConfirm');
+  document.getElementById('pickerTitle').innerText = parallel ? 'Параллельные задачи' : 'Задача';
+  document.getElementById('pickerHint').innerText = parallel ? 'Выберите 2 задачи' : 'Выберите 1 задачу';
+  btn.className = 'picker-confirm '+(parallel?'parallel':'single')+' disabled';
+  btn.innerText = 'Запустить';
   renderPickerList();
+  lockScroll();
   document.getElementById('picker').classList.add('open');
 }
 
 function renderPickerList(){
   const list=document.getElementById('pickerList');
   list.innerHTML='';
-  const activeIds = getActive().map(r=>r.activity);
   state.groups.forEach(g=>{
     const div=document.createElement('div');
     div.className='group';
@@ -689,48 +715,63 @@ function renderPickerList(){
     title.className='group-title';
     title.innerText=g.name;
     div.appendChild(title);
+    const wrap=document.createElement('div');
+    wrap.className='group-activities';
     state.activities.filter(a=>a.group==g.id).forEach(a=>{
       const btn=document.createElement('button');
       btn.className='activity';
       btn.innerText=a.name;
-      if(!pickerParallel && activeIds.includes(a.id)) btn.classList.add('active');
-      if(pickerParallel && parallelSelected.includes(a.id)) btn.classList.add('selected');
+      if(pickerSelected.includes(a.id)){
+        btn.classList.add(pickerParallel?'selected':'active');
+      }
       btn.onclick=()=>onPickerSelect(a.id);
-      div.appendChild(btn);
+      wrap.appendChild(btn);
     });
+    div.appendChild(wrap);
     list.appendChild(div);
   });
 }
 
 function onPickerSelect(actId){
-  if(!pickerParallel){
-    const now=new Date().toISOString();
-    closeAll(now);
-    state.records.push({id:Date.now(),activity:actId,start:now,end:null});
-    save();
-    renderMain();
-    closePicker();
-    return;
-  }
-  const idx=parallelSelected.indexOf(actId);
-  if(idx>=0) parallelSelected.splice(idx,1);
-  else if(parallelSelected.length<2) parallelSelected.push(actId);
-  const confirm=document.getElementById('parallelConfirm');
-  if(parallelSelected.length===2){
-    confirm.innerText='Запустить: '+getActivityName(parallelSelected[0])+' + '+getActivityName(parallelSelected[1]);
-    confirm.classList.add('visible');
+  const max = pickerParallel ? 2 : 1;
+  const idx = pickerSelected.indexOf(actId);
+  if(idx>=0){
+    pickerSelected.splice(idx,1);
   } else {
-    confirm.classList.remove('visible');
+    if(pickerSelected.length>=max){
+      // Replace last for single, ignore for parallel
+      if(!pickerParallel) pickerSelected=[actId];
+      else return;
+    } else {
+      pickerSelected.push(actId);
+    }
   }
+  updateConfirmBtn();
   renderPickerList();
 }
 
-function confirmParallel(){
-  if(parallelSelected.length!==2) return;
+function updateConfirmBtn(){
+  const btn=document.getElementById('pickerConfirm');
+  const ready = pickerParallel ? pickerSelected.length===2 : pickerSelected.length===1;
+  btn.className='picker-confirm '+(pickerParallel?'parallel':'single')+(ready?'':' disabled');
+  if(pickerSelected.length===0){
+    btn.innerText='Запустить';
+  } else if(pickerParallel && pickerSelected.length===2){
+    btn.innerText='Запустить: '+getActivityName(pickerSelected[0])+' + '+getActivityName(pickerSelected[1]);
+  } else if(pickerParallel && pickerSelected.length===1){
+    btn.innerText='Запустить: '+getActivityName(pickerSelected[0])+' + ...';
+  } else {
+    btn.innerText='Запустить: '+getActivityName(pickerSelected[0]);
+  }
+}
+
+function confirmPicker(){
+  const ready = pickerParallel ? pickerSelected.length===2 : pickerSelected.length===1;
+  if(!ready) return;
   const now=new Date().toISOString();
   closeAll(now);
   const ts=Date.now();
-  parallelSelected.forEach((actId,i)=>{
+  pickerSelected.forEach((actId,i)=>{
     state.records.push({id:ts+i,activity:actId,start:now,end:null});
   });
   save();
@@ -740,6 +781,7 @@ function confirmParallel(){
 
 function closePicker(){
   document.getElementById('picker').classList.remove('open');
+  unlockScroll();
 }
 
 // --- Render main ---
@@ -769,7 +811,6 @@ function renderMain(){
     div.innerText=formatRecord(r);
     container.appendChild(div);
   });
-
   renderWeekDays();
 }
 
@@ -778,7 +819,7 @@ function renderWeekDays(){
   const el=document.getElementById('weekDays');
   el.innerHTML='';
   const now=mskNow();
-  let todayDow=now.getDay(); // 0=Sun
+  let todayDow=now.getDay();
   if(todayDow===0) todayDow=7;
   for(let i=1;i<=7;i++){
     const d=document.createElement('div');
@@ -792,23 +833,21 @@ function renderWeekDays(){
 // --- Work tracker live update ---
 function updateWorkTracker(){
   const now=mskNow();
-  // Today range in UTC
   const todayStart=mskDayStartUTC(now.getFullYear(),now.getMonth()+1,now.getDate());
   const todayEnd=todayStart+86400000;
   const todayMs=calcWorkMs(todayStart,todayEnd);
 
   document.getElementById('workToday').innerText=hhmmFromMs(todayMs);
-  const todayPct=Math.round(todayMs/36000000*100);
+  const todayPct=(todayMs/36000000*100).toFixed(1);
   document.getElementById('workTodayPct').innerText=' ('+todayPct+'%)';
 
-  // Week range: Monday 00:00 MSK to Sunday 23:59 MSK
   const monday=getMondayMSK(now);
   const weekStart=mskDayStartUTC(monday.getFullYear(),monday.getMonth()+1,monday.getDate());
   const weekEnd=weekStart+7*86400000;
   const weekMs=calcWorkMs(weekStart,weekEnd);
 
   document.getElementById('workWeek').innerText=hhmmFromMs(weekMs);
-  const weekPct=Math.round(weekMs/252000000*100); // 70h
+  const weekPct=(weekMs/252000000*100).toFixed(1);
   document.getElementById('workWeekPct').innerText=' ('+weekPct+'%)';
 }
 
@@ -822,7 +861,6 @@ function updateTimer(){
   const m=Math.floor(diff%3600/60);
   const s=Math.floor(diff%60);
   el.innerText=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
-
   updateWorkTracker();
 }
 
@@ -834,22 +872,22 @@ let weekDetailOffset=0;
 function openWeekDetail(offset){
   weekDetailOffset=offset||0;
   renderWeekDetail();
+  lockScroll();
   document.getElementById('weekOverlay').classList.add('open');
 }
 
 function closeWeekDetail(){
   document.getElementById('weekOverlay').classList.remove('open');
+  unlockScroll();
 }
 
 function renderWeekDetail(){
   const container=document.getElementById('weekDetail');
   const now=mskNow();
-  // Get the Monday of current week, then shift by offset
   const monday=getMondayMSK(now);
   monday.setDate(monday.getDate()+weekDetailOffset*7);
   const weekStart=mskDayStartUTC(monday.getFullYear(),monday.getMonth()+1,monday.getDate());
 
-  // Header dates
   const sunday=new Date(monday);
   sunday.setDate(sunday.getDate()+6);
   const fmt=d=>String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0');
@@ -871,7 +909,7 @@ function renderWeekDetail(){
     html+='<div class="week-detail-row"><span>'+DAY_NAMES[i]+'</span><span>+'+hhmmFromMs(ms)+' = +'+pct+'%</span></div>';
   }
 
-  const totalPct=Math.round(totalMs/252000000*100);
+  const totalPct=(totalMs/252000000*100).toFixed(1);
   html+='<div class="week-detail-total"><span>Итого</span><span>'+hhmmFromMs(totalMs)+' / 70:00 ('+totalPct+'%)</span></div>';
 
   container.innerHTML=html;
