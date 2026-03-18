@@ -37,7 +37,9 @@ font-size:20px;
 text-align:center;
 }
 
-/* --- Главный экран --- */
+/* =============================================
+   ГЛАВНЫЙ ЭКРАН
+   ============================================= */
 
 .main-screen{
 display:flex;
@@ -46,6 +48,7 @@ align-items:center;
 padding:20px 10px 140px;
 }
 
+/* Рамка вокруг названия задачи + крупного таймера */
 .timer-box{
 border:1px solid rgba(255,255,255,0.25);
 border-radius:16px;
@@ -56,6 +59,7 @@ flex-direction:column;
 align-items:center;
 }
 
+/* Название текущей задачи (синий текст) */
 .current-activity{
 font-size:13px;
 color:#0a84ff;
@@ -64,6 +68,7 @@ min-height:18px;
 text-align:center;
 }
 
+/* Крупный таймер (ххч ххм ххс) */
 .timer-display{
 font-size:38px;
 font-weight:200;
@@ -72,6 +77,7 @@ letter-spacing:0.5px;
 min-height:46px;
 }
 
+/* Кнопки ПУСК и ПУСК ×2 */
 .buttons-row{
 display:flex;
 align-items:center;
@@ -108,7 +114,10 @@ padding:4px;
 
 .parallel-btn:active{background:rgba(255,159,10,0.2)}
 
-/* --- Record rows (shared for main + history) --- */
+/* =============================================
+   СТРОКИ ЗАПИСЕЙ (лог на главной + окно "Лог задач")
+   Столбцы: дата | название | время от—до | длительность
+   ============================================= */
 
 .recent-records{
 width:100%;
@@ -118,14 +127,44 @@ max-width:400px;
 .rec-row{
 display:flex;
 align-items:center;
-padding:5px 0;
-border-bottom:1px solid rgba(255,255,255,0.06);
-font-size:11px;
+padding:8px 10px;
+border:1px solid rgba(255,255,255,0.12);
+border-radius:8px;
+margin-bottom:4px;
+font-size:13px;
 color:rgba(255,255,255,0.45);
+cursor:pointer;
 }
+
+.rec-note-icon{
+font-size:11px;
+margin-left:4px;
+flex-shrink:0;
+}
+.rec-note-icon.red{color:#ff453a}
+.rec-note-icon.green{color:#30d158}
+.rec-note-icon.white{color:rgba(255,255,255,0.7)}
+.rec-note-icon.hidden{display:none}
+
+.note-section{padding:15px}
+.note-info{font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:12px}
+#noteText{
+width:100%;
+min-height:120px;
+padding:12px;
+background:#1a1a1a;
+border:1px solid rgba(255,255,255,0.15);
+border-radius:8px;
+color:white;
+font-size:15px;
+font-family:inherit;
+resize:vertical;
+}
+#noteText:focus{outline:none;border-color:#0a84ff}
 
 .rec-row.cur{color:rgba(255,255,255,0.7)}
 
+/* Столбец 1: дата (ПН 18.03) */
 .rec-date{
 font-size:9px;
 opacity:0.6;
@@ -133,6 +172,7 @@ white-space:nowrap;
 margin-right:8px;
 }
 
+/* Столбец 2: группа | задача */
 .rec-name{
 white-space:nowrap;
 font-weight:500;
@@ -142,6 +182,7 @@ text-overflow:ellipsis;
 flex:1;
 }
 
+/* Столбец 3: время от — до */
 .rec-times{
 font-size:10px;
 white-space:nowrap;
@@ -153,6 +194,7 @@ text-align:center;
 
 .rec-times b{font-weight:600}
 
+/* Столбец 4: длительность (у активной — live-счётчик) */
 .rec-dur{
 white-space:nowrap;
 font-variant-numeric:tabular-nums;
@@ -164,7 +206,10 @@ flex-shrink:0;
 
 .rec-dur.live{color:#0a84ff}
 
-/* --- Рабочий трекер --- */
+/* =============================================
+   РАБОЧИЙ ТРЕКЕР (виджет на главной)
+   Дни недели ПН—ВС + каунтеры Сегодня/Неделя
+   ============================================= */
 
 .work-tracker{
 width:100%;
@@ -194,12 +239,13 @@ border-radius:50%;
 
 .week-day.today{background:#0a84ff;color:white;font-weight:600}
 
+/* Каунтеры рабочих часов: Сегодня/Неделя | значение | из | цель | % */
 .work-grid{
 display:grid;
 grid-template-columns:56px auto 18px auto auto;
 justify-content:center;
 row-gap:6px;
-column-gap:6px;
+column-gap:14px;
 align-items:center;
 font-size:13px;
 }
@@ -218,7 +264,9 @@ text-underline-offset:3px;
 cursor:pointer;
 }
 
-/* --- Оверлей --- */
+/* =============================================
+   ОВЕРЛЕИ (общие стили для всех всплывающих окон)
+   ============================================= */
 
 .overlay{
 display:none;
@@ -254,7 +302,9 @@ font-size:16px;
 padding:8px;
 }
 
-/* --- Picker inline layout --- */
+/* =============================================
+   ПИКЕР ЗАДАЧ (выбор задачи при ПУСК / ПУСК ×2)
+   ============================================= */
 
 .picker-hint{
 padding:0 15px 8px;
@@ -312,7 +362,10 @@ border-radius:8px;
 .activity.active{background:#0a84ff}
 .activity.selected{background:#ff9f0a;color:#000}
 
-/* --- Week detail overlay --- */
+/* =============================================
+   ОКНО "РАБОЧИЕ ЧАСЫ" (детализация по дням недели)
+   Столбцы: день | часы | из цель | %
+   ============================================= */
 
 .week-detail{padding:15px}
 
@@ -335,7 +388,8 @@ padding:8px 12px;
 
 .wd-grid{
 display:grid;
-grid-template-columns:42px 35% 30% 1fr;
+grid-template-columns:42px 1fr auto 1fr;
+column-gap:54px;
 align-items:center;
 padding:8px 0;
 font-size:13px;
@@ -358,7 +412,9 @@ font-size:14px;
 .wd-grid .wd-tgt-from{color:rgba(255,255,255,0.35);font-size:11px}
 .wd-grid .wd-pct{text-align:right;color:rgba(255,255,255,0.5)}
 
-/* --- Burger menu --- */
+/* =============================================
+   МЕНЮ-БУРГЕР (☰)
+   ============================================= */
 
 .burger-list{padding:15px}
 
@@ -383,7 +439,9 @@ color:rgba(255,255,255,0.4);
 margin-top:4px;
 }
 
-/* --- Add activity form --- */
+/* =============================================
+   ОКНО "ДОБАВИТЬ ЗАДАЧУ" (новая задача + группа)
+   ============================================= */
 
 .form-section{padding:15px}
 
@@ -438,7 +496,9 @@ font-weight:600;
 
 .form-submit.disabled{opacity:0.25;pointer-events:none}
 
-/* --- Retro entry --- */
+/* =============================================
+   ОКНО "ЗАПИСЬ ЗАДНИМ ЧИСЛОМ"
+   ============================================= */
 
 .retro-section{padding:15px}
 
@@ -496,7 +556,9 @@ margin-bottom:8px;
 
 .retro-picker{margin-bottom:16px}
 
-/* --- JSON viewer --- */
+/* =============================================
+   ОКНО "ПРОСМОТР JSON"
+   ============================================= */
 
 .json-view{
 padding:15px;
@@ -509,7 +571,9 @@ max-height:calc(100vh - 80px);
 overflow-y:auto;
 }
 
-/* --- Нижняя панель --- */
+/* =============================================
+   НИЖНЯЯ ПАНЕЛЬ (Главная / Лог задач / ☰)
+   ============================================= */
 
 .bottom{
 position:fixed;
@@ -532,7 +596,9 @@ border-radius:6px;
 font-size:13px;
 }
 
-/* --- Лог задач (история) --- */
+/* =============================================
+   ОКНО "ЛОГ ЗАДАЧ" (история записей по дням)
+   ============================================= */
 
 #history{
 display:none;
@@ -540,6 +606,7 @@ padding:10px 15px;
 padding-bottom:120px;
 }
 
+/* Разделитель по дням: ПН | 18.03.2026 */
 .day-separator{
 font-size:14px;
 font-weight:700;
@@ -550,7 +617,7 @@ color:rgba(255,255,255,0.8);
 
 .day-separator:last-of-type{margin-top:0}
 
-/* history uses same .rec-row grid */
+/* Строки записей — те же .rec-row что и на главной */
 
 </style>
 
@@ -560,16 +627,21 @@ color:rgba(255,255,255,0.8);
 
 <header>Учёт времени</header>
 
+<!-- ========== ГЛАВНЫЙ ЭКРАН ========== -->
 <div class="main-screen" id="main">
+  <!-- Рамка: название задачи + крупный таймер -->
   <div class="timer-box">
     <div class="current-activity" id="currentActivity"></div>
     <div class="timer-display" id="timer">0ч 0м 0с</div>
   </div>
+  <!-- Кнопки ПУСК и ПУСК ×2 -->
   <div class="buttons-row">
     <button class="start-btn" onclick="openPicker(false)">ПУСК</button>
     <button class="parallel-btn" onclick="openPicker(true)">ПУСК<br>×2</button>
   </div>
+  <!-- Лог последних записей на главной (активные + 3 завершённые) -->
   <div class="recent-records" id="recentRecords"></div>
+  <!-- Рабочий трекер: дни недели + каунтеры Сегодня/Неделя -->
   <div class="work-tracker">
     <div class="week-days" id="weekDays"></div>
     <div class="work-grid">
@@ -587,7 +659,7 @@ color:rgba(255,255,255,0.8);
   </div>
 </div>
 
-<!-- Picker -->
+<!-- ========== ПИКЕР ЗАДАЧ (выбор при ПУСК / ПУСК ×2) ========== -->
 <div class="overlay" id="picker">
   <div class="overlay-header">
     <span id="pickerTitle">Задача</span>
@@ -598,7 +670,7 @@ color:rgba(255,255,255,0.8);
   <div id="pickerList"></div>
 </div>
 
-<!-- Week detail -->
+<!-- ========== ОКНО "РАБОЧИЕ ЧАСЫ" (детализация по дням) ========== -->
 <div class="overlay" id="weekOverlay">
   <div class="overlay-header">
     <span>Рабочие часы</span>
@@ -607,7 +679,7 @@ color:rgba(255,255,255,0.8);
   <div class="week-detail" id="weekDetail"></div>
 </div>
 
-<!-- Burger -->
+<!-- ========== МЕНЮ-БУРГЕР (☰) ========== -->
 <div class="overlay" id="burgerOverlay">
   <div class="overlay-header">
     <span>Меню</span>
@@ -641,7 +713,7 @@ color:rgba(255,255,255,0.8);
   </div>
 </div>
 
-<!-- Add activity -->
+<!-- ========== ОКНО "ДОБАВИТЬ ЗАДАЧУ" ========== -->
 <div class="overlay" id="addActivityOverlay">
   <div class="overlay-header">
     <span>Новая задача</span>
@@ -657,7 +729,7 @@ color:rgba(255,255,255,0.8);
   </div>
 </div>
 
-<!-- Retro entry -->
+<!-- ========== ОКНО "ЗАПИСЬ ЗАДНИМ ЧИСЛОМ" ========== -->
 <div class="overlay" id="retroOverlay">
   <div class="overlay-header">
     <span>Запись задним числом</span>
@@ -684,7 +756,7 @@ color:rgba(255,255,255,0.8);
   </div>
 </div>
 
-<!-- JSON viewer -->
+<!-- ========== ОКНО "ПРОСМОТР JSON" ========== -->
 <div class="overlay" id="jsonOverlay">
   <div class="overlay-header">
     <span>Данные JSON</span>
@@ -693,8 +765,22 @@ color:rgba(255,255,255,0.8);
   <div class="json-view" id="jsonContent"></div>
 </div>
 
+<!-- ========== ОКНО "МИКРО-ЛОГ" ========== -->
+<div class="overlay" id="noteOverlay">
+  <div class="overlay-header">
+    <span>Микро-Лог Бизнеса (и др. Задач)</span>
+    <button class="overlay-close" onclick="closeNote()">Закрыть</button>
+  </div>
+  <div class="note-section">
+    <div class="note-info" id="noteInfo"></div>
+    <textarea id="noteText" placeholder="Опишите что делалось..."></textarea>
+  </div>
+</div>
+
+<!-- ========== ОКНО "ЛОГ ЗАДАЧ" (история по дням) ========== -->
 <div id="history"></div>
 
+<!-- ========== НИЖНЯЯ ПАНЕЛЬ ========== -->
 <div class="bottom">
   <button onclick="showMain()">Главная</button>
   <button onclick="showHistory()">Лог задач</button>
@@ -703,7 +789,7 @@ color:rgba(255,255,255,0.8);
 
 <script>
 
-// --- Scroll lock ---
+// ===== Блокировка скролла (при открытии оверлеев) =====
 let scrollY=0;
 function lockScroll(){
   scrollY=window.scrollY;
@@ -716,7 +802,7 @@ function unlockScroll(){
   window.scrollTo(0,scrollY);
 }
 
-// --- IndexedDB ---
+// ===== IndexedDB (основное хранилище данных) =====
 const DB_NAME='timetracker', DB_STORE='state';
 function dbOpen(){
   return new Promise((res,rej)=>{
@@ -743,7 +829,7 @@ function dbLoad(){
   }));
 }
 
-// --- Cache update ---
+// ===== Обновление кеша (кнопка в меню-бургере) =====
 function checkUpdate(){
   caches.keys().then(k=>Promise.all(k.map(x=>caches.delete(x)))).then(()=>{
     if(navigator.serviceWorker&&navigator.serviceWorker.controller){
@@ -755,7 +841,7 @@ function checkUpdate(){
   });
 }
 
-// --- SW ---
+// ===== Service Worker (PWA, офлайн) =====
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('./sw.js').then(reg=>{
     setInterval(()=>reg.update(),30000);
@@ -768,7 +854,7 @@ if('serviceWorker' in navigator){
 }
 if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();
 
-// --- State ---
+// ===== Состояние (группы, задачи, записи) =====
 const DEFAULT_STATE={
   groups:[{id:1,name:"Работа"},{id:2,name:"Отдых"},{id:3,name:"Быт"},{id:4,name:"Сон"}],
   activities:[{id:1,name:"Кодинг",group:1},{id:2,name:"Анализ",group:1},{id:3,name:"YouTube",group:2},{id:4,name:"Готовка",group:3},{id:5,name:"Сон",group:4}],
@@ -780,7 +866,7 @@ let state=DEFAULT_STATE;
 const DAY_NAMES=['ПН','ВТ','СР','ЧТ','ПТ','СБ','ВС'];
 const WORK_GROUP_NAME='Работа';
 
-// --- Helpers ---
+// ===== Вспомогательные функции (время, MSK, форматирование) =====
 function mskNow(){return new Date(new Date().toLocaleString('en-US',{timeZone:'Europe/Moscow'}))}
 function mskDayStartUTC(y,m,d){return new Date(`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}T00:00:00+03:00`).getTime()}
 function getMondayMSK(mskD){const d=new Date(mskD);let dow=d.getDay();if(dow===0)dow=7;d.setDate(d.getDate()-(dow-1));d.setHours(0,0,0,0);return d}
@@ -842,11 +928,12 @@ function calcWorkMs(from,to){
   let t=0;mg.forEach(x=>t+=x[1]-x[0]);return t;
 }
 
-// --- Split records at MSK midnight boundaries ---
+// ===== Разрезка записей по полуночи MSK (для отображения по дням) =====
 function splitAtMidnights(records){
   const result=[];
   records.forEach(r=>{
     if(!r.end){result.push(r);return}
+    let isFirst=true;
     let cs=new Date(r.start).getTime();
     const ce=new Date(r.end).getTime();
     while(cs<ce){
@@ -856,10 +943,12 @@ function splitAtMidnights(records){
       // Next midnight in UTC
       const midnightUTC=mskDayStartUTC(nextDay.getFullYear(),nextDay.getMonth()+1,nextDay.getDate());
       if(midnightUTC>=ce){
-        result.push({...r,start:new Date(cs).toISOString(),end:new Date(ce).toISOString()});
+        result.push({...r,start:new Date(cs).toISOString(),end:new Date(ce).toISOString(),note:isFirst?r.note||'':''});
+        isFirst=false;
         cs=ce;
       } else {
-        result.push({...r,id:r.id+Math.random(),start:new Date(cs).toISOString(),end:new Date(midnightUTC).toISOString()});
+        result.push({...r,id:r.id+Math.random(),start:new Date(cs).toISOString(),end:new Date(midnightUTC).toISOString(),note:isFirst?r.note||'':''});
+        isFirst=false;
         cs=midnightUTC;
       }
     }
@@ -869,7 +958,7 @@ function splitAtMidnights(records){
 
 function migrateState(d){if(d.active&&!Array.isArray(d.active))d.active=[];else if(!d.active)d.active=[];return d}
 
-// --- Init ---
+// ===== Инициализация (загрузка данных из IndexedDB / localStorage) =====
 (async function(){
   let d=null;
   try{d=await dbLoad()}catch(e){}
@@ -885,7 +974,7 @@ function save(){
   dbSave(state).catch(()=>{});
 }
 
-// --- Build record row HTML element ---
+// ===== Строка записи (buildRecRow) — используется в логе на главной и в "Лог задач" =====
 function shortDate(iso){
   if(!iso)return '';
   const d=mskDateObj(iso);
@@ -899,9 +988,32 @@ function hmsFromMs(ms){
   return h+'ч '+m+'м '+s+'с';
 }
 
+// ===== Микро-Лог (note) =====
+let noteRecordId=null;
+function openNote(recordId){
+  const r=state.records.find(x=>x.id===recordId);
+  if(!r)return;
+  noteRecordId=recordId;
+  document.getElementById('noteInfo').innerText=getGrpName(r.activity)+' | '+getActName(r.activity)+' — '+toMSK(r.start)+' — '+(r.end?toMSK(r.end):'...');
+  const ta=document.getElementById('noteText');
+  ta.value=r.note||'';
+  ta.oninput=()=>{r.note=ta.value;save()};
+  lockScroll();document.getElementById('noteOverlay').classList.add('open');
+}
+function closeNote(){
+  document.getElementById('noteOverlay').classList.remove('open');unlockScroll();
+  noteRecordId=null;
+  renderMain();
+  if(document.getElementById('history').style.display==='block')showHistory();
+}
+
 function buildRecRow(r, isCurrent, showDate){
   const row=document.createElement('div');
   row.className='rec-row'+(isCurrent?' cur':'');
+
+  // Find original record for note click (r may be a midnight-split copy)
+  const origId=typeof r.id==='number'&&state.records.find(x=>x.id===r.id)?r.id:null;
+  if(origId!==null){row.onclick=()=>openNote(origId)}
 
   const dateEl=document.createElement('span');
   dateEl.className='rec-date';
@@ -910,6 +1022,15 @@ function buildRecRow(r, isCurrent, showDate){
   const name=document.createElement('span');
   name.className='rec-name';
   name.innerText=getGrpName(r.activity)+' | '+getActName(r.activity);
+
+  // Note icon
+  const icon=document.createElement('span');
+  icon.className='rec-note-icon';
+  const hasNote=r.note&&r.note.trim();
+  const work=isWork(r.activity);
+  if(work){icon.classList.add(hasNote?'green':'red');icon.innerText='ⓘ'}
+  else if(hasNote){icon.classList.add('white');icon.innerText='ⓘ'}
+  else{icon.classList.add('hidden')}
 
   const times=document.createElement('span');
   times.className='rec-times';
@@ -927,12 +1048,13 @@ function buildRecRow(r, isCurrent, showDate){
 
   row.appendChild(dateEl);
   row.appendChild(name);
+  row.appendChild(icon);
   row.appendChild(times);
   row.appendChild(dur);
   return row;
 }
 
-// --- Picker list ---
+// ===== Рендер списка задач в пикере =====
 function renderInlinePicker(container, selected, parallel, onSelect){
   container.innerHTML='';
   state.groups.forEach(g=>{
@@ -954,7 +1076,7 @@ function renderInlinePicker(container, selected, parallel, onSelect){
   });
 }
 
-// --- Picker ---
+// ===== Пикер задач (ПУСК / ПУСК ×2) =====
 let pickerParallel=false, pickerSelected=[];
 
 function openPicker(parallel){
@@ -999,7 +1121,7 @@ function confirmPicker(){
 
 function closePicker(){document.getElementById('picker').classList.remove('open');unlockScroll()}
 
-// --- Main screen ---
+// ===== Главный экран (рендер + таймер + каунтеры рабочих часов) =====
 function renderMain(){
   const cur=document.getElementById('currentActivity');
   const active=getActive();
@@ -1051,7 +1173,7 @@ function updateTimer(){
 }
 setInterval(updateTimer,1000);
 
-// --- Week detail ---
+// ===== Окно "Рабочие часы" (детализация по дням недели) =====
 let weekDetailOffset=0;
 function openWeekDetail(o){weekDetailOffset=o||0;renderWeekDetail();lockScroll();document.getElementById('weekOverlay').classList.add('open')}
 function closeWeekDetail(){document.getElementById('weekOverlay').classList.remove('open');unlockScroll()}
@@ -1073,11 +1195,11 @@ function renderWeekDetail(){
   c.innerHTML=h;
 }
 
-// --- Burger ---
+// ===== Меню-бургер (☰) =====
 function openBurger(){lockScroll();document.getElementById('burgerOverlay').classList.add('open')}
 function closeBurger(){document.getElementById('burgerOverlay').classList.remove('open');unlockScroll()}
 
-// --- Add Activity ---
+// ===== Окно "Добавить задачу" =====
 let pickedGroupId=null;
 function openAddActivity(){
   pickedGroupId=null;
@@ -1115,7 +1237,7 @@ function submitAddActivity(){
   save();closeAddActivity();
 }
 
-// --- Retro entry ---
+// ===== Окно "Запись задним числом" =====
 let retroMode='single', retroActId=null;
 
 function openRetroEntry(){
@@ -1203,14 +1325,14 @@ function insertRecordSingle(actId, startISO, endISO){
   state.records=merged;
 }
 
-// --- JSON viewer ---
+// ===== Окно "Просмотр JSON" =====
 function openJsonView(){
   document.getElementById('jsonContent').innerText=JSON.stringify({groups:state.groups,activities:state.activities,records:state.records},null,2);
   lockScroll();document.getElementById('jsonOverlay').classList.add('open');
 }
 function closeJsonView(){document.getElementById('jsonOverlay').classList.remove('open');unlockScroll()}
 
-// --- Navigation ---
+// ===== Навигация (Главная / Лог задач) =====
 function showMain(){
   document.getElementById('main').style.display='flex';
   document.getElementById('history').style.display='none';
