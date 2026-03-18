@@ -14,11 +14,14 @@
 
 <style>
 
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
 body{
-font-family:Arial;
+font-family:-apple-system,Arial,sans-serif;
 margin:0;
 background:#111;
 color:white;
+overflow-x:hidden;
 }
 
 header{
@@ -26,6 +29,7 @@ padding:15px;
 background:#222;
 font-size:20px;
 position:relative;
+text-align:center;
 }
 
 .update-btn{
@@ -41,44 +45,130 @@ padding:4px 8px;
 border-radius:4px;
 }
 
-.container{
-padding:10px;
+/* --- Главный экран --- */
+
+.main-screen{
+display:flex;
+flex-direction:column;
+align-items:center;
+padding:20px 10px 100px;
+}
+
+.current-activity{
+font-size:13px;
+color:#0a84ff;
+margin-bottom:4px;
+min-height:18px;
+}
+
+.timer-display{
+font-size:42px;
+font-weight:200;
+font-variant-numeric:tabular-nums;
+letter-spacing:1px;
+margin-bottom:20px;
+min-height:50px;
+}
+
+.start-btn{
+width:80px;
+height:80px;
+border-radius:50%;
+border:3px solid #0a84ff;
+background:none;
+color:#0a84ff;
+font-size:14px;
+font-weight:600;
+margin-bottom:24px;
+}
+
+.start-btn:active{
+background:rgba(10,132,255,0.2);
+}
+
+.recent-records{
+width:100%;
+max-width:400px;
+}
+
+.recent-record{
+font-size:11px;
+color:rgba(255,255,255,0.45);
+padding:4px 0;
+border-bottom:1px solid rgba(255,255,255,0.08);
+line-height:1.4;
+}
+
+.recent-record:first-child{
+color:rgba(255,255,255,0.6);
+}
+
+/* --- Оверлей выбора активности --- */
+
+.overlay{
+display:none;
+position:fixed;
+top:0;left:0;right:0;bottom:0;
+background:rgba(0,0,0,0.85);
+z-index:100;
+overflow-y:auto;
+-webkit-overflow-scrolling:touch;
+}
+
+.overlay.open{display:block}
+
+.overlay-header{
+padding:15px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.overlay-header span{font-size:18px}
+
+.overlay-close{
+background:none;
+border:none;
+color:#0a84ff;
+font-size:16px;
+padding:8px;
 }
 
 .group{
-margin-top:20px;
+padding:0 15px;
+margin-bottom:15px;
 }
 
 .group-title{
-font-size:18px;
-margin-bottom:8px;
-opacity:0.8;
+font-size:14px;
+margin-bottom:6px;
+opacity:0.5;
+text-transform:uppercase;
+letter-spacing:1px;
 }
 
 .activity{
 display:block;
 width:100%;
-padding:15px;
-margin-bottom:6px;
+padding:14px;
+margin-bottom:5px;
 border:none;
-background:#333;
+background:#222;
 color:white;
 font-size:16px;
-border-radius:8px;
+border-radius:10px;
+text-align:left;
 }
 
-.activity:hover{
-background:#444;
+.activity:active{
+background:#333;
 }
 
-.active{
+.activity.active{
 background:#0a84ff;
 }
 
-.timer{
-font-size:22px;
-margin:10px;
-}
+/* --- Нижняя панель --- */
 
 .bottom{
 position:fixed;
@@ -86,29 +176,36 @@ bottom:0;
 left:0;
 right:0;
 background:#222;
-padding:10px;
+padding:8px 10px;
+padding-bottom:max(8px,env(safe-area-inset-bottom));
 display:flex;
 gap:5px;
 }
 
 .bottom button{
 flex:1;
-padding:10px;
+padding:10px 4px;
 border:none;
-background:#444;
+background:#333;
 color:white;
 border-radius:6px;
+font-size:12px;
 }
+
+/* --- История --- */
 
 #history{
 display:none;
+padding:10px;
 padding-bottom:80px;
 }
 
 .record{
-padding:8px;
-border-bottom:1px solid #333;
-font-size:14px;
+padding:6px 0;
+border-bottom:1px solid rgba(255,255,255,0.08);
+font-size:12px;
+line-height:1.5;
+color:rgba(255,255,255,0.8);
 }
 
 </style>
@@ -118,28 +215,33 @@ font-size:14px;
 <body>
 
 <header>
-Time Tracker  | 107.03
+Учёт времени
 <button class="update-btn" onclick="checkUpdate()">↻</button>
 </header>
 
-<div class="timer" id="timer"></div>
+<div class="main-screen" id="main">
+  <div class="current-activity" id="currentActivity"></div>
+  <div class="timer-display" id="timer">00:00:00</div>
+  <button class="start-btn" onclick="openPicker()">ПУСК</button>
+  <div class="recent-records" id="recentRecords"></div>
+</div>
 
-<div class="container" id="activities"></div>
+<div class="overlay" id="picker">
+  <div class="overlay-header">
+    <span>Выбрать</span>
+    <button class="overlay-close" onclick="closePicker()">Закрыть</button>
+  </div>
+  <div id="pickerList"></div>
+</div>
 
-<div class="container" id="history"></div>
+<div id="history"></div>
 
 <div class="bottom">
-
-<button onclick="showActivities()">Activities</button>
-
-<button onclick="showHistory()">History</button>
-
-<button onclick="addActivity()">Add</button>
-
-<button onclick="exportData()">Export</button>
-
-<button onclick="importData()">Import</button>
-
+<button onclick="showMain()">Главная</button>
+<button onclick="showHistory()">История</button>
+<button onclick="addActivity()">Добавить</button>
+<button onclick="exportData()">Экспорт</button>
+<button onclick="importData()">Импорт</button>
 </div>
 
 <script>
@@ -192,19 +294,14 @@ function checkUpdate(){
 // --- Service Worker registration + auto-update ---
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').then(reg => {
-    // Check for updates every 30 seconds
     setInterval(() => reg.update(), 30000);
     reg.addEventListener('updatefound', () => {
       const nw = reg.installing;
       nw.addEventListener('statechange', () => {
-        if (nw.state === 'activated') {
-          // New SW activated — reload to get fresh content
-          location.reload();
-        }
+        if (nw.state === 'activated') location.reload();
       });
     });
   });
-  // Also reload when a new SW takes control
   navigator.serviceWorker.addEventListener('controllerchange', () => {
     location.reload();
   });
@@ -215,31 +312,63 @@ if (navigator.storage && navigator.storage.persist) {
 
 // --- Default state ---
 const DEFAULT_STATE = {
-
 groups:[
-{id:1,name:"Work"},
-{id:2,name:"Rest"},
-{id:3,name:"Life"},
-{id:4,name:"Sleep"}
+{id:1,name:"Работа"},
+{id:2,name:"Отдых"},
+{id:3,name:"Быт"},
+{id:4,name:"Сон"}
 ],
-
 activities:[
-{id:1,name:"Coding",group:1},
-{id:2,name:"Analysis",group:1},
+{id:1,name:"Кодинг",group:1},
+{id:2,name:"Анализ",group:1},
 {id:3,name:"YouTube",group:2},
-{id:4,name:"Cooking",group:3},
-{id:5,name:"Sleep",group:4}
+{id:4,name:"Готовка",group:3},
+{id:5,name:"Сон",group:4}
 ],
-
 records:[],
-
 active:null
-
 };
 
 let state = DEFAULT_STATE;
 
-// --- Init: load from IndexedDB, fallback to localStorage ---
+// --- Helpers ---
+function toMSK(iso){
+  if(!iso) return '...';
+  const d = new Date(iso);
+  return d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Moscow'});
+}
+
+function durationStr(ms){
+  if(ms<=0) return '0м';
+  const h=Math.floor(ms/3600000);
+  const m=Math.floor((ms%3600000)/60000);
+  if(h>0) return h+'ч '+m+'м';
+  return m+'м';
+}
+
+function getActivityName(id){
+  const a=state.activities.find(x=>x.id==id);
+  return a?a.name:'?';
+}
+
+function getGroupName(actId){
+  const a=state.activities.find(x=>x.id==actId);
+  if(!a) return '?';
+  const g=state.groups.find(x=>x.id==a.group);
+  return g?g.name:'?';
+}
+
+function formatRecord(r){
+  const grp=getGroupName(r.activity);
+  const act=getActivityName(r.activity);
+  const from=toMSK(r.start);
+  const to=r.end?toMSK(r.end):'...';
+  const ms=r.end?(new Date(r.end)-new Date(r.start)):0;
+  const dur=r.end?durationStr(ms):'...';
+  return grp+' | '+act+': с '+from+' до '+to+' — '+dur;
+}
+
+// --- Init ---
 (async function init() {
   let data = null;
   try { data = await dbLoad(); } catch(e) {}
@@ -247,228 +376,145 @@ let state = DEFAULT_STATE;
     const ls = localStorage.getItem("timedata");
     if (ls) {
       data = JSON.parse(ls);
-      // Migrate to IndexedDB
       try { await dbSave(data); } catch(e) {}
     }
   }
   state = data || DEFAULT_STATE;
-  render();
+  renderMain();
   updateTimer();
 })();
 
 function save(){
-localStorage.setItem("timedata",JSON.stringify(state));
-dbSave(state).catch(()=>{});
+  localStorage.setItem("timedata",JSON.stringify(state));
+  dbSave(state).catch(()=>{});
 }
 
-function render(){
+// --- Picker (выбор активности) ---
+function openPicker(){
+  const list=document.getElementById('pickerList');
+  list.innerHTML='';
+  state.groups.forEach(g=>{
+    const div=document.createElement('div');
+    div.className='group';
+    const title=document.createElement('div');
+    title.className='group-title';
+    title.innerText=g.name;
+    div.appendChild(title);
+    state.activities.filter(a=>a.group==g.id).forEach(a=>{
+      const btn=document.createElement('button');
+      btn.className='activity';
+      btn.innerText=a.name;
+      if(state.active && state.active.activity==a.id) btn.classList.add('active');
+      btn.onclick=()=>{startActivity(a.id);closePicker()};
+      div.appendChild(btn);
+    });
+    list.appendChild(div);
+  });
+  document.getElementById('picker').classList.add('open');
+}
 
-let container=document.getElementById("activities")
+function closePicker(){
+  document.getElementById('picker').classList.remove('open');
+}
 
-container.innerHTML=""
-
-state.groups.forEach(g=>{
-
-let div=document.createElement("div")
-div.className="group"
-
-let title=document.createElement("div")
-title.className="group-title"
-title.innerText=g.name
-
-div.appendChild(title)
-
-state.activities
-.filter(a=>a.group==g.id)
-.forEach(a=>{
-
-let btn=document.createElement("button")
-btn.className="activity"
-btn.innerText=a.name
-
-if(state.active && state.active.activity==a.id)
-btn.classList.add("active")
-
-btn.onclick=()=>startActivity(a.id)
-
-div.appendChild(btn)
-
-})
-
-container.appendChild(div)
-
-})
-
+// --- Render main ---
+function renderMain(){
+  // Current activity label
+  const cur=document.getElementById('currentActivity');
+  if(state.active){
+    cur.innerText=getGroupName(state.active.activity)+' | '+getActivityName(state.active.activity);
+  } else {
+    cur.innerText='Нет активности';
+  }
+  // Recent records
+  const container=document.getElementById('recentRecords');
+  container.innerHTML='';
+  const recent=state.records.slice(-3).reverse();
+  recent.forEach(r=>{
+    const div=document.createElement('div');
+    div.className='recent-record';
+    div.innerText=formatRecord(r);
+    container.appendChild(div);
+  });
 }
 
 function startActivity(id){
-
-let now=new Date().toISOString()
-
-if(state.active){
-
-state.active.end=now
-
-}
-
-let rec={
-id:Date.now(),
-activity:id,
-start:now,
-end:null
-}
-
-state.records.push(rec)
-
-state.active=rec
-
-save()
-
-render()
-
+  const now=new Date().toISOString();
+  if(state.active) state.active.end=now;
+  const rec={id:Date.now(),activity:id,start:now,end:null};
+  state.records.push(rec);
+  state.active=rec;
+  save();
+  renderMain();
 }
 
 function updateTimer(){
-
-if(!state.active){
-document.getElementById("timer").innerText=""
-return
+  const el=document.getElementById('timer');
+  if(!state.active){el.innerText='00:00:00';return}
+  const diff=(Date.now()-new Date(state.active.start))/1000;
+  const h=Math.floor(diff/3600);
+  const m=Math.floor(diff%3600/60);
+  const s=Math.floor(diff%60);
+  el.innerText=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
 }
 
-let start=new Date(state.active.start)
+setInterval(updateTimer,1000);
 
-let diff=(Date.now()-start)/1000
-
-let h=Math.floor(diff/3600)
-let m=Math.floor(diff%3600/60)
-let s=Math.floor(diff%60)
-
-document.getElementById("timer").innerText=
-"h "+h+" m "+m+" s "+s
-
+// --- Navigation ---
+function showMain(){
+  document.getElementById('main').style.display='flex';
+  document.getElementById('history').style.display='none';
+  renderMain();
 }
-
-setInterval(updateTimer,1000)
 
 function showHistory(){
-
-document.getElementById("activities").style.display="none"
-
-let h=document.getElementById("history")
-
-h.style.display="block"
-
-h.innerHTML=""
-
-state.records
-.slice()
-.reverse()
-.forEach(r=>{
-
-let act=state.activities.find(a=>a.id==r.activity)
-
-let div=document.createElement("div")
-div.className="record"
-
-div.innerText=
-act.name+" | "+
-r.start+" → "+
-(r.end||"...")
-
-h.appendChild(div)
-
-})
-
-}
-
-function showActivities(){
-
-document.getElementById("history").style.display="none"
-document.getElementById("activities").style.display="block"
-
+  document.getElementById('main').style.display='none';
+  const h=document.getElementById('history');
+  h.style.display='block';
+  h.innerHTML='';
+  state.records.slice().reverse().forEach(r=>{
+    const div=document.createElement('div');
+    div.className='record';
+    div.innerText=formatRecord(r);
+    h.appendChild(div);
+  });
 }
 
 function addActivity(){
-
-let name=prompt("Activity name")
-
-if(!name)return
-
-let group=prompt("Group name")
-
-let g=state.groups.find(x=>x.name==group)
-
-if(!g){
-
-g={
-id:Date.now(),
-name:group
-}
-
-state.groups.push(g)
-
-}
-
-state.activities.push({
-
-id:Date.now(),
-name:name,
-group:g.id
-
-})
-
-save()
-
-render()
-
+  const name=prompt('Название активности');
+  if(!name)return;
+  const group=prompt('Название группы');
+  let g=state.groups.find(x=>x.name==group);
+  if(!g){
+    g={id:Date.now(),name:group};
+    state.groups.push(g);
+  }
+  state.activities.push({id:Date.now()+1,name:name,group:g.id});
+  save();
 }
 
 function exportData(){
-
-let data=JSON.stringify(state)
-
-let blob=new Blob([data],{type:"application/json"})
-
-let a=document.createElement("a")
-
-a.href=URL.createObjectURL(blob)
-
-a.download="timedata.json"
-
-a.click()
-
+  const blob=new Blob([JSON.stringify(state)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='timedata.json';
+  a.click();
 }
 
 function importData(){
-
-let input=document.createElement("input")
-input.type="file"
-
-input.onchange=e=>{
-
-let file=e.target.files[0]
-
-let reader=new FileReader()
-
-reader.onload=()=>{
-
-state=JSON.parse(reader.result)
-
-save()
-
-render()
-
+  const input=document.createElement('input');
+  input.type='file';
+  input.onchange=e=>{
+    const reader=new FileReader();
+    reader.onload=()=>{
+      state=JSON.parse(reader.result);
+      save();
+      renderMain();
+    };
+    reader.readAsText(e.target.files[0]);
+  };
+  input.click();
 }
-
-reader.readAsText(file)
-
-}
-
-input.click()
-
-}
-
-render()
 
 </script>
 
