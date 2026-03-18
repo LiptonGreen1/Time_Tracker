@@ -100,7 +100,7 @@ padding:4px;
 
 .parallel-btn:active{background:rgba(255,159,10,0.2)}
 
-/* --- Recent records (compact format) --- */
+/* --- Record rows (shared for main + history) --- */
 
 .recent-records{
 width:100%;
@@ -108,9 +108,10 @@ max-width:400px;
 }
 
 .rec-row{
-display:flex;
+display:grid;
+grid-template-columns:48px 1fr auto auto;
+gap:0 6px;
 align-items:center;
-gap:8px;
 padding:5px 0;
 border-bottom:1px solid rgba(255,255,255,0.06);
 font-size:11px;
@@ -119,30 +120,37 @@ color:rgba(255,255,255,0.45);
 
 .rec-row.cur{color:rgba(255,255,255,0.7)}
 
+.rec-date{
+font-size:9px;
+opacity:0.6;
+white-space:nowrap;
+}
+
 .rec-name{
 white-space:nowrap;
 font-weight:500;
 min-width:0;
-flex-shrink:1;
 overflow:hidden;
 text-overflow:ellipsis;
 }
 
 .rec-times{
-font-size:9px;
-line-height:1.3;
+font-size:10px;
 white-space:nowrap;
-color:inherit;
-opacity:0.8;
-flex-shrink:0;
+padding:0 4px;
 }
+
+.rec-times b{font-weight:600}
 
 .rec-dur{
 white-space:nowrap;
-margin-left:auto;
-flex-shrink:0;
 font-variant-numeric:tabular-nums;
+font-weight:600;
+text-align:right;
+min-width:52px;
 }
+
+.rec-dur.live{color:#0a84ff}
 
 /* --- Рабочий трекер --- */
 
@@ -176,17 +184,19 @@ border-radius:50%;
 
 .work-grid{
 display:grid;
-grid-template-columns:60px 1fr 50px;
+grid-template-columns:56px 80px 40px 48px;
+justify-content:center;
 row-gap:6px;
+column-gap:6px;
 align-items:center;
 font-size:13px;
 }
 
 .work-lbl{color:rgba(255,255,255,0.5);font-size:12px}
-.work-mid{text-align:center;font-variant-numeric:tabular-nums}
-.work-right{text-align:right}
-.work-pct{color:rgba(255,255,255,0.4);font-size:11px}
+.work-val{font-variant-numeric:tabular-nums;text-align:center}
+.work-tgt{text-align:center}
 .work-target{color:#FF2FFF;font-weight:700}
+.work-pctcol{text-align:right;color:rgba(255,255,255,0.4);font-size:11px}
 
 .work-week-val{
 text-decoration:underline;
@@ -524,39 +534,7 @@ color:rgba(255,255,255,0.8);
 
 .day-separator:last-of-type{margin-top:0}
 
-.record{
-display:flex;
-align-items:center;
-gap:8px;
-padding:5px 0;
-border-bottom:1px solid rgba(255,255,255,0.06);
-font-size:12px;
-color:rgba(255,255,255,0.8);
-}
-
-.rec-name{
-white-space:nowrap;
-font-weight:500;
-min-width:0;
-flex-shrink:1;
-overflow:hidden;
-text-overflow:ellipsis;
-}
-
-.rec-times{
-font-size:9px;
-line-height:1.3;
-white-space:nowrap;
-opacity:0.7;
-flex-shrink:0;
-}
-
-.rec-dur{
-white-space:nowrap;
-margin-left:auto;
-flex-shrink:0;
-font-variant-numeric:tabular-nums;
-}
+/* history uses same .rec-row grid */
 
 </style>
 
@@ -578,11 +556,13 @@ font-variant-numeric:tabular-nums;
     <div class="week-days" id="weekDays"></div>
     <div class="work-grid">
       <span class="work-lbl">Сегодня</span>
-      <span class="work-mid" id="workToday">0ч 0м</span>
-      <span class="work-right"><span class="work-target">10ч</span> <span class="work-pct" id="workTodayPct"></span></span>
+      <span class="work-val" id="workToday">0ч 0м</span>
+      <span class="work-tgt"><span class="work-target">10ч</span></span>
+      <span class="work-pctcol" id="workTodayPct"></span>
       <span class="work-lbl">Неделя</span>
-      <span class="work-mid"><span class="work-week-val" id="workWeek" onclick="openWeekDetail(0)">0ч 0м</span></span>
-      <span class="work-right"><span class="work-target">70ч</span> <span class="work-pct" id="workWeekPct"></span></span>
+      <span class="work-val"><span class="work-week-val" id="workWeek" onclick="openWeekDetail(0)">0ч 0м</span></span>
+      <span class="work-tgt"><span class="work-target">70ч</span></span>
+      <span class="work-pctcol" id="workWeekPct"></span>
     </div>
   </div>
 </div>
@@ -886,9 +866,26 @@ function save(){
 }
 
 // --- Build record row HTML element ---
-function buildRecRow(r, isCurrent){
+function shortDate(iso){
+  if(!iso)return '';
+  const d=mskDateObj(iso);
+  const dow=d.getDay();
+  return DAY_NAMES[dow===0?6:dow-1]+' '+String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0');
+}
+
+function hmsFromMs(ms){
+  if(ms<=0)return '0ч 0м 0с';
+  const h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000),s=Math.floor((ms%60000)/1000);
+  return h+'ч '+m+'м '+s+'с';
+}
+
+function buildRecRow(r, isCurrent, showDate){
   const row=document.createElement('div');
   row.className='rec-row'+(isCurrent?' cur':'');
+
+  const dateEl=document.createElement('span');
+  dateEl.className='rec-date';
+  dateEl.innerText=showDate!==false?shortDate(r.start):'';
 
   const name=document.createElement('span');
   name.className='rec-name';
@@ -896,13 +893,19 @@ function buildRecRow(r, isCurrent){
 
   const times=document.createElement('span');
   times.className='rec-times';
-  times.innerHTML='с '+toMSK(r.start)+'<br>до '+(r.end?toMSK(r.end):'...');
+  times.innerHTML='<b>'+toMSK(r.start)+'</b> — <b>'+(r.end?toMSK(r.end):'...')+'</b>';
 
   const dur=document.createElement('span');
   dur.className='rec-dur';
-  const ms=r.end?(new Date(r.end)-new Date(r.start)):0;
-  dur.innerText=r.end?durationStr(ms):'...';
+  if(isCurrent&&!r.end){
+    dur.classList.add('live');
+    dur.dataset.start=r.start;
+  } else {
+    const ms=r.end?(new Date(r.end)-new Date(r.start)):0;
+    dur.innerText=r.end?durationStr(ms):'...';
+  }
 
+  row.appendChild(dateEl);
   row.appendChild(name);
   row.appendChild(times);
   row.appendChild(dur);
@@ -985,8 +988,8 @@ function renderMain(){
   else cur.innerText='Нет активности';
 
   const c=document.getElementById('recentRecords');c.innerHTML='';
-  active.forEach(r=>c.appendChild(buildRecRow(r,true)));
-  state.records.filter(r=>r.end!==null).slice(-3).reverse().forEach(r=>c.appendChild(buildRecRow(r,false)));
+  active.forEach(r=>c.appendChild(buildRecRow(r,true,true)));
+  state.records.filter(r=>r.end!==null).slice(-3).reverse().forEach(r=>c.appendChild(buildRecRow(r,false,true)));
   renderWeekDays();
 }
 
@@ -1018,6 +1021,11 @@ function updateTimer(){
   const diff=(Date.now()-earliest)/1000;
   const h=Math.floor(diff/3600),m=Math.floor(diff%3600/60),s=Math.floor(diff%60);
   el.innerText=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  // Update live durations in rec rows
+  document.querySelectorAll('.rec-dur.live').forEach(d=>{
+    const ms=Date.now()-new Date(d.dataset.start).getTime();
+    d.innerText=hmsFromMs(ms);
+  });
   updateWorkTracker();
 }
 setInterval(updateTimer,1000);
@@ -1217,7 +1225,7 @@ function showHistory(){
     label.innerText=mskDayLabel(byDay[day][0].start);
     h.appendChild(label);
     byDay[day].sort((a,b)=>new Date(b.start)-new Date(a.start)).forEach(r=>{
-      h.appendChild(buildRecRow(r,r.end===null));
+      h.appendChild(buildRecRow(r,r.end===null,false));
     });
   });
 }
