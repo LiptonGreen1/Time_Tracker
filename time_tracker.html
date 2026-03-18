@@ -43,7 +43,17 @@ text-align:center;
 display:flex;
 flex-direction:column;
 align-items:center;
-padding:20px 10px 120px;
+padding:20px 10px 140px;
+}
+
+.timer-box{
+border:1px solid rgba(255,255,255,0.25);
+border-radius:16px;
+padding:12px 24px 14px;
+margin-bottom:20px;
+display:inline-flex;
+flex-direction:column;
+align-items:center;
 }
 
 .current-activity{
@@ -52,16 +62,14 @@ color:#0a84ff;
 margin-bottom:4px;
 min-height:18px;
 text-align:center;
-padding:0 10px;
 }
 
 .timer-display{
-font-size:42px;
+font-size:38px;
 font-weight:200;
 font-variant-numeric:tabular-nums;
-letter-spacing:1px;
-margin-bottom:20px;
-min-height:50px;
+letter-spacing:0.5px;
+min-height:46px;
 }
 
 .buttons-row{
@@ -108,9 +116,7 @@ max-width:400px;
 }
 
 .rec-row{
-display:grid;
-grid-template-columns:48px 1fr auto auto;
-gap:0 6px;
+display:flex;
 align-items:center;
 padding:5px 0;
 border-bottom:1px solid rgba(255,255,255,0.06);
@@ -124,6 +130,7 @@ color:rgba(255,255,255,0.45);
 font-size:9px;
 opacity:0.6;
 white-space:nowrap;
+margin-right:8px;
 }
 
 .rec-name{
@@ -132,12 +139,16 @@ font-weight:500;
 min-width:0;
 overflow:hidden;
 text-overflow:ellipsis;
+flex:1;
 }
 
 .rec-times{
 font-size:10px;
 white-space:nowrap;
-padding:0 4px;
+margin:0 8px;
+min-width:90px;
+flex-shrink:0;
+text-align:center;
 }
 
 .rec-times b{font-weight:600}
@@ -147,7 +158,8 @@ white-space:nowrap;
 font-variant-numeric:tabular-nums;
 font-weight:600;
 text-align:right;
-min-width:52px;
+min-width:62px;
+flex-shrink:0;
 }
 
 .rec-dur.live{color:#0a84ff}
@@ -184,7 +196,7 @@ border-radius:50%;
 
 .work-grid{
 display:grid;
-grid-template-columns:56px 80px 40px 48px;
+grid-template-columns:56px auto 18px auto auto;
 justify-content:center;
 row-gap:6px;
 column-gap:6px;
@@ -193,8 +205,9 @@ font-size:13px;
 }
 
 .work-lbl{color:rgba(255,255,255,0.5);font-size:12px}
-.work-val{font-variant-numeric:tabular-nums;text-align:center}
-.work-tgt{text-align:center}
+.work-val{font-variant-numeric:tabular-nums}
+.work-from{color:rgba(255,255,255,0.35);font-size:11px}
+.work-tgt{}
 .work-target{color:#FF2FFF;font-weight:700}
 .work-pctcol{text-align:right;color:rgba(255,255,255,0.4);font-size:11px}
 
@@ -320,27 +333,30 @@ padding:8px 12px;
 
 .week-detail-dates{font-size:14px;color:rgba(255,255,255,0.7)}
 
-.week-detail-row{
+.wd-grid{
 display:grid;
-grid-template-columns:30px 1fr 60px;
-padding:8px 0;
-border-bottom:1px solid rgba(255,255,255,0.06);
-font-size:13px;
+grid-template-columns:42px 35% 30% 1fr;
 align-items:center;
+padding:8px 0;
+font-size:13px;
 }
 
-.week-detail-row .wd-val{text-align:center}
-.week-detail-row .wd-pct{text-align:right;color:rgba(255,255,255,0.5)}
+.wd-grid.wd-day-row{border-bottom:1px solid rgba(255,255,255,0.06)}
 
-.week-detail-total{
+.wd-grid.wd-total-row{
 margin-top:8px;
 padding-top:8px;
 border-top:1px solid rgba(255,255,255,0.15);
-font-size:14px;
 font-weight:600;
-display:flex;
-justify-content:space-between;
+font-size:14px;
 }
+
+.wd-grid .wd-day{font-weight:500}
+.wd-grid .wd-val{text-align:left;font-variant-numeric:tabular-nums}
+.wd-grid .wd-tgt{text-align:left;white-space:nowrap}
+.wd-grid .wd-tgt-inner{color:#FF2FFF;font-weight:700}
+.wd-grid .wd-tgt-from{color:rgba(255,255,255,0.35);font-size:11px}
+.wd-grid .wd-pct{text-align:right;color:rgba(255,255,255,0.5)}
 
 /* --- Burger menu --- */
 
@@ -500,7 +516,7 @@ position:fixed;
 bottom:0;left:0;right:0;
 background:#222;
 padding:10px 10px;
-padding-bottom:calc(10px + env(safe-area-inset-bottom));
+padding-bottom:calc(24px + env(safe-area-inset-bottom));
 display:flex;
 gap:5px;
 z-index:50;
@@ -520,7 +536,7 @@ font-size:13px;
 
 #history{
 display:none;
-padding:10px;
+padding:10px 15px;
 padding-bottom:120px;
 }
 
@@ -545,8 +561,10 @@ color:rgba(255,255,255,0.8);
 <header>Учёт времени</header>
 
 <div class="main-screen" id="main">
-  <div class="current-activity" id="currentActivity"></div>
-  <div class="timer-display" id="timer">00:00:00</div>
+  <div class="timer-box">
+    <div class="current-activity" id="currentActivity"></div>
+    <div class="timer-display" id="timer">0ч 0м 0с</div>
+  </div>
   <div class="buttons-row">
     <button class="start-btn" onclick="openPicker(false)">ПУСК</button>
     <button class="parallel-btn" onclick="openPicker(true)">ПУСК<br>×2</button>
@@ -557,10 +575,12 @@ color:rgba(255,255,255,0.8);
     <div class="work-grid">
       <span class="work-lbl">Сегодня</span>
       <span class="work-val" id="workToday">0ч 0м</span>
+      <span class="work-from">из</span>
       <span class="work-tgt"><span class="work-target">10ч</span></span>
       <span class="work-pctcol" id="workTodayPct"></span>
       <span class="work-lbl">Неделя</span>
       <span class="work-val"><span class="work-week-val" id="workWeek" onclick="openWeekDetail(0)">0ч 0м</span></span>
+      <span class="work-from">из</span>
       <span class="work-tgt"><span class="work-target">70ч</span></span>
       <span class="work-pctcol" id="workWeekPct"></span>
     </div>
@@ -989,7 +1009,8 @@ function renderMain(){
 
   const c=document.getElementById('recentRecords');c.innerHTML='';
   active.forEach(r=>c.appendChild(buildRecRow(r,true,true)));
-  state.records.filter(r=>r.end!==null).slice(-3).reverse().forEach(r=>c.appendChild(buildRecRow(r,false,true)));
+  const completed=state.records.filter(r=>r.end!==null).slice(-3);
+  splitAtMidnights(completed).reverse().forEach(r=>c.appendChild(buildRecRow(r,false,true)));
   renderWeekDays();
 }
 
@@ -1004,23 +1025,23 @@ function updateWorkTracker(){
   const ts=mskDayStartUTC(now.getFullYear(),now.getMonth()+1,now.getDate());
   const todayMs=calcWorkMs(ts,ts+86400000);
   document.getElementById('workToday').innerText=hmFromMs(todayMs);
-  document.getElementById('workTodayPct').innerText=(todayMs/36000000*100).toFixed(1)+'%';
+  document.getElementById('workTodayPct').innerText='('+(todayMs/36000000*100).toFixed(1)+'%)';
 
   const mon=getMondayMSK(now);
   const ws=mskDayStartUTC(mon.getFullYear(),mon.getMonth()+1,mon.getDate());
   const weekMs=calcWorkMs(ws,ws+604800000);
   document.getElementById('workWeek').innerText=hmFromMs(weekMs);
-  document.getElementById('workWeekPct').innerText=(weekMs/252000000*100).toFixed(1)+'%';
+  document.getElementById('workWeekPct').innerText='('+(weekMs/252000000*100).toFixed(1)+'%)';
 }
 
 function updateTimer(){
   const el=document.getElementById('timer');
   const active=getActive();
-  if(!active.length){el.innerText='00:00:00';updateWorkTracker();return}
+  if(!active.length){el.innerText='0ч 0м 0с';updateWorkTracker();return}
   const earliest=Math.min(...active.map(r=>new Date(r.start).getTime()));
   const diff=(Date.now()-earliest)/1000;
   const h=Math.floor(diff/3600),m=Math.floor(diff%3600/60),s=Math.floor(diff%60);
-  el.innerText=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  el.innerText=h+'ч '+m+'м '+s+'с';
   // Update live durations in rec rows
   document.querySelectorAll('.rec-dur.live').forEach(d=>{
     const ms=Date.now()-new Date(d.dataset.start).getTime();
@@ -1046,9 +1067,9 @@ function renderWeekDetail(){
   let tot=0;
   for(let i=0;i<7;i++){
     const ds=ws+i*86400000,ms=calcWorkMs(ds,ds+86400000);tot+=ms;
-    h+='<div class="week-detail-row"><span>'+DAY_NAMES[i]+'</span><span class="wd-val">'+hmFromMs(ms)+'</span><span class="wd-pct">+'+(ms/36000000*100).toFixed(1)+'%</span></div>';
+    h+='<div class="wd-grid wd-day-row"><span class="wd-day">'+DAY_NAMES[i]+'</span><span class="wd-val">'+hmFromMs(ms)+'</span><span class="wd-tgt"><span class="wd-tgt-from">из </span><span class="wd-tgt-inner">10ч</span></span><span class="wd-pct">('+(ms/36000000*100).toFixed(1)+'%)</span></div>';
   }
-  h+='<div class="week-detail-total"><span>Итого</span><span>'+hmFromMs(tot)+' / <span class="work-target">70ч</span> ('+(tot/252000000*100).toFixed(1)+'%)</span></div>';
+  h+='<div class="wd-grid wd-total-row"><span class="wd-day">Итого</span><span class="wd-val">'+hmFromMs(tot)+'</span><span class="wd-tgt"><span class="wd-tgt-from">из </span><span class="wd-tgt-inner">70ч</span></span><span class="wd-pct">('+(tot/252000000*100).toFixed(1)+'%)</span></div>';
   c.innerHTML=h;
 }
 
