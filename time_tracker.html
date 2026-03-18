@@ -43,7 +43,7 @@ text-align:center;
 display:flex;
 flex-direction:column;
 align-items:center;
-padding:20px 10px 100px;
+padding:20px 10px 120px;
 }
 
 .current-activity{
@@ -100,17 +100,48 @@ padding:4px;
 
 .parallel-btn:active{background:rgba(255,159,10,0.2)}
 
+/* --- Recent records (compact format) --- */
+
 .recent-records{
 width:100%;
 max-width:400px;
 }
 
-.recent-record{
+.rec-row{
+display:flex;
+align-items:center;
+gap:8px;
+padding:5px 0;
+border-bottom:1px solid rgba(255,255,255,0.06);
 font-size:11px;
 color:rgba(255,255,255,0.45);
-padding:4px 0;
-border-bottom:1px solid rgba(255,255,255,0.08);
-line-height:1.4;
+}
+
+.rec-row.cur{color:rgba(255,255,255,0.7)}
+
+.rec-name{
+white-space:nowrap;
+font-weight:500;
+min-width:0;
+flex-shrink:1;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+
+.rec-times{
+font-size:9px;
+line-height:1.3;
+white-space:nowrap;
+color:inherit;
+opacity:0.8;
+flex-shrink:0;
+}
+
+.rec-dur{
+white-space:nowrap;
+margin-left:auto;
+flex-shrink:0;
+font-variant-numeric:tabular-nums;
 }
 
 /* --- Рабочий трекер --- */
@@ -143,17 +174,19 @@ border-radius:50%;
 
 .week-day.today{background:#0a84ff;color:white;font-weight:600}
 
-.work-row{
-display:flex;
-justify-content:space-between;
+.work-grid{
+display:grid;
+grid-template-columns:60px 1fr 50px;
+row-gap:6px;
 align-items:center;
-padding:6px 0;
 font-size:13px;
 }
 
-.work-label{color:rgba(255,255,255,0.5);font-size:12px}
-.work-value{font-variant-numeric:tabular-nums}
-.work-pct{color:rgba(255,255,255,0.4);font-size:11px;margin-left:6px}
+.work-lbl{color:rgba(255,255,255,0.5);font-size:12px}
+.work-mid{text-align:center;font-variant-numeric:tabular-nums}
+.work-right{text-align:right}
+.work-pct{color:rgba(255,255,255,0.4);font-size:11px}
+.work-target{color:#FF2FFF;font-weight:700}
 
 .work-week-val{
 text-decoration:underline;
@@ -278,12 +311,16 @@ padding:8px 12px;
 .week-detail-dates{font-size:14px;color:rgba(255,255,255,0.7)}
 
 .week-detail-row{
-display:flex;
-justify-content:space-between;
+display:grid;
+grid-template-columns:30px 1fr 60px;
 padding:8px 0;
 border-bottom:1px solid rgba(255,255,255,0.06);
 font-size:13px;
+align-items:center;
 }
+
+.week-detail-row .wd-val{text-align:center}
+.week-detail-row .wd-pct{text-align:right;color:rgba(255,255,255,0.5)}
 
 .week-detail-total{
 margin-top:8px;
@@ -297,9 +334,7 @@ justify-content:space-between;
 
 /* --- Burger menu --- */
 
-.burger-list{
-padding:15px;
-}
+.burger-list{padding:15px}
 
 .burger-item{
 display:block;
@@ -324,9 +359,7 @@ margin-top:4px;
 
 /* --- Add activity form --- */
 
-.form-section{
-padding:15px;
-}
+.form-section{padding:15px}
 
 .form-label{
 font-size:12px;
@@ -363,11 +396,7 @@ color:rgba(255,255,255,0.7);
 font-size:13px;
 }
 
-.form-group-chip.picked{
-border-color:#0a84ff;
-color:#0a84ff;
-}
-
+.form-group-chip.picked{border-color:#0a84ff;color:#0a84ff}
 .form-group-chip:active{background:rgba(255,255,255,0.05)}
 
 .form-submit{
@@ -385,9 +414,7 @@ font-weight:600;
 
 /* --- Retro entry --- */
 
-.retro-section{
-padding:15px;
-}
+.retro-section{padding:15px}
 
 .retro-mode-row{
 display:flex;
@@ -462,8 +489,8 @@ overflow-y:auto;
 position:fixed;
 bottom:0;left:0;right:0;
 background:#222;
-padding:8px 10px;
-padding-bottom:max(8px,env(safe-area-inset-bottom));
+padding:10px 10px;
+padding-bottom:calc(10px + env(safe-area-inset-bottom));
 display:flex;
 gap:5px;
 z-index:50;
@@ -479,20 +506,56 @@ border-radius:6px;
 font-size:13px;
 }
 
-/* --- История --- */
+/* --- Лог задач (история) --- */
 
 #history{
 display:none;
 padding:10px;
-padding-bottom:80px;
+padding-bottom:120px;
 }
 
-.record{
-padding:6px 0;
-border-bottom:1px solid rgba(255,255,255,0.08);
-font-size:12px;
-line-height:1.5;
+.day-separator{
+font-size:14px;
+font-weight:700;
+padding:12px 0 6px;
+margin-top:8px;
 color:rgba(255,255,255,0.8);
+}
+
+.day-separator:last-of-type{margin-top:0}
+
+.record{
+display:flex;
+align-items:center;
+gap:8px;
+padding:5px 0;
+border-bottom:1px solid rgba(255,255,255,0.06);
+font-size:12px;
+color:rgba(255,255,255,0.8);
+}
+
+.rec-name{
+white-space:nowrap;
+font-weight:500;
+min-width:0;
+flex-shrink:1;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+
+.rec-times{
+font-size:9px;
+line-height:1.3;
+white-space:nowrap;
+opacity:0.7;
+flex-shrink:0;
+}
+
+.rec-dur{
+white-space:nowrap;
+margin-left:auto;
+flex-shrink:0;
+font-variant-numeric:tabular-nums;
 }
 
 </style>
@@ -513,13 +576,13 @@ color:rgba(255,255,255,0.8);
   <div class="recent-records" id="recentRecords"></div>
   <div class="work-tracker">
     <div class="week-days" id="weekDays"></div>
-    <div class="work-row">
-      <span class="work-label">Сегодня</span>
-      <span><span class="work-value" id="workToday">00:00</span> / 10:00<span class="work-pct" id="workTodayPct"></span></span>
-    </div>
-    <div class="work-row">
-      <span class="work-label">Неделя</span>
-      <span><span class="work-value work-week-val" id="workWeek" onclick="openWeekDetail(0)">00:00</span> / 70:00<span class="work-pct" id="workWeekPct"></span></span>
+    <div class="work-grid">
+      <span class="work-lbl">Сегодня</span>
+      <span class="work-mid" id="workToday">0ч 0м</span>
+      <span class="work-right"><span class="work-target">10ч</span> <span class="work-pct" id="workTodayPct"></span></span>
+      <span class="work-lbl">Неделя</span>
+      <span class="work-mid"><span class="work-week-val" id="workWeek" onclick="openWeekDetail(0)">0ч 0м</span></span>
+      <span class="work-right"><span class="work-target">70ч</span> <span class="work-pct" id="workWeekPct"></span></span>
     </div>
   </div>
 </div>
@@ -726,23 +789,40 @@ function toMSK(iso){
   if(!iso)return '...';
   return new Date(iso).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Moscow'});
 }
-function toMSKDate(iso){
+function mskDateObj(iso){
+  return new Date(new Date(iso).toLocaleString('en-US',{timeZone:'Europe/Moscow'}));
+}
+function toMSKDateStr(iso){
   if(!iso)return '';
-  const d=new Date(new Date(iso).toLocaleString('en-US',{timeZone:'Europe/Moscow'}));
+  const d=mskDateObj(iso);
   const dow=d.getDay();
   return DAY_NAMES[dow===0?6:dow-1]+' | '+String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0');
 }
-function formatTime(iso){return iso?toMSK(iso)+' ('+toMSKDate(iso)+')':'...'}
-function hhmmFromMs(ms){if(ms<=0)return'00:00';const h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000);return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')}
-function durationStr(ms){if(ms<=0)return'0м';const h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000);return h>0?h+'ч '+m+'м':m+'м'}
+function mskDayKey(iso){
+  const d=mskDateObj(iso);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function mskDayLabel(iso){
+  const d=mskDateObj(iso);
+  const dow=d.getDay();
+  return DAY_NAMES[dow===0?6:dow-1]+' | '+String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear();
+}
+function formatTimeShort(iso){return iso?toMSK(iso)+' ('+toMSKDateStr(iso)+')':'...'}
+
+function hmFromMs(ms){
+  if(ms<=0)return '0м';
+  const h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000);
+  if(h>0&&m>0)return h+'ч '+m+'м';
+  if(h>0)return h+'ч 0м';
+  return m+'м';
+}
+
+function durationStr(ms){return hmFromMs(ms)}
+
 function getAct(id){return state.activities.find(x=>x.id==id)}
 function getActName(id){const a=getAct(id);return a?a.name:'?'}
 function getGrpName(actId){const a=getAct(actId);if(!a)return'?';const g=state.groups.find(x=>x.id==a.group);return g?g.name:'?'}
 function isWork(actId){const a=getAct(actId);if(!a)return false;const g=state.groups.find(x=>x.id==a.group);return g&&g.name===WORK_GROUP_NAME}
-
-function formatRecord(r){
-  return getGrpName(r.activity)+' | '+getActName(r.activity)+': с '+formatTime(r.start)+' до '+formatTime(r.end)+' — '+(r.end?durationStr(new Date(r.end)-new Date(r.start)):'...');
-}
 
 function getActive(){return state.records.filter(r=>r.end===null)}
 function closeAll(now){state.records.forEach(r=>{if(r.end===null)r.end=now});state.active=[]}
@@ -757,9 +837,34 @@ function calcWorkMs(from,to){
   });
   if(!iv.length)return 0;
   iv.sort((a,b)=>a[0]-b[0]);
-  const m=[[...iv[0]]];
-  for(let i=1;i<iv.length;i++){const l=m[m.length-1];if(iv[i][0]<=l[1])l[1]=Math.max(l[1],iv[i][1]);else m.push([...iv[i]])}
-  let t=0;m.forEach(x=>t+=x[1]-x[0]);return t;
+  const mg=[[...iv[0]]];
+  for(let i=1;i<iv.length;i++){const l=mg[mg.length-1];if(iv[i][0]<=l[1])l[1]=Math.max(l[1],iv[i][1]);else mg.push([...iv[i]])}
+  let t=0;mg.forEach(x=>t+=x[1]-x[0]);return t;
+}
+
+// --- Split records at MSK midnight boundaries ---
+function splitAtMidnights(records){
+  const result=[];
+  records.forEach(r=>{
+    if(!r.end){result.push(r);return}
+    let cs=new Date(r.start).getTime();
+    const ce=new Date(r.end).getTime();
+    while(cs<ce){
+      const msk=mskDateObj(new Date(cs).toISOString());
+      const nextDay=new Date(msk);
+      nextDay.setDate(nextDay.getDate()+1);nextDay.setHours(0,0,0,0);
+      // Next midnight in UTC
+      const midnightUTC=mskDayStartUTC(nextDay.getFullYear(),nextDay.getMonth()+1,nextDay.getDate());
+      if(midnightUTC>=ce){
+        result.push({...r,start:new Date(cs).toISOString(),end:new Date(ce).toISOString()});
+        cs=ce;
+      } else {
+        result.push({...r,id:r.id+Math.random(),start:new Date(cs).toISOString(),end:new Date(midnightUTC).toISOString()});
+        cs=midnightUTC;
+      }
+    }
+  });
+  return result;
 }
 
 function migrateState(d){if(d.active&&!Array.isArray(d.active))d.active=[];else if(!d.active)d.active=[];return d}
@@ -780,8 +885,32 @@ function save(){
   dbSave(state).catch(()=>{});
 }
 
-// --- Render picker list (inline: group + activities in one row) ---
-function renderInlinePicker(container, selected, parallel){
+// --- Build record row HTML element ---
+function buildRecRow(r, isCurrent){
+  const row=document.createElement('div');
+  row.className='rec-row'+(isCurrent?' cur':'');
+
+  const name=document.createElement('span');
+  name.className='rec-name';
+  name.innerText=getGrpName(r.activity)+' | '+getActName(r.activity);
+
+  const times=document.createElement('span');
+  times.className='rec-times';
+  times.innerHTML='с '+toMSK(r.start)+'<br>до '+(r.end?toMSK(r.end):'...');
+
+  const dur=document.createElement('span');
+  dur.className='rec-dur';
+  const ms=r.end?(new Date(r.end)-new Date(r.start)):0;
+  dur.innerText=r.end?durationStr(ms):'...';
+
+  row.appendChild(name);
+  row.appendChild(times);
+  row.appendChild(dur);
+  return row;
+}
+
+// --- Picker list ---
+function renderInlinePicker(container, selected, parallel, onSelect){
   container.innerHTML='';
   state.groups.forEach(g=>{
     const row=document.createElement('div');
@@ -795,7 +924,7 @@ function renderInlinePicker(container, selected, parallel){
       btn.className='activity';
       btn.innerText=a.name;
       if(selected.includes(a.id))btn.classList.add(parallel?'selected':'active');
-      btn.onclick=()=>onPickerSelect(a.id);
+      btn.onclick=()=>onSelect(a.id);
       row.appendChild(btn);
     });
     container.appendChild(row);
@@ -810,7 +939,7 @@ function openPicker(parallel){
   document.getElementById('pickerTitle').innerText=parallel?'Параллельные задачи':'Задача';
   document.getElementById('pickerHint').innerText=parallel?'Выберите 2 задачи':'Выберите 1 задачу';
   updateConfirmBtn();
-  renderInlinePicker(document.getElementById('pickerList'),pickerSelected,parallel);
+  renderInlinePicker(document.getElementById('pickerList'),pickerSelected,parallel,onPickerSelect);
   lockScroll();
   document.getElementById('picker').classList.add('open');
 }
@@ -822,7 +951,7 @@ function onPickerSelect(actId){
   else if(pickerSelected.length>=max){if(!pickerParallel)pickerSelected=[actId];else return}
   else pickerSelected.push(actId);
   updateConfirmBtn();
-  renderInlinePicker(document.getElementById('pickerList'),pickerSelected,pickerParallel);
+  renderInlinePicker(document.getElementById('pickerList'),pickerSelected,pickerParallel,onPickerSelect);
 }
 
 function updateConfirmBtn(){
@@ -856,8 +985,8 @@ function renderMain(){
   else cur.innerText='Нет активности';
 
   const c=document.getElementById('recentRecords');c.innerHTML='';
-  active.forEach(r=>{const d=document.createElement('div');d.className='recent-record';d.style.color='rgba(255,255,255,0.7)';d.innerText=formatRecord(r);c.appendChild(d)});
-  state.records.filter(r=>r.end!==null).slice(-3).reverse().forEach(r=>{const d=document.createElement('div');d.className='recent-record';d.innerText=formatRecord(r);c.appendChild(d)});
+  active.forEach(r=>c.appendChild(buildRecRow(r,true)));
+  state.records.filter(r=>r.end!==null).slice(-3).reverse().forEach(r=>c.appendChild(buildRecRow(r,false)));
   renderWeekDays();
 }
 
@@ -871,14 +1000,14 @@ function updateWorkTracker(){
   const now=mskNow();
   const ts=mskDayStartUTC(now.getFullYear(),now.getMonth()+1,now.getDate());
   const todayMs=calcWorkMs(ts,ts+86400000);
-  document.getElementById('workToday').innerText=hhmmFromMs(todayMs);
-  document.getElementById('workTodayPct').innerText=' ('+(todayMs/36000000*100).toFixed(1)+'%)';
+  document.getElementById('workToday').innerText=hmFromMs(todayMs);
+  document.getElementById('workTodayPct').innerText=(todayMs/36000000*100).toFixed(1)+'%';
 
   const mon=getMondayMSK(now);
   const ws=mskDayStartUTC(mon.getFullYear(),mon.getMonth()+1,mon.getDate());
   const weekMs=calcWorkMs(ws,ws+604800000);
-  document.getElementById('workWeek').innerText=hhmmFromMs(weekMs);
-  document.getElementById('workWeekPct').innerText=' ('+(weekMs/252000000*100).toFixed(1)+'%)';
+  document.getElementById('workWeek').innerText=hmFromMs(weekMs);
+  document.getElementById('workWeekPct').innerText=(weekMs/252000000*100).toFixed(1)+'%';
 }
 
 function updateTimer(){
@@ -907,8 +1036,11 @@ function renderWeekDetail(){
   h+=weekDetailOffset<0?'<button onclick="weekDetailOffset++;renderWeekDetail()">›</button>':'<button style="visibility:hidden">›</button>';
   h+='</div>';
   let tot=0;
-  for(let i=0;i<7;i++){const ds=ws+i*86400000,ms=calcWorkMs(ds,ds+86400000);tot+=ms;h+='<div class="week-detail-row"><span>'+DAY_NAMES[i]+'</span><span>+'+hhmmFromMs(ms)+' = +'+(ms/36000000*100).toFixed(1)+'%</span></div>'}
-  h+='<div class="week-detail-total"><span>Итого</span><span>'+hhmmFromMs(tot)+' / 70:00 ('+(tot/252000000*100).toFixed(1)+'%)</span></div>';
+  for(let i=0;i<7;i++){
+    const ds=ws+i*86400000,ms=calcWorkMs(ds,ds+86400000);tot+=ms;
+    h+='<div class="week-detail-row"><span>'+DAY_NAMES[i]+'</span><span class="wd-val">'+hmFromMs(ms)+'</span><span class="wd-pct">+'+(ms/36000000*100).toFixed(1)+'%</span></div>';
+  }
+  h+='<div class="week-detail-total"><span>Итого</span><span>'+hmFromMs(tot)+' / <span class="work-target">70ч</span> ('+(tot/252000000*100).toFixed(1)+'%)</span></div>';
   c.innerHTML=h;
 }
 
@@ -961,7 +1093,6 @@ function openRetroEntry(){
   retroMode='single';retroActId=null;
   document.getElementById('retroModeSingle').classList.add('active');
   document.getElementById('retroModeParallel').classList.remove('active');
-  // Default times: now-1h to now, MSK
   const now=mskNow();
   const h1=new Date(now.getTime()-3600000);
   document.getElementById('retroStartDate').value=fmtDateVal(h1);
@@ -984,18 +1115,8 @@ function setRetroMode(m){
 }
 
 function renderRetroPicker(){
-  const c=document.getElementById('retroPicker');c.innerHTML='';
-  state.groups.forEach(g=>{
-    const row=document.createElement('div');row.className='picker-group';
-    const label=document.createElement('span');label.className='picker-group-label';label.innerText=g.name;row.appendChild(label);
-    state.activities.filter(a=>a.group==g.id).forEach(a=>{
-      const btn=document.createElement('button');btn.className='activity';btn.innerText=a.name;
-      if(a.id===retroActId)btn.classList.add('active');
-      btn.onclick=()=>{retroActId=a.id;renderRetroPicker()};
-      row.appendChild(btn);
-    });
-    c.appendChild(row);
-  });
+  const c=document.getElementById('retroPicker');
+  renderInlinePicker(c,[retroActId].filter(Boolean),false,id=>{retroActId=id;renderRetroPicker()});
 }
 
 function submitRetro(){
@@ -1006,7 +1127,6 @@ function submitRetro(){
   const et=document.getElementById('retroEndTime').value;
   if(!sd||!st||!ed||!et)return;
 
-  // Parse as MSK (+03:00)
   const startISO=sd+'T'+st+':00+03:00';
   const endISO=ed+'T'+et+':00+03:00';
   const startMs=new Date(startISO).getTime();
@@ -1016,65 +1136,47 @@ function submitRetro(){
   if(retroMode==='single'){
     insertRecordSingle(retroActId, new Date(startMs).toISOString(), new Date(endMs).toISOString());
   } else {
-    // Parallel: just insert alongside existing
     state.records.push({id:Date.now(),activity:retroActId,start:new Date(startMs).toISOString(),end:new Date(endMs).toISOString()});
     state.records.sort((a,b)=>new Date(a.start)-new Date(b.start));
   }
   save();renderMain();closeRetro();
 }
 
-// --- Insert single record (replaces overlapping) ---
 function insertRecordSingle(actId, startISO, endISO){
   const ns=new Date(startISO).getTime(), ne=new Date(endISO).getTime();
   const newRecs=[];
   state.records.forEach(r=>{
     const rs=new Date(r.start).getTime();
     const re=r.end?new Date(r.end).getTime():null;
-    // Active record (no end) or no overlap
     if(re===null){
-      // If active record overlaps with our range, split it
       if(rs<ns){
-        // Left part
         newRecs.push({...r, end:startISO, id:r.id});
-        // Right part: continues after our end
         newRecs.push({...r, id:Date.now()+Math.random()*1000|0, start:endISO, end:null});
       } else if(rs>=ns && rs<ne){
-        // Active starts within our range — push it after
         newRecs.push({...r, start:endISO});
       } else {
         newRecs.push(r);
       }
       return;
     }
-    // No overlap
     if(re<=ns || rs>=ne){newRecs.push(r);return}
-    // Overlap — keep left part
     if(rs<ns) newRecs.push({...r, end:startISO});
-    // Keep right part
     if(re>ne) newRecs.push({...r, id:Date.now()+Math.random()*1000|0, start:endISO, end:r.end});
-    // Original record is replaced (dropped)
   });
-  // Add new record
   newRecs.push({id:Date.now(),activity:actId,start:startISO,end:endISO});
-  // Sort
   newRecs.sort((a,b)=>new Date(a.start)-new Date(b.start));
-  // Merge adjacent same activity
   const merged=[];
   newRecs.forEach(r=>{
     const last=merged[merged.length-1];
-    if(last && last.activity===r.activity && last.end===r.start){
-      last.end=r.end;
-    } else {
-      merged.push({...r});
-    }
+    if(last && last.activity===r.activity && last.end===r.start){last.end=r.end}
+    else merged.push({...r});
   });
   state.records=merged;
 }
 
 // --- JSON viewer ---
 function openJsonView(){
-  const data={groups:state.groups,activities:state.activities,records:state.records};
-  document.getElementById('jsonContent').innerText=JSON.stringify(data,null,2);
+  document.getElementById('jsonContent').innerText=JSON.stringify({groups:state.groups,activities:state.activities,records:state.records},null,2);
   lockScroll();document.getElementById('jsonOverlay').classList.add('open');
 }
 function closeJsonView(){document.getElementById('jsonOverlay').classList.remove('open');unlockScroll()}
@@ -1089,8 +1191,34 @@ function showMain(){
 function showHistory(){
   document.getElementById('main').style.display='none';
   const h=document.getElementById('history');h.style.display='block';h.innerHTML='';
-  state.records.slice().reverse().forEach(r=>{
-    const d=document.createElement('div');d.className='record';d.innerText=formatRecord(r);h.appendChild(d);
+
+  // Split records at midnight boundaries for display
+  const display=splitAtMidnights(state.records);
+  // Also add active records (end=null) as-is
+  // Group by MSK day, newest first
+  const byDay={};
+  display.forEach(r=>{
+    const key=mskDayKey(r.start);
+    if(!byDay[key])byDay[key]=[];
+    byDay[key].push(r);
+  });
+  // Also add active records
+  getActive().forEach(r=>{
+    const key=mskDayKey(r.start);
+    if(!byDay[key])byDay[key]=[];
+    // Only add if not already present (splitAtMidnights passes them through)
+    if(!byDay[key].find(x=>x.id===r.id))byDay[key].push(r);
+  });
+
+  const sortedDays=Object.keys(byDay).sort().reverse();
+  sortedDays.forEach(day=>{
+    const label=document.createElement('div');
+    label.className='day-separator';
+    label.innerText=mskDayLabel(byDay[day][0].start);
+    h.appendChild(label);
+    byDay[day].sort((a,b)=>new Date(b.start)-new Date(a.start)).forEach(r=>{
+      h.appendChild(buildRecRow(r,r.end===null));
+    });
   });
 }
 
