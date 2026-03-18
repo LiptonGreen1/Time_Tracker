@@ -59,6 +59,7 @@ font-size:13px;
 color:#0a84ff;
 margin-bottom:4px;
 min-height:18px;
+text-align:center;
 }
 
 .timer-display{
@@ -70,6 +71,13 @@ margin-bottom:20px;
 min-height:50px;
 }
 
+.buttons-row{
+display:flex;
+align-items:center;
+gap:16px;
+margin-bottom:24px;
+}
+
 .start-btn{
 width:80px;
 height:80px;
@@ -79,11 +87,28 @@ background:none;
 color:#0a84ff;
 font-size:14px;
 font-weight:600;
-margin-bottom:24px;
 }
 
 .start-btn:active{
 background:rgba(10,132,255,0.2);
+}
+
+.parallel-btn{
+width:52px;
+height:52px;
+border-radius:50%;
+border:2px solid #ff9f0a;
+background:none;
+color:#ff9f0a;
+font-size:9px;
+font-weight:600;
+line-height:1.2;
+text-align:center;
+padding:4px;
+}
+
+.parallel-btn:active{
+background:rgba(255,159,10,0.2);
 }
 
 .recent-records{
@@ -99,8 +124,57 @@ border-bottom:1px solid rgba(255,255,255,0.08);
 line-height:1.4;
 }
 
-.recent-record:first-child{
-color:rgba(255,255,255,0.6);
+/* --- Рабочий трекер --- */
+
+.work-tracker{
+width:100%;
+max-width:400px;
+margin-top:16px;
+padding:12px;
+background:#1a1a1a;
+border-radius:12px;
+}
+
+.week-days{
+display:flex;
+justify-content:space-around;
+margin-bottom:10px;
+}
+
+.week-day{
+font-size:12px;
+color:rgba(255,255,255,0.4);
+width:32px;
+height:32px;
+display:flex;
+align-items:center;
+justify-content:center;
+border-radius:50%;
+}
+
+.week-day.today{
+background:#0a84ff;
+color:white;
+font-weight:600;
+}
+
+.work-row{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:6px 0;
+font-size:13px;
+}
+
+.work-label{color:rgba(255,255,255,0.5);font-size:12px}
+.work-value{font-variant-numeric:tabular-nums}
+.work-pct{color:rgba(255,255,255,0.4);font-size:11px;margin-left:6px}
+
+.work-week-val{
+text-decoration:underline;
+text-decoration-style:dotted;
+text-underline-offset:3px;
+cursor:pointer;
 }
 
 /* --- Оверлей выбора активности --- */
@@ -134,6 +208,28 @@ font-size:16px;
 padding:8px;
 }
 
+.parallel-hint{
+padding:0 15px 10px;
+font-size:12px;
+color:#ff9f0a;
+}
+
+.parallel-confirm{
+display:none;
+margin:10px 15px;
+padding:14px;
+border:none;
+border-radius:10px;
+background:#ff9f0a;
+color:#000;
+font-size:16px;
+font-weight:600;
+width:calc(100% - 30px);
+text-align:center;
+}
+
+.parallel-confirm.visible{display:block}
+
 .group{
 padding:0 15px;
 margin-bottom:15px;
@@ -160,12 +256,58 @@ border-radius:10px;
 text-align:left;
 }
 
-.activity:active{
-background:#333;
+.activity:active{background:#333}
+.activity.active{background:#0a84ff}
+.activity.selected{background:#ff9f0a;color:#000}
+
+/* --- Week detail overlay --- */
+
+.week-detail{
+padding:15px;
 }
 
-.activity.active{
-background:#0a84ff;
+.week-detail-title{
+font-size:16px;
+margin-bottom:12px;
+text-align:center;
+}
+
+.week-detail-nav{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:12px;
+}
+
+.week-detail-nav button{
+background:none;
+border:none;
+color:#0a84ff;
+font-size:20px;
+padding:8px 12px;
+}
+
+.week-detail-dates{
+font-size:14px;
+color:rgba(255,255,255,0.7);
+}
+
+.week-detail-row{
+display:flex;
+justify-content:space-between;
+padding:8px 0;
+border-bottom:1px solid rgba(255,255,255,0.06);
+font-size:13px;
+}
+
+.week-detail-total{
+margin-top:8px;
+padding-top:8px;
+border-top:1px solid rgba(255,255,255,0.15);
+font-size:14px;
+font-weight:600;
+display:flex;
+justify-content:space-between;
 }
 
 /* --- Нижняя панель --- */
@@ -222,16 +364,41 @@ color:rgba(255,255,255,0.8);
 <div class="main-screen" id="main">
   <div class="current-activity" id="currentActivity"></div>
   <div class="timer-display" id="timer">00:00:00</div>
-  <button class="start-btn" onclick="openPicker()">ПУСК</button>
+  <div class="buttons-row">
+    <button class="start-btn" onclick="openPicker(false)">ПУСК</button>
+    <button class="parallel-btn" onclick="openPicker(true)">ПУСК<br>×2</button>
+  </div>
   <div class="recent-records" id="recentRecords"></div>
+
+  <div class="work-tracker" id="workTracker">
+    <div class="week-days" id="weekDays"></div>
+    <div class="work-row">
+      <span class="work-label">Сегодня</span>
+      <span><span class="work-value" id="workToday">00:00</span> / 10:00<span class="work-pct" id="workTodayPct"></span></span>
+    </div>
+    <div class="work-row">
+      <span class="work-label">Неделя</span>
+      <span><span class="work-value work-week-val" id="workWeek" onclick="openWeekDetail(0)">00:00</span> / 70:00<span class="work-pct" id="workWeekPct"></span></span>
+    </div>
+  </div>
 </div>
 
 <div class="overlay" id="picker">
   <div class="overlay-header">
-    <span>Выбрать</span>
+    <span id="pickerTitle">Выбрать</span>
     <button class="overlay-close" onclick="closePicker()">Закрыть</button>
   </div>
+  <div class="parallel-hint" id="parallelHint">Выберите 2 активности</div>
+  <button class="parallel-confirm" id="parallelConfirm" onclick="confirmParallel()">Запустить 2 задачи</button>
   <div id="pickerList"></div>
+</div>
+
+<div class="overlay" id="weekOverlay">
+  <div class="overlay-header">
+    <span>Рабочие часы</span>
+    <button class="overlay-close" onclick="closeWeekDetail()">Закрыть</button>
+  </div>
+  <div class="week-detail" id="weekDetail"></div>
 </div>
 
 <div id="history"></div>
@@ -291,7 +458,7 @@ function checkUpdate(){
   });
 }
 
-// --- Service Worker registration + auto-update ---
+// --- Service Worker registration ---
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').then(reg => {
     setInterval(() => reg.update(), 30000);
@@ -326,16 +493,68 @@ activities:[
 {id:5,name:"Сон",group:4}
 ],
 records:[],
-active:null
+active:[]
 };
 
 let state = DEFAULT_STATE;
 
+const DAY_NAMES = ['ПН','ВТ','СР','ЧТ','ПТ','СБ','ВС'];
+const WORK_GROUP_NAME = 'Работа';
+
 // --- Helpers ---
+
+// Get current time in MSK as Date-like object helpers
+function mskNow(){
+  return new Date(new Date().toLocaleString('en-US',{timeZone:'Europe/Moscow'}));
+}
+
+// Get MSK date for an ISO string (returns {year,month,day,dayOfWeek})
+function mskDate(iso){
+  const d = new Date(new Date(iso).toLocaleString('en-US',{timeZone:'Europe/Moscow'}));
+  return d;
+}
+
+// Get start of day in MSK (as UTC timestamp)
+function mskDayStartUTC(year, month, day){
+  // Create date string and parse as MSK
+  const str = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}T00:00:00+03:00`;
+  return new Date(str).getTime();
+}
+
+// Get Monday of the week containing a MSK date
+function getMondayMSK(mskD){
+  const d = new Date(mskD);
+  let dow = d.getDay(); // 0=Sun
+  if(dow===0) dow=7;
+  d.setDate(d.getDate()-(dow-1));
+  d.setHours(0,0,0,0);
+  return d;
+}
+
 function toMSK(iso){
   if(!iso) return '...';
   const d = new Date(iso);
   return d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Moscow'});
+}
+
+function toMSKDate(iso){
+  if(!iso) return '';
+  const d = new Date(iso);
+  const day = d.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',timeZone:'Europe/Moscow'});
+  const dow = DAY_NAMES[(new Date(d.toLocaleString('en-US',{timeZone:'Europe/Moscow'}))).getDay()===0?6:(new Date(d.toLocaleString('en-US',{timeZone:'Europe/Moscow'}))).getDay()-1];
+  return dow+' | '+day;
+}
+
+function formatTime(iso){
+  if(!iso) return '...';
+  return toMSK(iso)+' ('+toMSKDate(iso)+')';
+}
+
+function hhmmFromMs(ms){
+  if(ms<=0) return '00:00';
+  const h=Math.floor(ms/3600000);
+  const m=Math.floor((ms%3600000)/60000);
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
 }
 
 function durationStr(ms){
@@ -358,14 +577,67 @@ function getGroupName(actId){
   return g?g.name:'?';
 }
 
+function isWorkActivity(actId){
+  const a=state.activities.find(x=>x.id==actId);
+  if(!a) return false;
+  const g=state.groups.find(x=>x.id==a.group);
+  return g && g.name===WORK_GROUP_NAME;
+}
+
 function formatRecord(r){
   const grp=getGroupName(r.activity);
   const act=getActivityName(r.activity);
-  const from=toMSK(r.start);
-  const to=r.end?toMSK(r.end):'...';
+  const from=formatTime(r.start);
+  const to=r.end?formatTime(r.end):'...';
   const ms=r.end?(new Date(r.end)-new Date(r.start)):0;
   const dur=r.end?durationStr(ms):'...';
   return grp+' | '+act+': с '+from+' до '+to+' — '+dur;
+}
+
+function getActive(){
+  return state.records.filter(r=>r.end===null);
+}
+
+function closeAll(now){
+  state.records.forEach(r=>{if(r.end===null) r.end=now});
+  state.active=[];
+}
+
+// --- Calculate work ms in a time range [startUTC, endUTC) ---
+// Merges overlapping intervals so parallel work tasks count as x1
+function calcWorkMs(fromUTC, toUTC){
+  // Collect clipped intervals
+  const intervals=[];
+  state.records.forEach(r=>{
+    if(!isWorkActivity(r.activity)) return;
+    const rs=new Date(r.start).getTime();
+    const re=r.end?new Date(r.end).getTime():Date.now();
+    const s=Math.max(rs,fromUTC);
+    const e=Math.min(re,toUTC);
+    if(e>s) intervals.push([s,e]);
+  });
+  if(!intervals.length) return 0;
+  // Merge overlapping
+  intervals.sort((a,b)=>a[0]-b[0]);
+  const merged=[[...intervals[0]]];
+  for(let i=1;i<intervals.length;i++){
+    const last=merged[merged.length-1];
+    if(intervals[i][0]<=last[1]) last[1]=Math.max(last[1],intervals[i][1]);
+    else merged.push([...intervals[i]]);
+  }
+  let total=0;
+  merged.forEach(iv=>total+=iv[1]-iv[0]);
+  return total;
+}
+
+// --- Migrate old state format ---
+function migrateState(data){
+  if(data.active && !Array.isArray(data.active)){
+    data.active=[];
+  } else if(!data.active){
+    data.active=[];
+  }
+  return data;
 }
 
 // --- Init ---
@@ -379,20 +651,37 @@ function formatRecord(r){
       try { await dbSave(data); } catch(e) {}
     }
   }
-  state = data || DEFAULT_STATE;
+  state = data ? migrateState(data) : DEFAULT_STATE;
+  state.active = state.records.filter(r=>r.end===null).map(r=>r.id);
   renderMain();
   updateTimer();
+  updateWorkTracker();
 })();
 
 function save(){
+  state.active = state.records.filter(r=>r.end===null).map(r=>r.id);
   localStorage.setItem("timedata",JSON.stringify(state));
   dbSave(state).catch(()=>{});
 }
 
-// --- Picker (выбор активности) ---
-function openPicker(){
+// --- Picker ---
+let pickerParallel = false;
+let parallelSelected = [];
+
+function openPicker(parallel){
+  pickerParallel = parallel;
+  parallelSelected = [];
+  document.getElementById('parallelHint').style.display = parallel ? 'block' : 'none';
+  document.getElementById('parallelConfirm').classList.remove('visible');
+  document.getElementById('pickerTitle').innerText = parallel ? 'Параллельные задачи' : 'Выбрать';
+  renderPickerList();
+  document.getElementById('picker').classList.add('open');
+}
+
+function renderPickerList(){
   const list=document.getElementById('pickerList');
   list.innerHTML='';
+  const activeIds = getActive().map(r=>r.activity);
   state.groups.forEach(g=>{
     const div=document.createElement('div');
     div.className='group';
@@ -404,13 +693,49 @@ function openPicker(){
       const btn=document.createElement('button');
       btn.className='activity';
       btn.innerText=a.name;
-      if(state.active && state.active.activity==a.id) btn.classList.add('active');
-      btn.onclick=()=>{startActivity(a.id);closePicker()};
+      if(!pickerParallel && activeIds.includes(a.id)) btn.classList.add('active');
+      if(pickerParallel && parallelSelected.includes(a.id)) btn.classList.add('selected');
+      btn.onclick=()=>onPickerSelect(a.id);
       div.appendChild(btn);
     });
     list.appendChild(div);
   });
-  document.getElementById('picker').classList.add('open');
+}
+
+function onPickerSelect(actId){
+  if(!pickerParallel){
+    const now=new Date().toISOString();
+    closeAll(now);
+    state.records.push({id:Date.now(),activity:actId,start:now,end:null});
+    save();
+    renderMain();
+    closePicker();
+    return;
+  }
+  const idx=parallelSelected.indexOf(actId);
+  if(idx>=0) parallelSelected.splice(idx,1);
+  else if(parallelSelected.length<2) parallelSelected.push(actId);
+  const confirm=document.getElementById('parallelConfirm');
+  if(parallelSelected.length===2){
+    confirm.innerText='Запустить: '+getActivityName(parallelSelected[0])+' + '+getActivityName(parallelSelected[1]);
+    confirm.classList.add('visible');
+  } else {
+    confirm.classList.remove('visible');
+  }
+  renderPickerList();
+}
+
+function confirmParallel(){
+  if(parallelSelected.length!==2) return;
+  const now=new Date().toISOString();
+  closeAll(now);
+  const ts=Date.now();
+  parallelSelected.forEach((actId,i)=>{
+    state.records.push({id:ts+i,activity:actId,start:now,end:null});
+  });
+  save();
+  renderMain();
+  closePicker();
 }
 
 function closePicker(){
@@ -419,46 +744,138 @@ function closePicker(){
 
 // --- Render main ---
 function renderMain(){
-  // Current activity label
   const cur=document.getElementById('currentActivity');
-  if(state.active){
-    cur.innerText=getGroupName(state.active.activity)+' | '+getActivityName(state.active.activity);
+  const active=getActive();
+  if(active.length>1){
+    cur.innerText=active.map(r=>getGroupName(r.activity)+' | '+getActivityName(r.activity)).join('  +  ');
+  } else if(active.length===1){
+    cur.innerText=getGroupName(active[0].activity)+' | '+getActivityName(active[0].activity);
   } else {
     cur.innerText='Нет активности';
   }
-  // Recent records
   const container=document.getElementById('recentRecords');
   container.innerHTML='';
-  const recent=state.records.slice(-3).reverse();
-  recent.forEach(r=>{
+  active.forEach(r=>{
+    const div=document.createElement('div');
+    div.className='recent-record';
+    div.style.color='rgba(255,255,255,0.7)';
+    div.innerText=formatRecord(r);
+    container.appendChild(div);
+  });
+  const completed=state.records.filter(r=>r.end!==null);
+  completed.slice(-3).reverse().forEach(r=>{
     const div=document.createElement('div');
     div.className='recent-record';
     div.innerText=formatRecord(r);
     container.appendChild(div);
   });
+
+  renderWeekDays();
 }
 
-function startActivity(id){
-  const now=new Date().toISOString();
-  if(state.active) state.active.end=now;
-  const rec={id:Date.now(),activity:id,start:now,end:null};
-  state.records.push(rec);
-  state.active=rec;
-  save();
-  renderMain();
+// --- Week days row ---
+function renderWeekDays(){
+  const el=document.getElementById('weekDays');
+  el.innerHTML='';
+  const now=mskNow();
+  let todayDow=now.getDay(); // 0=Sun
+  if(todayDow===0) todayDow=7;
+  for(let i=1;i<=7;i++){
+    const d=document.createElement('div');
+    d.className='week-day';
+    d.innerText=DAY_NAMES[i-1];
+    if(i===todayDow) d.classList.add('today');
+    el.appendChild(d);
+  }
+}
+
+// --- Work tracker live update ---
+function updateWorkTracker(){
+  const now=mskNow();
+  // Today range in UTC
+  const todayStart=mskDayStartUTC(now.getFullYear(),now.getMonth()+1,now.getDate());
+  const todayEnd=todayStart+86400000;
+  const todayMs=calcWorkMs(todayStart,todayEnd);
+
+  document.getElementById('workToday').innerText=hhmmFromMs(todayMs);
+  const todayPct=Math.round(todayMs/36000000*100);
+  document.getElementById('workTodayPct').innerText=' ('+todayPct+'%)';
+
+  // Week range: Monday 00:00 MSK to Sunday 23:59 MSK
+  const monday=getMondayMSK(now);
+  const weekStart=mskDayStartUTC(monday.getFullYear(),monday.getMonth()+1,monday.getDate());
+  const weekEnd=weekStart+7*86400000;
+  const weekMs=calcWorkMs(weekStart,weekEnd);
+
+  document.getElementById('workWeek').innerText=hhmmFromMs(weekMs);
+  const weekPct=Math.round(weekMs/252000000*100); // 70h
+  document.getElementById('workWeekPct').innerText=' ('+weekPct+'%)';
 }
 
 function updateTimer(){
   const el=document.getElementById('timer');
-  if(!state.active){el.innerText='00:00:00';return}
-  const diff=(Date.now()-new Date(state.active.start))/1000;
+  const active=getActive();
+  if(!active.length){el.innerText='00:00:00';return}
+  const earliest=Math.min(...active.map(r=>new Date(r.start).getTime()));
+  const diff=(Date.now()-earliest)/1000;
   const h=Math.floor(diff/3600);
   const m=Math.floor(diff%3600/60);
   const s=Math.floor(diff%60);
   el.innerText=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+
+  updateWorkTracker();
 }
 
 setInterval(updateTimer,1000);
+
+// --- Week detail overlay ---
+let weekDetailOffset=0;
+
+function openWeekDetail(offset){
+  weekDetailOffset=offset||0;
+  renderWeekDetail();
+  document.getElementById('weekOverlay').classList.add('open');
+}
+
+function closeWeekDetail(){
+  document.getElementById('weekOverlay').classList.remove('open');
+}
+
+function renderWeekDetail(){
+  const container=document.getElementById('weekDetail');
+  const now=mskNow();
+  // Get the Monday of current week, then shift by offset
+  const monday=getMondayMSK(now);
+  monday.setDate(monday.getDate()+weekDetailOffset*7);
+  const weekStart=mskDayStartUTC(monday.getFullYear(),monday.getMonth()+1,monday.getDate());
+
+  // Header dates
+  const sunday=new Date(monday);
+  sunday.setDate(sunday.getDate()+6);
+  const fmt=d=>String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0');
+
+  let html='<div class="week-detail-nav">';
+  html+='<button onclick="weekDetailOffset--;renderWeekDetail()">‹</button>';
+  html+='<span class="week-detail-dates">'+fmt(monday)+' — '+fmt(sunday)+'</span>';
+  if(weekDetailOffset<0) html+='<button onclick="weekDetailOffset++;renderWeekDetail()">›</button>';
+  else html+='<button style="visibility:hidden">›</button>';
+  html+='</div>';
+
+  let totalMs=0;
+  for(let i=0;i<7;i++){
+    const dayStart=weekStart+i*86400000;
+    const dayEnd=dayStart+86400000;
+    const ms=calcWorkMs(dayStart,dayEnd);
+    totalMs+=ms;
+    const pct=(ms/36000000*100).toFixed(1);
+    html+='<div class="week-detail-row"><span>'+DAY_NAMES[i]+'</span><span>+'+hhmmFromMs(ms)+' = +'+pct+'%</span></div>';
+  }
+
+  const totalPct=Math.round(totalMs/252000000*100);
+  html+='<div class="week-detail-total"><span>Итого</span><span>'+hhmmFromMs(totalMs)+' / 70:00 ('+totalPct+'%)</span></div>';
+
+  container.innerHTML=html;
+}
 
 // --- Navigation ---
 function showMain(){
@@ -507,7 +924,8 @@ function importData(){
   input.onchange=e=>{
     const reader=new FileReader();
     reader.onload=()=>{
-      state=JSON.parse(reader.result);
+      state=migrateState(JSON.parse(reader.result));
+      state.active=state.records.filter(r=>r.end===null).map(r=>r.id);
       save();
       renderMain();
     };
