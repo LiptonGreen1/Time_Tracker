@@ -625,7 +625,7 @@ color:rgba(255,255,255,0.8);
 
 <body>
 
-<header>Учёт времени</header>
+<header>Мониторинг времени и задач</header>
 
 <!-- ========== ГЛАВНЫЙ ЭКРАН ========== -->
 <div class="main-screen" id="main">
@@ -695,8 +695,8 @@ color:rgba(255,255,255,0.8);
       <div class="burger-item-desc">Вставить запись в прошлом</div>
     </button>
     <button class="burger-item" onclick="closeBurger();checkUpdate()">
-      Обновить кеш
-      <div class="burger-item-desc">Сбросить кеш и перезагрузить</div>
+      Обновить кеш HTML
+      <div class="burger-item-desc">Сбросить кеш HTML и перезагрузить</div>
     </button>
     <button class="burger-item" onclick="closeBurger();openJsonView()">
       Просмотр JSON
@@ -940,20 +940,52 @@ function splitAtMidnights(records){
       const msk=mskDateObj(new Date(cs).toISOString());
       const nextDay=new Date(msk);
       nextDay.setDate(nextDay.getDate()+1);nextDay.setHours(0,0,0,0);
-      // Next midnight in UTC
       const midnightUTC=mskDayStartUTC(nextDay.getFullYear(),nextDay.getMonth()+1,nextDay.getDate());
       if(midnightUTC>=ce){
-        result.push({...r,start:new Date(cs).toISOString(),end:new Date(ce).toISOString(),note:isFirst?r.note||'':''});
+        result.push({...r,start:new Date(cs).toISOString(),end:new Date(ce).toISOString(),note:isFirst?r.note||'':'',_origId:r.id});
         isFirst=false;
         cs=ce;
       } else {
-        result.push({...r,id:r.id+Math.random(),start:new Date(cs).toISOString(),end:new Date(midnightUTC).toISOString(),note:isFirst?r.note||'':''});
+        result.push({...r,id:r.id+Math.random(),start:new Date(cs).toISOString(),end:new Date(midnightUTC).toISOString(),note:isFirst?r.note||'':'',_origId:r.id});
         isFirst=false;
         cs=midnightUTC;
       }
     }
   });
   return result;
+}
+
+// ===== Физическая разрезка записей по полуночи MSK (в state.records) =====
+function physicalSplitAtMidnights(){
+  const result=[];
+  let changed=false;
+  state.records.forEach(r=>{
+    if(!r.end){result.push(r);return}
+    let cs=new Date(r.start).getTime();
+    const ce=new Date(r.end).getTime();
+    let isFirst=true;
+    while(cs<ce){
+      const msk=mskDateObj(new Date(cs).toISOString());
+      const nextDay=new Date(msk);
+      nextDay.setDate(nextDay.getDate()+1);nextDay.setHours(0,0,0,0);
+      const midnightUTC=mskDayStartUTC(nextDay.getFullYear(),nextDay.getMonth()+1,nextDay.getDate());
+      if(midnightUTC>=ce){
+        result.push(isFirst?r:{id:Date.now()+Math.random()*1000|0,activity:r.activity,start:new Date(cs).toISOString(),end:new Date(ce).toISOString(),note:''});
+        cs=ce;
+      } else {
+        changed=true;
+        if(isFirst){
+          result.push({...r,end:new Date(midnightUTC).toISOString()});
+        } else {
+          result.push({id:Date.now()+Math.random()*1000|0,activity:r.activity,start:new Date(cs).toISOString(),end:new Date(midnightUTC).toISOString(),note:''});
+        }
+        cs=midnightUTC;
+      }
+      isFirst=false;
+    }
+  });
+  if(changed){state.records=result;state.records.sort((a,b)=>new Date(a.start)-new Date(b.start))}
+  return changed;
 }
 
 function migrateState(d){if(d.active&&!Array.isArray(d.active))d.active=[];else if(!d.active)d.active=[];return d}
@@ -965,6 +997,7 @@ function migrateState(d){if(d.active&&!Array.isArray(d.active))d.active=[];else 
   if(!d){const ls=localStorage.getItem("timedata");if(ls){d=JSON.parse(ls);try{await dbSave(d)}catch(e){}}}
   state=d?migrateState(d):DEFAULT_STATE;
   state.active=state.records.filter(r=>r.end===null).map(r=>r.id);
+  if(physicalSplitAtMidnights())save();
   renderMain();updateTimer();updateWorkTracker();
 })();
 
@@ -1011,9 +1044,10 @@ function buildRecRow(r, isCurrent, showDate){
   const row=document.createElement('div');
   row.className='rec-row'+(isCurrent?' cur':'');
 
-  // Find original record for note click (r may be a midnight-split copy)
-  const origId=typeof r.id==='number'&&state.records.find(x=>x.id===r.id)?r.id:null;
-  if(origId!==null){row.onclick=()=>openNote(origId)}
+  // Find original record for note click (r may be a midnight-split copy with _origId)
+  const origId=r._origId||r.id;
+  const origRec=state.records.find(x=>x.id===origId);
+  if(origRec){row.onclick=()=>openNote(origId)}
 
   const dateEl=document.createElement('span');
   dateEl.className='rec-date';
@@ -1023,10 +1057,11 @@ function buildRecRow(r, isCurrent, showDate){
   name.className='rec-name';
   name.innerText=getGrpName(r.activity)+' | '+getActName(r.activity);
 
-  // Note icon
+  // Note icon — check original record's note for split rows
   const icon=document.createElement('span');
   icon.className='rec-note-icon';
-  const hasNote=r.note&&r.note.trim();
+  const origNote=origRec?origRec.note:'';
+  const hasNote=origNote&&origNote.trim();
   const work=isWork(r.activity);
   if(work){icon.classList.add(hasNote?'green':'red');icon.innerText='ⓘ'}
   else if(hasNote){icon.classList.add('white');icon.innerText='ⓘ'}
@@ -1173,6 +1208,24 @@ function updateTimer(){
 }
 setInterval(updateTimer,1000);
 
+// ===== Авто-разрезка по полуночи MSK (live midnight split) =====
+let lastMskDay=mskDayKey(new Date().toISOString());
+setInterval(()=>{
+  const nowKey=mskDayKey(new Date().toISOString());
+  if(nowKey===lastMskDay)return;
+  lastMskDay=nowKey;
+  // Midnight crossed — split all active records
+  const active=getActive();
+  if(!active.length)return;
+  const msk=mskNow();
+  const midnightISO=new Date(mskDayStartUTC(msk.getFullYear(),msk.getMonth()+1,msk.getDate())).toISOString();
+  active.forEach(r=>{
+    r.end=midnightISO;
+    state.records.push({id:Date.now()+Math.random()*1000|0,activity:r.activity,start:midnightISO,end:null,note:''});
+  });
+  save();renderMain();
+},1000);
+
 // ===== Окно "Рабочие часы" (детализация по дням недели) =====
 let weekDetailOffset=0;
 function openWeekDetail(o){weekDetailOffset=o||0;renderWeekDetail();lockScroll();document.getElementById('weekOverlay').classList.add('open')}
@@ -1290,6 +1343,7 @@ function submitRetro(){
     state.records.push({id:Date.now(),activity:retroActId,start:new Date(startMs).toISOString(),end:new Date(endMs).toISOString()});
     state.records.sort((a,b)=>new Date(a.start)-new Date(b.start));
   }
+  physicalSplitAtMidnights();
   save();renderMain();closeRetro();
 }
 
@@ -1382,7 +1436,7 @@ function importData(){
   const inp=document.createElement('input');inp.type='file';
   inp.onchange=e=>{
     const rd=new FileReader();
-    rd.onload=()=>{state=migrateState(JSON.parse(rd.result));state.active=state.records.filter(r=>r.end===null).map(r=>r.id);save();renderMain()};
+    rd.onload=()=>{state=migrateState(JSON.parse(rd.result));state.active=state.records.filter(r=>r.end===null).map(r=>r.id);physicalSplitAtMidnights();save();renderMain()};
     rd.readAsText(e.target.files[0]);
   };
   inp.click();
