@@ -846,22 +846,14 @@ padding-bottom:120px;
 }
 
 .chart-tabs-grid{
-display:flex;
-gap:10px;
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:6px;
 margin-bottom:14px;
 }
-.chart-tabs-col{flex:1}
-.chart-tabs-label{
-font-size:10px;
-color:rgba(255,255,255,0.4);
-margin-bottom:5px;
-text-align:center;
-}
-.chart-tabs-row{display:flex;gap:4px}
 
 .chart-tab{
-flex:1;
-padding:9px 4px;
+padding:12px 4px;
 border:1px solid rgba(255,255,255,0.2);
 border-radius:8px;
 background:none;
@@ -1188,20 +1180,10 @@ color:rgba(255,255,255,0.7);
 <!-- ========== ЭКРАН "ГРАФИКИ" ========== -->
 <div id="chartsScreen">
   <div class="chart-tabs-grid">
-    <div class="chart-tabs-col">
-      <div class="chart-tabs-label">Круговая диаграмма</div>
-      <div class="chart-tabs-row">
-        <button class="chart-tab active" onclick="setChartType('pie')">Все задачи</button>
-        <button class="chart-tab" onclick="setChartType('pie-work')">Рабочие часы</button>
-      </div>
-    </div>
-    <div class="chart-tabs-col">
-      <div class="chart-tabs-label">Линейный график</div>
-      <div class="chart-tabs-row">
-        <button class="chart-tab" onclick="setChartType('line')">Линейный</button>
-        <button class="chart-tab" onclick="setChartType('stack')">Бутерброд</button>
-      </div>
-    </div>
+    <button class="chart-tab active" onclick="setChartType('pie')">Круговая:<br>Все задачи</button>
+    <button class="chart-tab" onclick="setChartType('line')">Линейный<br>график</button>
+    <button class="chart-tab" onclick="setChartType('pie-work')">Круговая:<br>Рабочие часы</button>
+    <button class="chart-tab" onclick="setChartType('stack')">Бутерброд<br>график</button>
   </div>
   <!-- Календарь выбора периода -->
   <div class="cal-section">
@@ -1691,7 +1673,8 @@ function renderInlinePicker(container, selected, parallel, onSelect){
     getAllActivities().filter(a=>a.group==g.id).forEach(a=>{
       const btn=document.createElement('button');
       btn.className='activity';
-      btn.innerText=(a.isBusinessTime?'⭐ ':'')+a.name;
+      if(a.isBusinessTime)btn.innerHTML='<span style="font-size:10px">⭐</span> '+a.name;
+      else btn.innerText=a.name;
       if(selected.includes(a.id))btn.classList.add(parallel?'selected':'active');
       btn.onclick=()=>onSelect(a.id);
       row.appendChild(btn);
@@ -2111,7 +2094,7 @@ function showCharts(){
 
 function setChartType(t){
   chartType=t;
-  const types=['pie','pie-work','line','stack'];
+  const types=['pie','line','pie-work','stack'];
   document.querySelectorAll('.chart-tab').forEach((b,i)=>{
     b.classList.toggle('active',types[i]===t);
   });
