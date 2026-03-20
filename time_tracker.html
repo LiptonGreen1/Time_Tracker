@@ -58,15 +58,19 @@ margin-bottom:20px;
 display:inline-flex;
 flex-direction:column;
 align-items:center;
+transition:background 0.3s,border-color 0.3s;
 }
 
-/* Название текущей задачи (синий текст) */
+.timer-box .num-badge{width:18px;height:18px;font-size:11px}
+
+/* Название текущей задачи */
 .current-activity{
 font-size:13px;
-color:#0a84ff;
+color:#000;
 margin-bottom:4px;
 min-height:18px;
 text-align:center;
+font-weight:600;
 }
 
 /* Крупный таймер (ххч ххм ххс) */
@@ -76,6 +80,7 @@ font-weight:200;
 font-variant-numeric:tabular-nums;
 letter-spacing:0.5px;
 min-height:46px;
+color:#000;
 }
 
 /* Кнопки ПУСК и ПУСК ×2 */
@@ -175,12 +180,35 @@ margin-right:8px;
 
 /* Столбец 2: группа | задача */
 .rec-name{
-white-space:nowrap;
+display:flex;
+align-items:center;
+gap:4px;
 font-weight:500;
 min-width:0;
 overflow:hidden;
-text-overflow:ellipsis;
 flex:1;
+}
+
+.rec-grp-badge{
+display:inline-flex;
+align-items:center;
+gap:2px;
+padding:2px 6px;
+border-radius:5px;
+font-size:11px;
+font-weight:600;
+color:#000;
+white-space:nowrap;
+flex-shrink:0;
+max-width:60%;
+overflow:hidden;
+}
+.rec-grp-badge .num-badge{width:16px;height:16px;font-size:10px}
+
+.rec-act-name{
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
 }
 
 /* Столбец 3: время от — до */
@@ -826,7 +854,7 @@ color:rgba(255,255,255,0.7);
 <!-- ========== ГЛАВНЫЙ ЭКРАН ========== -->
 <div class="main-screen" id="main">
   <!-- Рамка: название задачи + крупный таймер -->
-  <div class="timer-box">
+  <div class="timer-box" id="timerBox">
     <div class="current-activity" id="currentActivity"></div>
     <div class="timer-display" id="timer">0ч 0м 0с</div>
   </div>
@@ -1123,6 +1151,14 @@ function renderGroupName(name){
   return name.replace(/#(\d)/g,'<span class="num-badge">$1</span>');
 }
 
+// Извлекает первый цвет из значения (plain или gradient) для использования в составных градиентах
+function flatColor(c){
+  if(!c)return'rgba(255,255,255,0.15)';
+  if(!c.startsWith('linear-gradient'))return c;
+  const m=c.match(/#[0-9A-Fa-f]{3,8}/);
+  return m?m[0]:'#888';
+}
+
 // ===== Вспомогательные функции (время, MSK, форматирование) =====
 function mskNow(){return new Date(new Date().toLocaleString('en-US',{timeZone:'Europe/Moscow'}))}
 function mskDayStartUTC(y,m,d){return new Date(`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}T00:00:00+03:00`).getTime()}
@@ -1164,7 +1200,9 @@ function durationStr(ms){return hmFromMs(ms)}
 
 function getAct(id){return getAllActivities().find(x=>x.id==id)}
 function getActName(id){const a=getAct(id);return a?a.name:'?'}
-function getGrpName(actId){const a=getAct(actId);if(!a)return'?';const g=getAllGroups().find(x=>x.id==a.group);return g?g.name:'?'}
+function getGrp(actId){const a=getAct(actId);if(!a)return null;return getAllGroups().find(x=>x.id==a.group)||null}
+function getGrpName(actId){const g=getGrp(actId);return g?g.name:'?'}
+function getGrpColor(actId){const g=getGrp(actId);return g&&g.color?g.color:null}
 function isWork(actId){const a=getAct(actId);if(!a)return false;return isKeyGroup(a.group)}
 
 function getActive(){return state.records.filter(r=>r.end===null)}
@@ -1304,7 +1342,7 @@ function openNote(recordId){
   const r=state.records.find(x=>x.id===recordId);
   if(!r)return;
   noteRecordId=recordId;
-  document.getElementById('noteInfo').innerText=getGrpName(r.activity)+' ➤ '+getActName(r.activity)+' — '+toMSK(r.start)+' — '+(r.end?toMSK(r.end):'...');
+  document.getElementById('noteInfo').innerHTML='<span class="rec-grp-badge" style="background:'+(getGrpColor(r.activity)||'rgba(255,255,255,0.15)')+'">'+renderGroupName(getGrpName(r.activity))+'</span> ➤ '+getActName(r.activity)+' — '+toMSK(r.start)+' — '+(r.end?toMSK(r.end):'...');
   const ta=document.getElementById('noteText');
   ta.value=r.note||'';
   ta.oninput=()=>{r.note=ta.value;save()};
@@ -1332,7 +1370,21 @@ function buildRecRow(r, isCurrent, showDate){
 
   const name=document.createElement('span');
   name.className='rec-name';
-  name.innerText=getGrpName(r.activity)+' ➤ '+getActName(r.activity);
+  const grpBadge=document.createElement('span');
+  grpBadge.className='rec-grp-badge';
+  grpBadge.innerHTML=renderGroupName(getGrpName(r.activity));
+  const gc=getGrpColor(r.activity);
+  if(gc){
+    if(gc.startsWith('linear-gradient'))grpBadge.style.background=gc;
+    else grpBadge.style.background=gc;
+  } else {grpBadge.style.background='rgba(255,255,255,0.15)';grpBadge.style.color='rgba(255,255,255,0.7)'}
+  name.appendChild(grpBadge);
+  const arrow=document.createTextNode(' ➤ ');
+  name.appendChild(arrow);
+  const actSpan=document.createElement('span');
+  actSpan.className='rec-act-name';
+  actSpan.innerText=getActName(r.activity);
+  name.appendChild(actSpan);
 
   // Note icon — check original record's note for split rows
   const icon=document.createElement('span');
@@ -1441,10 +1493,31 @@ function closePicker(){document.getElementById('picker').classList.remove('open'
 // ===== Главный экран (рендер + таймер + каунтеры рабочих часов) =====
 function renderMain(){
   const cur=document.getElementById('currentActivity');
+  const tb=document.getElementById('timerBox');
+  const timer=document.getElementById('timer');
   const active=getActive();
-  if(active.length>1)cur.innerText=active.map(r=>getGrpName(r.activity)+' ➤ '+getActName(r.activity)).join('  +  ');
-  else if(active.length===1)cur.innerText=getGrpName(active[0].activity)+' ➤ '+getActName(active[0].activity);
-  else cur.innerText='Нет активности';
+  if(active.length>1){
+    cur.innerHTML=active.map(r=>renderGroupName(getGrpName(r.activity))+' ➤ '+getActName(r.activity)).join('  +  ');
+    const c1=getGrpColor(active[0].activity)||'rgba(255,255,255,0.15)';
+    const c2=getGrpColor(active[1].activity)||'rgba(255,255,255,0.15)';
+    tb.style.background='linear-gradient(to bottom, '+flatColor(c1)+' 45%, '+flatColor(c2)+' 70%)';
+    tb.style.borderColor='transparent';
+    cur.style.color='#000';timer.style.color='#000';
+  } else if(active.length===1){
+    cur.innerHTML=renderGroupName(getGrpName(active[0].activity))+' ➤ '+getActName(active[0].activity);
+    const c=getGrpColor(active[0].activity);
+    if(c){
+      tb.style.background=c;tb.style.borderColor='transparent';
+      cur.style.color='#000';timer.style.color='#000';
+    } else {
+      tb.style.background='none';tb.style.borderColor='rgba(255,255,255,0.25)';
+      cur.style.color='#0a84ff';timer.style.color='white';
+    }
+  } else {
+    cur.innerText='Нет активности';
+    tb.style.background='none';tb.style.borderColor='rgba(255,255,255,0.25)';
+    cur.style.color='rgba(255,255,255,0.5)';timer.style.color='white';
+  }
 
   const c=document.getElementById('recentRecords');c.innerHTML='';
   active.forEach(r=>c.appendChild(buildRecRow(r,true,true)));
