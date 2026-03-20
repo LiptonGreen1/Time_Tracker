@@ -158,6 +158,8 @@ flex-shrink:0;
 .rec-note-icon.white{color:rgba(255,255,255,0.7)}
 .rec-note-icon.hidden{display:none}
 
+.rec-star{font-size:8px;margin:0 2px;flex-shrink:0}
+
 .note-section{padding:15px}
 .note-info{font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:12px}
 #noteText{
@@ -242,8 +244,10 @@ border:2px solid rgba(255,255,255,0.3);
 background:rgba(255,255,255,0.08);
 color:rgba(255,255,255,0.85);
 font-size:36px;
-font-weight:700;
-letter-spacing:2px;
+font-family:'SF Pro Display',-apple-system,'Helvetica Neue',Arial,sans-serif;
+font-weight:300;
+letter-spacing:1.5px;
+text-transform:uppercase;
 margin-bottom:24px;
 transition:background 0.15s;
 }
@@ -841,11 +845,19 @@ padding:10px 15px;
 padding-bottom:120px;
 }
 
-.chart-tabs{
+.chart-tabs-grid{
 display:flex;
-gap:6px;
+gap:10px;
 margin-bottom:14px;
 }
+.chart-tabs-col{flex:1}
+.chart-tabs-label{
+font-size:10px;
+color:rgba(255,255,255,0.4);
+margin-bottom:5px;
+text-align:center;
+}
+.chart-tabs-row{display:flex;gap:4px}
 
 .chart-tab{
 flex:1;
@@ -854,7 +866,7 @@ border:1px solid rgba(255,255,255,0.2);
 border-radius:8px;
 background:none;
 color:rgba(255,255,255,0.5);
-font-size:12px;
+font-size:11px;
 text-align:center;
 }
 
@@ -1175,10 +1187,21 @@ color:rgba(255,255,255,0.7);
 
 <!-- ========== ЭКРАН "ГРАФИКИ" ========== -->
 <div id="chartsScreen">
-  <div class="chart-tabs">
-    <button class="chart-tab active" onclick="setChartType('pie')">Круговая</button>
-    <button class="chart-tab" onclick="setChartType('line')">Линейный</button>
-    <button class="chart-tab" onclick="setChartType('stack')">Бутерброд</button>
+  <div class="chart-tabs-grid">
+    <div class="chart-tabs-col">
+      <div class="chart-tabs-label">Круговая диаграмма</div>
+      <div class="chart-tabs-row">
+        <button class="chart-tab active" onclick="setChartType('pie')">Все задачи</button>
+        <button class="chart-tab" onclick="setChartType('pie-work')">Рабочие часы</button>
+      </div>
+    </div>
+    <div class="chart-tabs-col">
+      <div class="chart-tabs-label">Линейный график</div>
+      <div class="chart-tabs-row">
+        <button class="chart-tab" onclick="setChartType('line')">Линейный</button>
+        <button class="chart-tab" onclick="setChartType('stack')">Бутерброд</button>
+      </div>
+    </div>
   </div>
   <!-- Календарь выбора периода -->
   <div class="cal-section">
@@ -1359,7 +1382,7 @@ function getActName(id){const a=getAct(id);return a?a.name:'?'}
 function getGrp(actId){const a=getAct(actId);if(!a)return null;return getAllGroups().find(x=>x.id==a.group)||null}
 function getGrpName(actId){const g=getGrp(actId);return g?g.name:'?'}
 function getGrpColor(actId){const g=getGrp(actId);return g&&g.color?g.color:null}
-function isWork(actId){const a=getAct(actId);if(!a)return false;return isKeyGroup(a.group)}
+function isWork(actId){const a=getAct(actId);if(!a)return false;return !!a.isBusinessTime}
 
 function getActive(){return state.records.filter(r=>r.end===null)}
 function closeAll(now){state.records.forEach(r=>{if(r.end===null)r.end=now});state.active=[]}
@@ -1498,7 +1521,7 @@ function setupSmartClose(overlayId,bottomId,fixedId){
 }
 
 // ===== Auto-backup daily at 00:00 UTC+3 =====
-const BACKUP_HOUR=21, BACKUP_MIN=33; // ← ВРЕМЯ СРАБАТЫВАНИЯ (MSK ч:мин). Для полуночи: 0,0
+const BACKUP_HOUR=00, BACKUP_MIN=00; // ← ВРЕМЯ СРАБАТЫВАНИЯ (MSK ч:мин). Для полуночи: 0,0
 function doBackupNow(){
   const exp={customGroups:state.customGroups,customActivities:state.customActivities,records:state.records,active:state.active};
   const now=mskNow();
@@ -1533,7 +1556,7 @@ function scheduleAutoBackup(){
   if(next.getTime()<=now.getTime()){next.setUTCDate(next.getUTCDate()+1)}
   const msUntil=next.getTime()-now.getTime();
   setTimeout(()=>{
-    if(localStorage.getItem('lastAutoBackupDate')==todayKey)showBackupNotify();
+    if(localStorage.getItem('lastAutoBackupDate')!==todayKey)showBackupNotify();
     setInterval(()=>{
       const n=new Date(),m=new Date(n.getTime()+3*3600000);
       const k=m.getUTCFullYear()+'-'+String(m.getUTCMonth()+1).padStart(2,'0')+'-'+String(m.getUTCDate()).padStart(2,'0');
@@ -1623,6 +1646,10 @@ function buildRecRow(r, isCurrent, showDate){
   else if(hasNote){icon.classList.add('white');icon.innerText='ⓘ'}
   else{icon.classList.add('hidden')}
 
+  const star=document.createElement('span');
+  star.className='rec-star';
+  if(isWork(r.activity))star.innerText='⭐';
+
   const times=document.createElement('span');
   times.className='rec-times';
   times.innerHTML='<b>'+toMSK(r.start)+'</b> — <b>'+(r.end?toMSK(r.end):'...')+'</b>';
@@ -1640,6 +1667,7 @@ function buildRecRow(r, isCurrent, showDate){
   row.appendChild(dateEl);
   row.appendChild(name);
   row.appendChild(icon);
+  row.appendChild(star);
   row.appendChild(times);
   row.appendChild(dur);
   return row;
@@ -1663,7 +1691,7 @@ function renderInlinePicker(container, selected, parallel, onSelect){
     getAllActivities().filter(a=>a.group==g.id).forEach(a=>{
       const btn=document.createElement('button');
       btn.className='activity';
-      btn.innerText=a.name;
+      btn.innerText=(a.isBusinessTime?'⭐ ':'')+a.name;
       if(selected.includes(a.id))btn.classList.add(parallel?'selected':'active');
       btn.onclick=()=>onSelect(a.id);
       row.appendChild(btn);
@@ -2083,11 +2111,13 @@ function showCharts(){
 
 function setChartType(t){
   chartType=t;
+  const types=['pie','pie-work','line','stack'];
   document.querySelectorAll('.chart-tab').forEach((b,i)=>{
-    b.classList.toggle('active',['pie','line','stack'][i]===t);
+    b.classList.toggle('active',types[i]===t);
   });
-  document.getElementById('chartActPicker').style.display=(t==='pie')?'none':'block';
-  if(t!=='pie')renderChartActPicker();
+  const isPie=t==='pie'||t==='pie-work';
+  document.getElementById('chartActPicker').style.display=isPie?'none':'block';
+  if(!isPie)renderChartActPicker();
 }
 
 // ===== Календарь =====
@@ -2237,7 +2267,8 @@ function buildChart(){
   document.getElementById('chartTooltip').innerText='Нажмите на элемент графика для деталей';
   document.getElementById('chartLegend').innerHTML='';
 
-  if(chartType==='pie')buildPieChart(days);
+  if(chartType==='pie')buildPieChart(days,false);
+  else if(chartType==='pie-work')buildPieChart(days,true);
   else if(chartType==='line')buildLineChart(days);
   else buildStackChart(days);
 }
@@ -2269,22 +2300,35 @@ const pieLabelsPlugin={
   }
 };
 
+// ===== Извлечь основной цвет из group.color (hex или gradient → первый цвет) =====
+function extractColor(c){
+  if(!c)return '#888';
+  if(c.startsWith('#'))return c;
+  const m=c.match(/#[0-9A-Fa-f]{3,8}/);
+  return m?m[0]:'#888';
+}
+function hexToRgba(hex,alpha){
+  let r=0,g=0,b=0;
+  if(hex.length===4){r=parseInt(hex[1]+hex[1],16);g=parseInt(hex[2]+hex[2],16);b=parseInt(hex[3]+hex[3],16)}
+  else{r=parseInt(hex.slice(1,3),16);g=parseInt(hex.slice(3,5),16);b=parseInt(hex.slice(5,7),16)}
+  return 'rgba('+r+','+g+','+b+','+alpha+')';
+}
+
 // ===== 1. КРУГОВАЯ ДИАГРАММА =====
-function buildPieChart(days){
-  const gIdx={};
-  let gi=0;
+function buildPieChart(days,workOnly){
   const groupData=[];
   getAllGroups().forEach(g=>{
-    const gMs=calcGroupMs(g.id,days);
-    if(gMs<=0)return;
-    gIdx[g.id]=gi++;
     const acts=[];
     getAllActivities().filter(a=>a.group===g.id).forEach(a=>{
+      if(workOnly&&!a.isBusinessTime)return;
       let ms=0;days.forEach(dk=>{ms+=calcActDayMs(a.id,dk)});
       if(ms>0)acts.push({id:a.id,name:a.name,ms});
     });
+    if(!acts.length)return;
     acts.sort((a,b)=>b.ms-a.ms);
-    groupData.push({id:g.id,name:g.name,ms:gMs,acts,hue:getGroupHue(gIdx[g.id])});
+    const gMs=acts.reduce((s,a)=>s+a.ms,0);
+    const baseColor=extractColor(g.color);
+    groupData.push({id:g.id,name:g.name,ms:gMs,acts,baseColor});
   });
   groupData.sort((a,b)=>b.ms-a.ms);
 
@@ -2292,11 +2336,10 @@ function buildPieChart(days){
   const totalMs=groupData.reduce((s,g)=>s+g.ms,0);
   groupData.forEach(g=>{
     g.acts.forEach((a,i)=>{
-      const light=50+i*8;
-      const sat=Math.max(35,75-i*12);
+      const alpha=Math.max(0.15,1-i*0.1);
       labels.push(a.name);
       data.push(a.ms/3600000);
-      colors.push('hsl('+g.hue+','+sat+'%,'+light+'%)');
+      colors.push(hexToRgba(g.baseColor,alpha));
       meta.push({actName:a.name,groupName:g.name,ms:a.ms,pct:(a.ms/totalMs*100).toFixed(1)});
     });
   });
@@ -2325,7 +2368,7 @@ function buildPieChart(days){
   groupData.forEach(g=>{
     const item=document.createElement('span');
     item.className='chart-legend-item';
-    item.innerHTML='<span class="chart-legend-color" style="background:hsl('+g.hue+',75%,50%)"></span>'+g.name+' — '+hmFromMs(g.ms)+' ('+(g.ms/totalMs*100).toFixed(1)+'%)';
+    item.innerHTML='<span class="chart-legend-color" style="background:'+g.baseColor+'"></span>'+g.name+' — '+hmFromMs(g.ms)+' ('+(g.ms/totalMs*100).toFixed(1)+'%)';
     leg.appendChild(item);
   });
 }
