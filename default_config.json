@@ -91,6 +91,7 @@
     {"id": 44, "name": "Приготовление еды",                   "group": 11, "isBusinessTime": false},
     {"id": 45, "name": "Выход в магазин(ы)",                  "group": 11, "isBusinessTime": false},
     {"id": 46, "name": "Поездка за арендной платой",          "group": 11, "isBusinessTime": false},
+	{"id": 57, "name": "Поиск товаров в онлайн-магазинах",          "group": 11, "isBusinessTime": false},
 
     {"id": 47, "name": "Художественная литература",           "group": 12, "isBusinessTime": false},
     {"id": 48, "name": "Видео (ПК)",                          "group": 12, "isBusinessTime": false},
