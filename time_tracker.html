@@ -338,7 +338,7 @@ flex-wrap:wrap;
 align-items:center;
 gap:6px;
 padding:0 15px;
-margin-bottom:20px;
+margin-bottom:25px;
 }
 
 .picker-group-label{
@@ -1355,7 +1355,7 @@ function renderInlinePicker(container, selected, parallel, onSelect){
     label.className='picker-group-label';
     label.innerText=g.name;
     if(g.color){
-      if(g.color.startsWith('linear-gradient')){label.style.background=g.color;label.style.borderColor='transparent'}
+      if(g.color.startsWith('linear-gradient')){label.style.background=g.color;label.style.border='none'}
       else{label.style.background=g.color;label.style.borderColor=g.color}
       label.style.color='#000';
     }
