@@ -83,6 +83,7 @@
     {"id": 38, "name": "Прием пищи",                          "group": 9, "isBusinessTime": false},
 
     {"id": 39, "name": "Телефон",                             "group": 10, "isBusinessTime": false},
+	{"id": 58, "name": "Сообщения",                        "group": 10, "isBusinessTime": false},
     {"id": 40, "name": "Прием гостей",                        "group": 10, "isBusinessTime": false},
     {"id": 41, "name": "Выход в гости",                       "group": 10, "isBusinessTime": false},
     {"id": 42, "name": "Посещение обществ. мест",             "group": 10, "isBusinessTime": false},
