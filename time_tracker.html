@@ -173,6 +173,46 @@ font-family:inherit;
 resize:vertical;
 }
 #noteText:focus{outline:none;border-color:#0a84ff}
+#noteText{max-height:70vh}
+
+.note-backdrop{
+min-height:50vh;
+flex-shrink:0;
+}
+
+.note-close-bottom{
+width:38px;height:38px;
+border-radius:50%;
+border:1px solid rgba(255,255,255,0.3);
+background:rgba(0,0,0,0.7);
+color:rgba(255,255,255,0.6);
+font-size:16px;
+display:flex;
+align-items:center;
+justify-content:center;
+margin:12px auto 0;
+flex-shrink:0;
+}
+.note-close-bottom:active{background:rgba(255,255,255,0.15)}
+
+.note-close-fixed{
+position:fixed;
+bottom:calc(18px + env(safe-area-inset-bottom));
+left:50%;
+transform:translateX(-50%);
+width:38px;height:38px;
+border-radius:50%;
+border:1px solid rgba(255,255,255,0.3);
+background:rgba(0,0,0,0.7);
+color:rgba(255,255,255,0.6);
+font-size:16px;
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:3;
+}
+.note-close-fixed:active{background:rgba(255,255,255,0.15)}
+.note-close-fixed.hidden{display:none}
 
 .rec-row.cur{color:rgba(255,255,255,0.7);border-color:rgba(255,255,255,0.5)}
 
@@ -384,7 +424,22 @@ align-items:center;
 justify-content:center;
 z-index:3;
 }
+.picker-fixed-close.hidden{display:none}
 .picker-fixed-close:active{background:rgba(255,255,255,0.15)}
+
+.picker-bottom-close{
+width:38px;height:38px;
+border-radius:50%;
+border:1px solid rgba(255,255,255,0.3);
+background:rgba(0,0,0,0.7);
+color:rgba(255,255,255,0.6);
+font-size:16px;
+display:flex;
+align-items:center;
+justify-content:center;
+margin:16px auto 30px;
+}
+.picker-bottom-close:active{background:rgba(255,255,255,0.15)}
 
 .picker-group{
 display:flex;
@@ -943,7 +998,8 @@ color:rgba(255,255,255,0.7);
   <div class="picker-hint" id="pickerHint">Выберите 1 задачу</div>
   <button class="picker-confirm single disabled" id="pickerConfirm" onclick="confirmPicker()">Запустить</button>
   <div id="pickerList"></div>
-  <button class="picker-fixed-close" onclick="closePicker()">✕</button>
+  <button class="picker-bottom-close" id="pickerCloseBottom" onclick="closePicker()">✕</button>
+  <button class="picker-fixed-close" id="pickerCloseFixed" onclick="closePicker()">✕</button>
 </div>
 
 <!-- ========== ОКНО "РАБОЧИЕ ЧАСЫ" (детализация по дням) ========== -->
@@ -1072,7 +1128,10 @@ color:rgba(255,255,255,0.7);
   <div class="note-section">
     <div class="note-info" id="noteInfo"></div>
     <textarea id="noteText" placeholder="Опишите что делалось..."></textarea>
+    <button class="note-close-bottom" id="noteCloseBottom" onclick="closeNote()">✕</button>
   </div>
+  <div class="note-backdrop" onclick="closeNote()"></div>
+  <button class="note-close-fixed" id="noteCloseFixed" onclick="closeNote()">✕</button>
 </div>
 
 <!-- ========== ОКНО "ЛОГ ЗАДАЧ" (история по дням) ========== -->
@@ -1377,6 +1436,53 @@ function save(){
   dbSave(state).catch(()=>{});
 }
 
+// ===== Smart close button (fixed ↔ static) for overlays =====
+let _smartObservers={};
+function setupSmartClose(overlayId,bottomId,fixedId){
+  if(_smartObservers[overlayId]){_smartObservers[overlayId].disconnect()}
+  const ov=document.getElementById(overlayId);
+  const bot=document.getElementById(bottomId);
+  const fix=document.getElementById(fixedId);
+  if(!ov||!bot||!fix)return;
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting)fix.classList.add('hidden');
+      else fix.classList.remove('hidden');
+    });
+  },{root:ov,threshold:0.5});
+  obs.observe(bot);
+  _smartObservers[overlayId]=obs;
+  fix.classList.remove('hidden');
+}
+
+// ===== Auto-backup daily at 00:00 UTC+3 =====
+function autoBackup(){
+  const exp={customGroups:state.customGroups,customActivities:state.customActivities,records:state.records,active:state.active};
+  const now=mskNow();
+  const dd=String(now.getDate()).padStart(2,'0');
+  const mes=String(now.getMonth()+1).padStart(2,'0');
+  const yr=now.getFullYear();
+  const fname='autobackup_'+yr+'-'+mes+'-'+dd+'_TimeTracker.json';
+  const b=new Blob([JSON.stringify(exp)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fname;a.click();
+  localStorage.setItem('lastAutoBackupDate',yr+'-'+mes+'-'+dd);
+}
+function scheduleAutoBackup(){
+  const now=new Date();
+  const msk=new Date(now.getTime()+3*3600000);
+  const todayKey=msk.getUTCFullYear()+'-'+String(msk.getUTCMonth()+1).padStart(2,'0')+'-'+String(msk.getUTCDate()).padStart(2,'0');
+  const lastBackup=localStorage.getItem('lastAutoBackupDate');
+  // If we missed today's backup (app opened after midnight MSK), do it now
+  if(lastBackup!==todayKey&&state.records.length>0){
+    autoBackup();
+  }
+  // Schedule next midnight MSK
+  const nextMidnightMSK=new Date(Date.UTC(msk.getUTCFullYear(),msk.getUTCMonth(),msk.getUTCDate()+1,0,0,0)-3*3600000);
+  const msUntil=nextMidnightMSK.getTime()-now.getTime();
+  setTimeout(()=>{autoBackup();setInterval(autoBackup,24*3600000)},msUntil>0?msUntil:0);
+}
+scheduleAutoBackup();
+
 // ===== Строка записи (buildRecRow) — используется в логе на главной и в "Лог задач" =====
 function shortDate(iso){
   if(!iso)return '';
@@ -1401,7 +1507,11 @@ function openNote(recordId){
   const ta=document.getElementById('noteText');
   ta.value=r.note||'';
   ta.oninput=()=>{r.note=ta.value;save()};
-  lockScroll();document.getElementById('noteOverlay').classList.add('open');
+  lockScroll();
+  const ov=document.getElementById('noteOverlay');
+  ov.classList.add('open');
+  ov.scrollTop=0;
+  setupSmartClose('noteOverlay','noteCloseBottom','noteCloseFixed');
 }
 function closeNote(){
   document.getElementById('noteOverlay').classList.remove('open');unlockScroll();
@@ -1513,6 +1623,7 @@ function openPicker(parallel){
   const pk=document.getElementById('picker');
   pk.classList.add('open');
   pk.scrollTop=0;
+  setupSmartClose('picker','pickerCloseBottom','pickerCloseFixed');
 }
 
 function onPickerSelect(actId){
