@@ -1,5 +1,5 @@
-const CACHE = 'tt-v9';
-const ASSETS = ['./time_tracker.html', './manifest.json'];
+const CACHE = 'tt-v13';
+const ASSETS = ['./time_tracker.html', './manifest.json', './default_config.json'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));

@@ -1,0 +1,15 @@
+{
+  "groups": [
+    {"id": 1, "name": "Работа ⬆️_❸", "isKeyGroup": true},
+    {"id": 2, "name": "Отдых"},
+    {"id": 3, "name": "Быт"},
+    {"id": 4, "name": "Сон"}
+  ],
+  "activities": [
+    {"id": 1, "name": "Кодинг", "group": 1},
+    {"id": 2, "name": "Анализ", "group": 1},
+    {"id": 3, "name": "YouTube", "group": 2},
+    {"id": 4, "name": "Готовка", "group": 3},
+    {"id": 5, "name": "Сон", "group": 4}
+  ]
+}
