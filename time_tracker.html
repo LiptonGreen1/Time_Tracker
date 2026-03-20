@@ -342,7 +342,9 @@ margin-bottom:25px;
 }
 
 .picker-group-label{
-display:inline-block;
+display:inline-flex;
+align-items:center;
+gap:4px;
 padding:6px 12px;
 border:2px solid rgba(255,255,255,0.7);
 border-radius:8px;
@@ -350,6 +352,20 @@ font-size:13px;
 font-weight:600;
 color:rgba(255,255,255,0.85);
 white-space:nowrap;
+}
+
+.num-badge{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+width:20px;height:20px;
+border-radius:50%;
+background:#000;
+color:#fff;
+font-size:12px;
+font-weight:700;
+line-height:1;
+flex-shrink:0;
 }
 
 .activity{
@@ -1102,6 +1118,11 @@ function getAllGroups(){return defaultConfig.groups.concat(state.customGroups||[
 function getAllActivities(){return defaultConfig.activities.concat(state.customActivities||[])}
 function isKeyGroup(groupId){return defaultConfig.groups.some(g=>g.id===groupId&&g.isKeyGroup)}
 
+// Заменяет #N в имени группы на HTML-бейдж (чёрный кружок с белой цифрой)
+function renderGroupName(name){
+  return name.replace(/#(\d)/g,'<span class="num-badge">$1</span>');
+}
+
 // ===== Вспомогательные функции (время, MSK, форматирование) =====
 function mskNow(){return new Date(new Date().toLocaleString('en-US',{timeZone:'Europe/Moscow'}))}
 function mskDayStartUTC(y,m,d){return new Date(`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}T00:00:00+03:00`).getTime()}
@@ -1353,7 +1374,7 @@ function renderInlinePicker(container, selected, parallel, onSelect){
     row.className='picker-group';
     const label=document.createElement('span');
     label.className='picker-group-label';
-    label.innerText=g.name;
+    label.innerHTML=renderGroupName(g.name);
     if(g.color){
       if(g.color.startsWith('linear-gradient')){label.style.background=g.color;label.style.border='none'}
       else{label.style.background=g.color;label.style.borderColor=g.color}
