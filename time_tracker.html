@@ -82,7 +82,7 @@ font-weight:600;
 /* Крупный таймер (ххч ххм ххс) */
 .timer-display{
 font-size:38px;
-font-weight:200;
+font-weight:700;
 font-variant-numeric:tabular-nums;
 letter-spacing:0.5px;
 min-height:46px;
@@ -174,7 +174,7 @@ resize:vertical;
 }
 #noteText:focus{outline:none;border-color:#0a84ff}
 
-.rec-row.cur{color:rgba(255,255,255,0.7)}
+.rec-row.cur{color:rgba(255,255,255,0.7);border-color:rgba(255,255,255,0.5)}
 
 /* Столбец 1: дата (ПН 18.03) */
 .rec-date{
@@ -1558,21 +1558,21 @@ function renderMain(){
     const c1=getGrpColor(active[0].activity)||'rgba(255,255,255,0.15)';
     const c2=getGrpColor(active[1].activity)||'rgba(255,255,255,0.15)';
     tb.style.background='linear-gradient(to bottom, '+flatColor(c1)+' 45%, '+flatColor(c2)+' 70%)';
-    tb.style.borderColor='transparent';
+    tb.style.border='none';
     cur.style.color='#000';timer.style.color='#000';
   } else if(active.length===1){
     cur.innerHTML=renderGroupName(getGrpName(active[0].activity))+' ➤ '+getActName(active[0].activity);
     const c=getGrpColor(active[0].activity);
     if(c){
-      tb.style.background=c;tb.style.borderColor='transparent';
+      tb.style.background=c;tb.style.border='none';
       cur.style.color='#000';timer.style.color='#000';
     } else {
-      tb.style.background='none';tb.style.borderColor='rgba(255,255,255,0.25)';
+      tb.style.background='none';tb.style.border='1px solid rgba(255,255,255,0.25)';
       cur.style.color='#0a84ff';timer.style.color='white';
     }
   } else {
     cur.innerText='Нет активности';
-    tb.style.background='none';tb.style.borderColor='rgba(255,255,255,0.25)';
+    tb.style.background='none';tb.style.border='1px solid rgba(255,255,255,0.25)';
     cur.style.color='rgba(255,255,255,0.5)';timer.style.color='white';
   }
 
