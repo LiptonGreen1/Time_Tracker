@@ -314,6 +314,9 @@ color:rgba(255,255,255,0.4);
 }
 
 .picker-confirm{
+position:sticky;
+top:52px;
+z-index:2;
 margin:0 15px 20px;
 padding:13px;
 border:none;
@@ -1351,6 +1354,11 @@ function renderInlinePicker(container, selected, parallel, onSelect){
     const label=document.createElement('span');
     label.className='picker-group-label';
     label.innerText=g.name;
+    if(g.color){
+      if(g.color.startsWith('linear-gradient')){label.style.background=g.color;label.style.borderColor='transparent'}
+      else{label.style.background=g.color;label.style.borderColor=g.color}
+      label.style.color='#000';
+    }
     row.appendChild(label);
     getAllActivities().filter(a=>a.group==g.id).forEach(a=>{
       const btn=document.createElement('button');
