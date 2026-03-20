@@ -1506,11 +1506,12 @@ function openNote(recordId){
   document.getElementById('noteInfo').innerHTML='<span class="rec-grp-badge" style="background:'+(getGrpColor(r.activity)||'rgba(255,255,255,0.15)')+'">'+renderGroupName(getGrpName(r.activity))+'</span> ➤ '+getActName(r.activity)+' — '+toMSK(r.start)+' — '+(r.end?toMSK(r.end):'...');
   const ta=document.getElementById('noteText');
   ta.value=r.note||'';
-  ta.style.height='auto';ta.style.height=Math.max(120,ta.scrollHeight)+'px';
+  ta.style.height='120px';
   ta.oninput=()=>{r.note=ta.value;save();ta.style.height='auto';ta.style.height=Math.max(120,ta.scrollHeight)+'px'};
   lockScroll();
   const ov=document.getElementById('noteOverlay');
   ov.classList.add('open');
+  requestAnimationFrame(()=>{ta.style.height='auto';ta.style.height=Math.max(120,ta.scrollHeight)+'px'});
   ov.scrollTop=0;
   setupSmartClose('noteOverlay','noteCloseBottom','noteCloseFixed');
 }
