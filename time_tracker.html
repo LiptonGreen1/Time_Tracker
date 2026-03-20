@@ -286,7 +286,7 @@ font-size:13px;
 }
 
 .work-lbl{color:rgba(255,255,255,0.5);font-size:12px}
-.work-val{font-variant-numeric:tabular-nums}
+.work-val{font-variant-numeric:tabular-nums;text-align:center}
 .work-from{color:rgba(255,255,255,0.35);font-size:11px}
 .work-tgt{}
 .work-target{color:#FF2FFF;font-weight:700}
@@ -297,6 +297,8 @@ cursor:pointer;
 border:1px solid rgba(255,255,255,0.4);
 border-radius:6px;
 padding:2px 8px;
+display:inline-block;
+text-align:center;
 }
 
 /* =============================================
@@ -691,7 +693,11 @@ border:none;
 background:#333;
 color:white;
 border-radius:6px;
-font-size:13px;
+font-size:12px;
+font-family:'SF Pro Display',-apple-system,'Helvetica Neue',Arial,sans-serif;
+letter-spacing:0.8px;
+text-transform:uppercase;
+font-weight:400;
 }
 
 /* =============================================
@@ -919,6 +925,9 @@ color:rgba(255,255,255,0.7);
   <div class="picker-hint" id="pickerHint">Выберите 1 задачу</div>
   <button class="picker-confirm single disabled" id="pickerConfirm" onclick="confirmPicker()">Запустить</button>
   <div id="pickerList"></div>
+  <div style="text-align:center;padding:20px 0 40px">
+    <button class="week-close-circle" onclick="closePicker()">✕</button>
+  </div>
 </div>
 
 <!-- ========== ОКНО "РАБОЧИЕ ЧАСЫ" (детализация по дням) ========== -->
