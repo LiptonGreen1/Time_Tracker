@@ -214,6 +214,49 @@ z-index:3;
 .note-close-fixed:active{background:rgba(255,255,255,0.15)}
 .note-close-fixed.hidden{display:none}
 
+/* Уведомление о бекапе */
+.backup-notify{
+display:none;
+position:fixed;
+top:0;left:0;right:0;bottom:0;
+background:rgba(0,0,0,0.75);
+z-index:200;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+text-align:center;
+padding:40px;
+}
+.backup-notify.open{display:flex}
+.backup-notify-text{
+font-size:18px;
+color:rgba(255,255,255,0.85);
+line-height:1.6;
+margin-bottom:40px;
+font-weight:300;
+letter-spacing:0.5px;
+}
+.backup-notify-btn{
+width:160px;height:160px;
+border-radius:50%;
+border:2px solid rgba(10,132,255,0.5);
+background:rgba(10,132,255,0.12);
+color:#0a84ff;
+font-size:36px;
+font-weight:700;
+letter-spacing:2px;
+margin-bottom:24px;
+transition:background 0.15s;
+}
+.backup-notify-btn:active{background:rgba(10,132,255,0.3)}
+.backup-notify-skip{
+background:none;
+border:none;
+color:rgba(255,255,255,0.35);
+font-size:14px;
+padding:12px 24px;
+}
+
 .rec-row.cur{color:rgba(255,255,255,0.7);border-color:rgba(255,255,255,0.5)}
 
 /* Столбец 1: дата (ПН 18.03) */
@@ -1166,6 +1209,13 @@ color:rgba(255,255,255,0.7);
   <div class="chart-tooltip-box" id="chartTooltip">Нажмите на элемент графика для деталей</div>
 </div>
 
+<!-- ========== УВЕДОМЛЕНИЕ О БЕКАПЕ ========== -->
+<div class="backup-notify" id="backupNotify">
+  <div class="backup-notify-text">Наступило 00:00:00<br>Время сохранить<br>Бекап Кастомной конфигурации</div>
+  <button class="backup-notify-btn" onclick="doBackupNow()">OK</button>
+  <button class="backup-notify-skip" onclick="hideBackupNotify()">Позже</button>
+</div>
+
 <!-- ========== НИЖНЯЯ ПАНЕЛЬ ========== -->
 <div class="bottom">
   <button onclick="showMain()">Главная</button>
@@ -1456,30 +1506,48 @@ function setupSmartClose(overlayId,bottomId,fixedId){
 }
 
 // ===== Auto-backup daily at 00:00 UTC+3 =====
-function autoBackup(){
+const BACKUP_HOUR=21, BACKUP_MIN=17; // ← ВРЕМЯ СРАБАТЫВАНИЯ (MSK ч:мин). Для полуночи: 0,0
+function doBackupNow(){
   const exp={customGroups:state.customGroups,customActivities:state.customActivities,records:state.records,active:state.active};
   const now=mskNow();
   const dd=String(now.getDate()).padStart(2,'0');
   const mes=String(now.getMonth()+1).padStart(2,'0');
   const yr=now.getFullYear();
-  const fname='autobackup_'+yr+'-'+mes+'-'+dd+'_TimeTracker.json';
+  const hh=String(now.getHours()).padStart(2,'0');
+  const mi=String(now.getMinutes()).padStart(2,'0');
+  const fname='autobackup_'+yr+'-'+mes+'-'+dd+'_'+hh+'-'+mi+'_TimeTracker.json';
   const b=new Blob([JSON.stringify(exp)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fname;a.click();
   localStorage.setItem('lastAutoBackupDate',yr+'-'+mes+'-'+dd);
+  hideBackupNotify();
+}
+function showBackupNotify(){
+  document.getElementById('backupNotify').classList.add('open');
+}
+function hideBackupNotify(){
+  document.getElementById('backupNotify').classList.remove('open');
 }
 function scheduleAutoBackup(){
   const now=new Date();
   const msk=new Date(now.getTime()+3*3600000);
   const todayKey=msk.getUTCFullYear()+'-'+String(msk.getUTCMonth()+1).padStart(2,'0')+'-'+String(msk.getUTCDate()).padStart(2,'0');
   const lastBackup=localStorage.getItem('lastAutoBackupDate');
-  // If we missed today's backup (app opened after backup time), do it now
-  // Disabled for testing — only scheduled trigger at 21:00 MSK
-  // if(lastBackup!==todayKey&&state.records.length>0){autoBackup()}
-  // Schedule next 21:00 MSK (temporary for testing, change to 0,0,0 for midnight)
-  const nextMidnightMSK=new Date(Date.UTC(msk.getUTCFullYear(),msk.getUTCMonth(),msk.getUTCDate(),21,0,0)-3*3600000);
-  if(nextMidnightMSK.getTime()<=now.getTime()){nextMidnightMSK.setUTCDate(nextMidnightMSK.getUTCDate()+1)}
-  const msUntil=nextMidnightMSK.getTime()-now.getTime();
-  setTimeout(()=>{autoBackup();setInterval(autoBackup,24*3600000)},msUntil>0?msUntil:0);
+  // If missed today's backup and past backup hour, show notification now
+  if(lastBackup!==todayKey&&state.records.length>0&&(msk.getUTCHours()>BACKUP_HOUR||(msk.getUTCHours()===BACKUP_HOUR&&msk.getUTCMinutes()>=BACKUP_MIN))){
+    showBackupNotify();
+  }
+  // Schedule next trigger
+  const next=new Date(Date.UTC(msk.getUTCFullYear(),msk.getUTCMonth(),msk.getUTCDate(),BACKUP_HOUR,BACKUP_MIN,0)-3*3600000);
+  if(next.getTime()<=now.getTime()){next.setUTCDate(next.getUTCDate()+1)}
+  const msUntil=next.getTime()-now.getTime();
+  setTimeout(()=>{
+    if(localStorage.getItem('lastAutoBackupDate')!==todayKey)showBackupNotify();
+    setInterval(()=>{
+      const n=new Date(),m=new Date(n.getTime()+3*3600000);
+      const k=m.getUTCFullYear()+'-'+String(m.getUTCMonth()+1).padStart(2,'0')+'-'+String(m.getUTCDate()).padStart(2,'0');
+      if(localStorage.getItem('lastAutoBackupDate')!==k)showBackupNotify();
+    },24*3600000);
+  },msUntil>0?msUntil:0);
 }
 scheduleAutoBackup();
 
