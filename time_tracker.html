@@ -11,6 +11,7 @@
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%23111'/><circle cx='96' cy='96' r='60' fill='none' stroke='%230a84ff' stroke-width='8'/><line x1='96' y1='96' x2='96' y2='56' stroke='%230a84ff' stroke-width='6' stroke-linecap='round'/><line x1='96' y1='96' x2='126' y2='96' stroke='%230a84ff' stroke-width='4' stroke-linecap='round'/></svg>">
 
 <title>Time Tracker</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 
 <style>
 
@@ -619,6 +620,159 @@ color:rgba(255,255,255,0.8);
 
 /* Строки записей — те же .rec-row что и на главной */
 
+/* =============================================
+   ГРАФИКИ
+   ============================================= */
+
+#chartsScreen{
+display:none;
+padding:10px 15px;
+padding-bottom:120px;
+}
+
+.chart-tabs{
+display:flex;
+gap:6px;
+margin-bottom:14px;
+}
+
+.chart-tab{
+flex:1;
+padding:9px 4px;
+border:1px solid rgba(255,255,255,0.2);
+border-radius:8px;
+background:none;
+color:rgba(255,255,255,0.5);
+font-size:12px;
+text-align:center;
+}
+
+.chart-tab.active{border-color:#0a84ff;color:#0a84ff}
+
+/* Календарь выбора периода */
+.cal-section{margin-bottom:14px}
+
+.cal-nav{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:8px;
+}
+
+.cal-nav button{
+background:none;border:none;color:#0a84ff;font-size:20px;padding:6px 10px;
+}
+
+.cal-nav span{font-size:14px;color:rgba(255,255,255,0.7)}
+
+.cal-grid{
+display:grid;
+grid-template-columns:36px repeat(7,1fr);
+gap:2px;
+font-size:12px;
+text-align:center;
+}
+
+.cal-hdr{color:rgba(255,255,255,0.4);padding:4px 0;font-weight:600}
+
+.cal-wk{
+color:#0a84ff;
+font-size:10px;
+display:flex;
+align-items:center;
+justify-content:center;
+cursor:pointer;
+border-radius:4px;
+}
+
+.cal-wk:active{background:rgba(10,132,255,0.2)}
+.cal-wk.sel{background:rgba(10,132,255,0.3)}
+
+.cal-day{
+padding:6px 0;
+border-radius:6px;
+color:rgba(255,255,255,0.5);
+cursor:pointer;
+}
+
+.cal-day:active{background:rgba(255,255,255,0.1)}
+.cal-day.sel{background:#0a84ff;color:white}
+.cal-day.empty{cursor:default}
+.cal-day.today-mark{border:1px solid #0a84ff}
+
+.cal-selected-label{
+font-size:11px;
+color:rgba(255,255,255,0.4);
+margin-top:6px;
+}
+
+/* Пикер задач для линейных графиков */
+.chart-act-picker{margin-bottom:14px}
+
+.chart-act-btn{
+display:inline-block;
+padding:6px 10px;
+margin:2px;
+border:1px solid rgba(255,255,255,0.2);
+border-radius:6px;
+background:none;
+color:rgba(255,255,255,0.6);
+font-size:12px;
+}
+
+.chart-act-btn.sel{border-color:#0a84ff;color:#0a84ff}
+
+.chart-build-btn{
+width:100%;
+padding:12px;
+border:none;
+border-radius:10px;
+background:#0a84ff;
+color:white;
+font-size:14px;
+font-weight:600;
+margin-bottom:14px;
+}
+
+.chart-container{
+position:relative;
+width:100%;
+max-width:100%;
+margin-bottom:16px;
+}
+
+.chart-container canvas{
+width:100%!important;
+max-height:350px;
+}
+
+.chart-legend{
+font-size:12px;
+color:rgba(255,255,255,0.6);
+}
+
+.chart-legend-item{
+display:inline-flex;
+align-items:center;
+gap:4px;
+margin:3px 8px 3px 0;
+}
+
+.chart-legend-color{
+width:12px;height:12px;border-radius:3px;flex-shrink:0;
+}
+
+.chart-tooltip-box{
+background:#222;
+border:1px solid rgba(255,255,255,0.2);
+border-radius:8px;
+padding:10px;
+font-size:13px;
+margin-top:8px;
+min-height:40px;
+color:rgba(255,255,255,0.7);
+}
+
 </style>
 
 </head>
@@ -780,10 +934,40 @@ color:rgba(255,255,255,0.8);
 <!-- ========== ОКНО "ЛОГ ЗАДАЧ" (история по дням) ========== -->
 <div id="history"></div>
 
+<!-- ========== ЭКРАН "ГРАФИКИ" ========== -->
+<div id="chartsScreen">
+  <div class="chart-tabs">
+    <button class="chart-tab active" onclick="setChartType('pie')">Круговая</button>
+    <button class="chart-tab" onclick="setChartType('line')">Линейный</button>
+    <button class="chart-tab" onclick="setChartType('stack')">Бутерброд</button>
+  </div>
+  <!-- Календарь выбора периода -->
+  <div class="cal-section">
+    <div class="cal-nav">
+      <button onclick="calMove(-1)">‹</button>
+      <span id="calTitle"></span>
+      <button onclick="calMove(1)">›</button>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="cal-selected-label" id="calLabel"></div>
+  </div>
+  <!-- Пикер задач (для line/stack) -->
+  <div class="chart-act-picker" id="chartActPicker" style="display:none"></div>
+  <!-- Кнопка построить -->
+  <button class="chart-build-btn" onclick="buildChart()">Построить</button>
+  <!-- Контейнер графика -->
+  <div class="chart-container"><canvas id="chartCanvas"></canvas></div>
+  <!-- Легенда -->
+  <div class="chart-legend" id="chartLegend"></div>
+  <!-- Тултип по клику -->
+  <div class="chart-tooltip-box" id="chartTooltip">Нажмите на элемент графика для деталей</div>
+</div>
+
 <!-- ========== НИЖНЯЯ ПАНЕЛЬ ========== -->
 <div class="bottom">
   <button onclick="showMain()">Главная</button>
   <button onclick="showHistory()">Лог задач</button>
+  <button onclick="showCharts()">Графики</button>
   <button onclick="openBurger()">☰</button>
 </div>
 
@@ -1251,6 +1435,9 @@ function renderWeekDetail(){
 // ===== Меню-бургер (☰) =====
 function openBurger(){lockScroll();document.getElementById('burgerOverlay').classList.add('open')}
 function closeBurger(){document.getElementById('burgerOverlay').classList.remove('open');unlockScroll()}
+document.getElementById('burgerOverlay').addEventListener('click',function(e){
+  if(e.target===this||e.target.classList.contains('burger-list'))closeBurger();
+});
 
 // ===== Окно "Добавить задачу" =====
 let pickedGroupId=null;
@@ -1390,11 +1577,13 @@ function closeJsonView(){document.getElementById('jsonOverlay').classList.remove
 function showMain(){
   document.getElementById('main').style.display='flex';
   document.getElementById('history').style.display='none';
+  document.getElementById('chartsScreen').style.display='none';
   renderMain();
 }
 
 function showHistory(){
   document.getElementById('main').style.display='none';
+  document.getElementById('chartsScreen').style.display='none';
   const h=document.getElementById('history');h.style.display='block';h.innerHTML='';
 
   // Split records at midnight boundaries for display
@@ -1430,6 +1619,405 @@ function showHistory(){
 function exportData(){
   const b=new Blob([JSON.stringify(state)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='timedata.json';a.click();
+}
+
+// ===== ГРАФИКИ =====
+let chartType='pie';
+let calYear, calMonth; // текущий отображаемый месяц
+let calSelectedDays=new Set(); // выбранные дни как 'YYYY-MM-DD'
+let chartSelectedActs=[]; // выбранные задачи для line/stack
+let currentChart=null;
+
+// Цвета групп (яркие, различимые)
+const GROUP_HUES=[210,30,120,0,270,60,180,330,90,300];
+
+function getGroupHue(gIdx){return GROUP_HUES[gIdx%GROUP_HUES.length]}
+
+function showCharts(){
+  document.getElementById('main').style.display='none';
+  document.getElementById('history').style.display='none';
+  document.getElementById('chartsScreen').style.display='block';
+  const now=mskNow();
+  calYear=now.getFullYear();calMonth=now.getMonth();
+  // Default: select current week
+  calSelectedDays.clear();
+  const mon=getMondayMSK(now);
+  for(let i=0;i<7;i++){
+    const d=new Date(mon);d.setDate(d.getDate()+i);
+    calSelectedDays.add(fmtDateVal(d));
+  }
+  chartSelectedActs=[];
+  setChartType('pie');
+  renderCal();
+}
+
+function setChartType(t){
+  chartType=t;
+  document.querySelectorAll('.chart-tab').forEach((b,i)=>{
+    b.classList.toggle('active',['pie','line','stack'][i]===t);
+  });
+  document.getElementById('chartActPicker').style.display=(t==='pie')?'none':'block';
+  if(t!=='pie')renderChartActPicker();
+}
+
+// ===== Календарь =====
+function calMove(dir){calMonth+=dir;if(calMonth<0){calMonth=11;calYear--}if(calMonth>11){calMonth=0;calYear++}renderCal()}
+
+const MONTH_NAMES=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+
+function renderCal(){
+  document.getElementById('calTitle').innerText=MONTH_NAMES[calMonth]+' '+calYear;
+  const g=document.getElementById('calGrid');
+  g.innerHTML='';
+  // Header row: empty + ПН-ВС
+  g.innerHTML='<div class="cal-hdr"></div>'+DAY_NAMES.map(d=>'<div class="cal-hdr">'+d+'</div>').join('');
+
+  const first=new Date(calYear,calMonth,1);
+  let dow=first.getDay();if(dow===0)dow=7; // 1=ПН
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+
+  const todayKey=fmtDateVal(mskNow());
+
+  // Build weeks
+  let day=1;
+  let weekStart=1-(dow-1); // может быть <= 0
+  while(weekStart<=daysInMonth){
+    // Week button
+    const wkDays=[];
+    for(let i=0;i<7;i++){
+      const d=weekStart+i;
+      if(d>=1&&d<=daysInMonth)wkDays.push(fmtDateVal(new Date(calYear,calMonth,d)));
+    }
+    const allSel=wkDays.length>0&&wkDays.every(k=>calSelectedDays.has(k));
+    const wkBtn=document.createElement('div');
+    wkBtn.className='cal-wk'+(allSel?' sel':'');
+    wkBtn.innerText='Нед';
+    wkBtn.onclick=(function(days){return function(){
+      // Toggle: if all selected, deselect; else select all
+      const allIn=days.every(k=>calSelectedDays.has(k));
+      days.forEach(k=>{if(allIn)calSelectedDays.delete(k);else calSelectedDays.add(k)});
+      renderCal();
+    }})(wkDays);
+    g.appendChild(wkBtn);
+
+    // Day cells
+    for(let i=0;i<7;i++){
+      const d=weekStart+i;
+      const cell=document.createElement('div');
+      cell.className='cal-day';
+      if(d<1||d>daysInMonth){
+        cell.classList.add('empty');
+        g.appendChild(cell);continue;
+      }
+      const key=fmtDateVal(new Date(calYear,calMonth,d));
+      cell.innerText=d;
+      if(calSelectedDays.has(key))cell.classList.add('sel');
+      if(key===todayKey)cell.classList.add('today-mark');
+      cell.onclick=(function(k){return function(){
+        if(calSelectedDays.has(k))calSelectedDays.delete(k);else calSelectedDays.add(k);
+        renderCal();
+      }})(key);
+      g.appendChild(cell);
+    }
+    weekStart+=7;
+  }
+
+  // Label
+  const sorted=[...calSelectedDays].sort();
+  const lbl=document.getElementById('calLabel');
+  if(!sorted.length){lbl.innerText='Период не выбран'}
+  else if(sorted.length===1){lbl.innerText='Выбрано: '+sorted[0]}
+  else{lbl.innerText='Выбрано: '+sorted[0]+' — '+sorted[sorted.length-1]+' ('+sorted.length+' дн.)'}
+}
+
+// ===== Подсчёт времени задачи за день (ms) =====
+function calcActDayMs(actId,dayKey){
+  const parts=dayKey.split('-');
+  const y=+parts[0],m=+parts[1],d=+parts[2];
+  const from=mskDayStartUTC(y,m,d),to=from+86400000;
+  // Collect intervals, then merge overlapping
+  const iv=[];
+  state.records.forEach(r=>{
+    if(r.activity!==actId)return;
+    const rs=new Date(r.start).getTime(),re=r.end?new Date(r.end).getTime():Date.now();
+    const s=Math.max(rs,from),e=Math.min(re,to);
+    if(e>s)iv.push([s,e]);
+  });
+  if(!iv.length)return 0;
+  iv.sort((a,b)=>a[0]-b[0]);
+  const mg=[[...iv[0]]];
+  for(let i=1;i<iv.length;i++){const l=mg[mg.length-1];if(iv[i][0]<=l[1])l[1]=Math.max(l[1],iv[i][1]);else mg.push([...iv[i]])}
+  let t=0;mg.forEach(x=>t+=x[1]-x[0]);return t;
+}
+
+// Подсчёт времени группы за набор дней
+function calcGroupMs(gId,days){
+  let total=0;
+  const acts=state.activities.filter(a=>a.group===gId).map(a=>a.id);
+  days.forEach(dk=>{acts.forEach(aid=>{total+=calcActDayMs(aid,dk)})});
+  return total;
+}
+
+// ===== Пикер задач (line/stack) — только задачи с записями =====
+function renderChartActPicker(){
+  const c=document.getElementById('chartActPicker');
+  c.innerHTML='<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:6px">Выберите задачи:</div>';
+  const actsWithData=new Set();
+  state.records.forEach(r=>actsWithData.add(r.activity));
+  const allAvail=state.activities.filter(a=>actsWithData.has(a.id)).map(a=>a.id);
+  const allSel=allAvail.length>0&&allAvail.every(id=>chartSelectedActs.includes(id));
+  const selAllBtn=document.createElement('button');
+  selAllBtn.className='chart-act-btn'+(allSel?' sel':'');
+  selAllBtn.innerText=allSel?'Снять все':'Выбрать все';
+  selAllBtn.style.marginBottom='8px';
+  selAllBtn.onclick=()=>{
+    if(allSel)chartSelectedActs=[];else chartSelectedActs=allAvail.slice();
+    renderChartActPicker();
+  };
+  c.appendChild(selAllBtn);
+  state.groups.forEach(g=>{
+    const acts=state.activities.filter(a=>a.group===g.id&&actsWithData.has(a.id));
+    if(!acts.length)return;
+    const row=document.createElement('div');
+    row.style.marginBottom='6px';
+    const gl=document.createElement('span');
+    gl.style.cssText='font-size:11px;color:rgba(255,255,255,0.35);margin-right:4px';
+    gl.innerText=g.name+':';
+    row.appendChild(gl);
+    acts.forEach(a=>{
+      const btn=document.createElement('button');
+      btn.className='chart-act-btn'+(chartSelectedActs.includes(a.id)?' sel':'');
+      btn.innerText=a.name;
+      btn.onclick=()=>{
+        const idx=chartSelectedActs.indexOf(a.id);
+        if(idx>=0)chartSelectedActs.splice(idx,1);else chartSelectedActs.push(a.id);
+        renderChartActPicker();
+      };
+      row.appendChild(btn);
+    });
+    c.appendChild(row);
+  });
+}
+
+// ===== Построение графика =====
+function buildChart(){
+  const days=[...calSelectedDays].sort();
+  if(!days.length)return;
+  if(currentChart){currentChart.destroy();currentChart=null}
+  document.getElementById('chartTooltip').innerText='Нажмите на элемент графика для деталей';
+  document.getElementById('chartLegend').innerHTML='';
+
+  if(chartType==='pie')buildPieChart(days);
+  else if(chartType==='line')buildLineChart(days);
+  else buildStackChart(days);
+}
+
+// ===== 1. КРУГОВАЯ ДИАГРАММА =====
+function buildPieChart(days){
+  // Collect data: group -> activities -> ms
+  const gIdx={}; // groupId -> index in GROUP_HUES
+  let gi=0;
+  const groupData=[];
+  state.groups.forEach(g=>{
+    const gMs=calcGroupMs(g.id,days);
+    if(gMs<=0)return;
+    gIdx[g.id]=gi++;
+    const acts=[];
+    state.activities.filter(a=>a.group===g.id).forEach(a=>{
+      let ms=0;days.forEach(dk=>{ms+=calcActDayMs(a.id,dk)});
+      if(ms>0)acts.push({id:a.id,name:a.name,ms});
+    });
+    acts.sort((a,b)=>b.ms-a.ms);
+    groupData.push({id:g.id,name:g.name,ms:gMs,acts,hue:getGroupHue(gIdx[g.id])});
+  });
+  groupData.sort((a,b)=>b.ms-a.ms);
+
+  // Build segments: each activity is a segment
+  const labels=[],data=[],colors=[],meta=[];
+  const totalMs=groupData.reduce((s,g)=>s+g.ms,0);
+  groupData.forEach(g=>{
+    g.acts.forEach((a,i)=>{
+      const sat=Math.max(30, 80-i*15);
+      labels.push(a.name);
+      data.push(a.ms/3600000);
+      colors.push('hsl('+g.hue+','+sat+'%,50%)');
+      meta.push({actName:a.name,groupName:g.name,ms:a.ms,pct:(a.ms/totalMs*100).toFixed(1)});
+    });
+  });
+
+  const ctx=document.getElementById('chartCanvas').getContext('2d');
+  currentChart=new Chart(ctx,{
+    type:'doughnut',
+    data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:1,borderColor:'#111'}]},
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{display:false},
+        tooltip:{enabled:false}
+      },
+      onClick:(e,els)=>{
+        if(els.length){
+          const m=meta[els[0].index];
+          document.getElementById('chartTooltip').innerText=m.groupName+' → '+m.actName+': '+hmFromMs(m.ms)+' ('+m.pct+'%)';
+        }
+      }
+    }
+  });
+
+  // Legend: groups only
+  const leg=document.getElementById('chartLegend');
+  groupData.forEach(g=>{
+    const item=document.createElement('span');
+    item.className='chart-legend-item';
+    item.innerHTML='<span class="chart-legend-color" style="background:hsl('+g.hue+',80%,50%)"></span>'+g.name+' — '+hmFromMs(g.ms)+' ('+(g.ms/totalMs*100).toFixed(1)+'%)';
+    leg.appendChild(item);
+  });
+}
+
+// ===== 2. ЛИНЕЙНЫЙ ГРАФИК =====
+function buildLineChart(days){
+  if(!chartSelectedActs.length)return;
+  const dayLabels=days.map(dk=>{const p=dk.split('-');return p[2]+'.'+p[1]});
+
+  const datasets=[];
+  let gi=0;
+  const gHueMap={};
+  const actCountInGroup={};
+
+  chartSelectedActs.forEach(actId=>{
+    const a=getAct(actId);if(!a)return;
+    if(!(a.group in gHueMap)){gHueMap[a.group]=getGroupHue(gi++);actCountInGroup[a.group]=0}
+    const aIdx=actCountInGroup[a.group]++;
+    const hue=gHueMap[a.group];
+    const sat=Math.max(40, 80-aIdx*15);
+
+    const vals=days.map(dk=>calcActDayMs(actId,dk)/3600000);
+    datasets.push({
+      label:getGrpName(actId)+' | '+a.name,
+      data:vals,
+      borderColor:'hsl('+hue+','+sat+'%,55%)',
+      backgroundColor:'hsl('+hue+','+sat+'%,55%)',
+      tension:0.3,
+      pointRadius:4,
+      pointHitRadius:20,
+      fill:false,
+      _actId:actId
+    });
+  });
+
+  const ctx=document.getElementById('chartCanvas').getContext('2d');
+  currentChart=new Chart(ctx,{
+    type:'line',
+    data:{labels:dayLabels,datasets},
+    options:{
+      responsive:true,
+      interaction:{mode:'nearest',intersect:true},
+      scales:{
+        y:{beginAtZero:true,title:{display:true,text:'Часы',color:'rgba(255,255,255,0.5)'},ticks:{color:'rgba(255,255,255,0.4)'},grid:{color:'rgba(255,255,255,0.06)'}},
+        x:{ticks:{color:'rgba(255,255,255,0.4)'},grid:{color:'rgba(255,255,255,0.06)'}}
+      },
+      plugins:{
+        legend:{display:false},
+        tooltip:{enabled:false}
+      },
+      onClick:(e,els)=>{
+        if(els.length){
+          const di=els[0].datasetIndex,pi=els[0].index;
+          const ds=datasets[di];
+          const hrs=ds.data[pi];
+          document.getElementById('chartTooltip').innerText=ds.label+' — '+days[pi]+': '+hmFromMs(hrs*3600000);
+        }
+      }
+    }
+  });
+
+  // Legend
+  const leg=document.getElementById('chartLegend');
+  datasets.forEach(ds=>{
+    const item=document.createElement('span');
+    item.className='chart-legend-item';
+    item.innerHTML='<span class="chart-legend-color" style="background:'+ds.borderColor+'"></span>'+ds.label;
+    leg.appendChild(item);
+  });
+}
+
+// ===== 3. БУТЕРБРОД (stacked area) =====
+function buildStackChart(days){
+  if(!chartSelectedActs.length)return;
+  const dayLabels=days.map(dk=>{const p=dk.split('-');return p[2]+'.'+p[1]});
+
+  const datasets=[];
+  let gi=0;
+  const gHueMap={};
+  const actCountInGroup={};
+
+  // Build datasets in order (first selected = bottom)
+  chartSelectedActs.forEach(actId=>{
+    const a=getAct(actId);if(!a)return;
+    if(!(a.group in gHueMap)){gHueMap[a.group]=getGroupHue(gi++);actCountInGroup[a.group]=0}
+    const aIdx=actCountInGroup[a.group]++;
+    const hue=gHueMap[a.group];
+    const sat=Math.max(40, 80-aIdx*15);
+
+    const vals=days.map(dk=>calcActDayMs(actId,dk)/3600000);
+    datasets.push({
+      label:getGrpName(actId)+' | '+a.name,
+      data:vals,
+      backgroundColor:'hsla('+hue+','+sat+'%,50%,0.7)',
+      borderColor:'hsl('+hue+','+sat+'%,55%)',
+      borderWidth:1,
+      fill:true,
+      pointRadius:4,
+      pointHitRadius:20,
+      _actId:actId
+    });
+  });
+
+  const ctx=document.getElementById('chartCanvas').getContext('2d');
+  currentChart=new Chart(ctx,{
+    type:'line',
+    data:{labels:dayLabels,datasets},
+    options:{
+      responsive:true,
+      interaction:{mode:'nearest',intersect:true},
+      scales:{
+        y:{
+          stacked:true,
+          beginAtZero:true,
+          title:{display:true,text:'Часы',color:'rgba(255,255,255,0.5)'},
+          ticks:{color:'rgba(255,255,255,0.4)'},
+          grid:{color:'rgba(255,255,255,0.06)'}
+        },
+        x:{
+          ticks:{color:'rgba(255,255,255,0.4)'},
+          grid:{color:'rgba(255,255,255,0.06)'}
+        }
+      },
+      plugins:{
+        legend:{display:false},
+        tooltip:{enabled:false},
+        filler:{propagate:true}
+      },
+      onClick:(e,els)=>{
+        if(els.length){
+          const di=els[0].datasetIndex,pi=els[0].index;
+          const ds=datasets[di];
+          const hrs=ds.data[pi];
+          const pct=(hrs/24*100).toFixed(1);
+          document.getElementById('chartTooltip').innerText=ds.label+' — '+days[pi]+': '+hmFromMs(hrs*3600000)+' ('+pct+'% дня)';
+        }
+      }
+    }
+  });
+
+  // Legend
+  const leg=document.getElementById('chartLegend');
+  datasets.forEach(ds=>{
+    const item=document.createElement('span');
+    item.className='chart-legend-item';
+    item.innerHTML='<span class="chart-legend-color" style="background:'+ds.backgroundColor+'"></span>'+ds.label;
+    leg.appendChild(item);
+  });
 }
 
 function importData(){

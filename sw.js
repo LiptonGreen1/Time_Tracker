@@ -1,4 +1,4 @@
-const CACHE = 'tt-v9';
+const CACHE = 'tt-v12';
 const ASSETS = ['./time_tracker.html', './manifest.json'];
 
 self.addEventListener('install', e => {
