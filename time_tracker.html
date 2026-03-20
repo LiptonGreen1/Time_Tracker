@@ -238,23 +238,16 @@ letter-spacing:0.5px;
 .backup-notify-btn{
 width:160px;height:160px;
 border-radius:50%;
-border:2px solid rgba(10,132,255,0.5);
-background:rgba(10,132,255,0.12);
-color:#0a84ff;
+border:2px solid rgba(255,255,255,0.3);
+background:rgba(255,255,255,0.08);
+color:rgba(255,255,255,0.85);
 font-size:36px;
 font-weight:700;
 letter-spacing:2px;
 margin-bottom:24px;
 transition:background 0.15s;
 }
-.backup-notify-btn:active{background:rgba(10,132,255,0.3)}
-.backup-notify-skip{
-background:none;
-border:none;
-color:rgba(255,255,255,0.35);
-font-size:14px;
-padding:12px 24px;
-}
+.backup-notify-btn:active{background:rgba(255,255,255,0.2)}
 
 .rec-row.cur{color:rgba(255,255,255,0.7);border-color:rgba(255,255,255,0.5)}
 
@@ -1213,7 +1206,6 @@ color:rgba(255,255,255,0.7);
 <div class="backup-notify" id="backupNotify">
   <div class="backup-notify-text">Наступило 00:00:00<br>Время сохранить<br>Бекап Кастомной конфигурации</div>
   <button class="backup-notify-btn" onclick="doBackupNow()">OK</button>
-  <button class="backup-notify-skip" onclick="hideBackupNotify()">Позже</button>
 </div>
 
 <!-- ========== НИЖНЯЯ ПАНЕЛЬ ========== -->
@@ -1506,7 +1498,7 @@ function setupSmartClose(overlayId,bottomId,fixedId){
 }
 
 // ===== Auto-backup daily at 00:00 UTC+3 =====
-const BACKUP_HOUR=21, BACKUP_MIN=26; // ← ВРЕМЯ СРАБАТЫВАНИЯ (MSK ч:мин). Для полуночи: 0,0
+const BACKUP_HOUR=21, BACKUP_MIN=33; // ← ВРЕМЯ СРАБАТЫВАНИЯ (MSK ч:мин). Для полуночи: 0,0
 function doBackupNow(){
   const exp={customGroups:state.customGroups,customActivities:state.customActivities,records:state.records,active:state.active};
   const now=mskNow();
