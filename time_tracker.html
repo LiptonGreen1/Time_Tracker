@@ -173,7 +173,7 @@ font-family:inherit;
 resize:vertical;
 }
 #noteText:focus{outline:none;border-color:#0a84ff}
-#noteText{max-height:70vh}
+#noteText{overflow:hidden}
 
 .note-backdrop{
 min-height:50vh;
@@ -1472,12 +1472,12 @@ function scheduleAutoBackup(){
   const msk=new Date(now.getTime()+3*3600000);
   const todayKey=msk.getUTCFullYear()+'-'+String(msk.getUTCMonth()+1).padStart(2,'0')+'-'+String(msk.getUTCDate()).padStart(2,'0');
   const lastBackup=localStorage.getItem('lastAutoBackupDate');
-  // If we missed today's backup (app opened after midnight MSK), do it now
-  if(lastBackup!==todayKey&&state.records.length>0){
-    autoBackup();
-  }
-  // Schedule next midnight MSK
-  const nextMidnightMSK=new Date(Date.UTC(msk.getUTCFullYear(),msk.getUTCMonth(),msk.getUTCDate()+1,0,0,0)-3*3600000);
+  // If we missed today's backup (app opened after backup time), do it now
+  // Disabled for testing — only scheduled trigger at 21:00 MSK
+  // if(lastBackup!==todayKey&&state.records.length>0){autoBackup()}
+  // Schedule next 21:00 MSK (temporary for testing, change to 0,0,0 for midnight)
+  const nextMidnightMSK=new Date(Date.UTC(msk.getUTCFullYear(),msk.getUTCMonth(),msk.getUTCDate(),21,0,0)-3*3600000);
+  if(nextMidnightMSK.getTime()<=now.getTime()){nextMidnightMSK.setUTCDate(nextMidnightMSK.getUTCDate()+1)}
   const msUntil=nextMidnightMSK.getTime()-now.getTime();
   setTimeout(()=>{autoBackup();setInterval(autoBackup,24*3600000)},msUntil>0?msUntil:0);
 }
@@ -1506,7 +1506,8 @@ function openNote(recordId){
   document.getElementById('noteInfo').innerHTML='<span class="rec-grp-badge" style="background:'+(getGrpColor(r.activity)||'rgba(255,255,255,0.15)')+'">'+renderGroupName(getGrpName(r.activity))+'</span> ➤ '+getActName(r.activity)+' — '+toMSK(r.start)+' — '+(r.end?toMSK(r.end):'...');
   const ta=document.getElementById('noteText');
   ta.value=r.note||'';
-  ta.oninput=()=>{r.note=ta.value;save()};
+  ta.style.height='auto';ta.style.height=Math.max(120,ta.scrollHeight)+'px';
+  ta.oninput=()=>{r.note=ta.value;save();ta.style.height='auto';ta.style.height=Math.max(120,ta.scrollHeight)+'px'};
   lockScroll();
   const ov=document.getElementById('noteOverlay');
   ov.classList.add('open');
