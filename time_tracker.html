@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="Time Tracker">
 <meta name="theme-color" content="#111">
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%23111'/><circle cx='96' cy='96' r='60' fill='none' stroke='%230a84ff' stroke-width='8'/><line x1='96' y1='96' x2='96' y2='56' stroke='%230a84ff' stroke-width='6' stroke-linecap='round'/><line x1='96' y1='96' x2='126' y2='96' stroke='%230a84ff' stroke-width='4' stroke-linecap='round'/></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><defs><radialGradient id='bg' cx='50%25' cy='40%25' r='60%25'><stop offset='0' stop-color='%231a1a2e'/><stop offset='1' stop-color='%23080810'/></radialGradient><radialGradient id='gl' cx='50%25' cy='50%25' r='50%25'><stop offset='0' stop-color='%230a84ff' stop-opacity='0.25'/><stop offset='1' stop-color='%230a84ff' stop-opacity='0'/></radialGradient><linearGradient id='hg' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='%2340b0ff'/><stop offset='1' stop-color='%230a64dd'/></linearGradient></defs><rect width='192' height='192' rx='38' fill='url(%23bg)'/><circle cx='96' cy='96' r='72' fill='url(%23gl)'/><circle cx='96' cy='96' r='68' fill='none' stroke='url(%23hg)' stroke-width='4' opacity='0.6'/><circle cx='96' cy='96' r='58' fill='none' stroke='url(%23hg)' stroke-width='5'/><line x1='96' y1='38' x2='96' y2='46' stroke='%230a84ff' stroke-width='3' stroke-linecap='round'/><line x1='96' y1='146' x2='96' y2='154' stroke='%230a84ff' stroke-width='3' stroke-linecap='round'/><line x1='38' y1='96' x2='46' y2='96' stroke='%230a84ff' stroke-width='3' stroke-linecap='round'/><line x1='146' y1='96' x2='154' y2='96' stroke='%230a84ff' stroke-width='3' stroke-linecap='round'/><line x1='137' y1='55' x2='131.5' y2='60.5' stroke='%230a84ff' stroke-width='2' stroke-linecap='round' opacity='0.5'/><line x1='55' y1='137' x2='60.5' y2='131.5' stroke='%230a84ff' stroke-width='2' stroke-linecap='round' opacity='0.5'/><line x1='137' y1='137' x2='131.5' y2='131.5' stroke='%230a84ff' stroke-width='2' stroke-linecap='round' opacity='0.5'/><line x1='55' y1='55' x2='60.5' y2='60.5' stroke='%230a84ff' stroke-width='2' stroke-linecap='round' opacity='0.5'/><line x1='96' y1='96' x2='96' y2='54' stroke='white' stroke-width='5' stroke-linecap='round'/><line x1='96' y1='96' x2='124' y2='80' stroke='white' stroke-width='3.5' stroke-linecap='round'/><line x1='96' y1='96' x2='118' y2='108' stroke='%230a84ff' stroke-width='1.5' stroke-linecap='round' opacity='0.7'/><circle cx='96' cy='96' r='4' fill='white'/><circle cx='96' cy='96' r='2' fill='%230a84ff'/></svg>">
 
 <title>Time Tracker</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
@@ -1280,7 +1280,7 @@ function openNote(recordId){
   const r=state.records.find(x=>x.id===recordId);
   if(!r)return;
   noteRecordId=recordId;
-  document.getElementById('noteInfo').innerText=getGrpName(r.activity)+' ➠ '+getActName(r.activity)+' — '+toMSK(r.start)+' — '+(r.end?toMSK(r.end):'...');
+  document.getElementById('noteInfo').innerText=getGrpName(r.activity)+' ➤ '+getActName(r.activity)+' — '+toMSK(r.start)+' — '+(r.end?toMSK(r.end):'...');
   const ta=document.getElementById('noteText');
   ta.value=r.note||'';
   ta.oninput=()=>{r.note=ta.value;save()};
@@ -1308,7 +1308,7 @@ function buildRecRow(r, isCurrent, showDate){
 
   const name=document.createElement('span');
   name.className='rec-name';
-  name.innerText=getGrpName(r.activity)+' ➠ '+getActName(r.activity);
+  name.innerText=getGrpName(r.activity)+' ➤ '+getActName(r.activity);
 
   // Note icon — check original record's note for split rows
   const icon=document.createElement('span');
@@ -1413,8 +1413,8 @@ function closePicker(){document.getElementById('picker').classList.remove('open'
 function renderMain(){
   const cur=document.getElementById('currentActivity');
   const active=getActive();
-  if(active.length>1)cur.innerText=active.map(r=>getGrpName(r.activity)+' ➠ '+getActName(r.activity)).join('  +  ');
-  else if(active.length===1)cur.innerText=getGrpName(active[0].activity)+' ➠ '+getActName(active[0].activity);
+  if(active.length>1)cur.innerText=active.map(r=>getGrpName(r.activity)+' ➤ '+getActName(r.activity)).join('  +  ');
+  else if(active.length===1)cur.innerText=getGrpName(active[0].activity)+' ➤ '+getActName(active[0].activity);
   else cur.innerText='Нет активности';
 
   const c=document.getElementById('recentRecords');c.innerHTML='';
@@ -2017,7 +2017,7 @@ function buildLineChart(days){
 
     const vals=days.map(dk=>calcActDayMs(actId,dk)/3600000);
     datasets.push({
-      label:getGrpName(actId)+' ➠ '+a.name,
+      label:getGrpName(actId)+' ➤ '+a.name,
       data:vals,
       borderColor:'hsl('+hue+','+sat+'%,55%)',
       backgroundColor:'hsl('+hue+','+sat+'%,55%)',
@@ -2085,7 +2085,7 @@ function buildStackChart(days){
 
     const vals=days.map(dk=>calcActDayMs(actId,dk)/3600000);
     datasets.push({
-      label:getGrpName(actId)+' ➠ '+a.name,
+      label:getGrpName(actId)+' ➤ '+a.name,
       data:vals,
       backgroundColor:'hsla('+hue+','+sat+'%,50%,0.7)',
       borderColor:'hsl('+hue+','+sat+'%,55%)',
