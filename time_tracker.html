@@ -1705,8 +1705,14 @@ function showHistory(){
 
 function exportData(){
   const exp={customGroups:state.customGroups,customActivities:state.customActivities,records:state.records,active:state.active};
+  const now=mskNow();
+  const hh=String(now.getHours()).padStart(2,'0');
+  const mi=String(now.getMinutes()).padStart(2,'0');
+  const dd=String(now.getDate()).padStart(2,'0');
+  const mes=String(now.getMonth()+1).padStart(2,'0');
+  const fname=hh+'-'+mi+'_'+dd+'-'+mes+'_CustomConfig_TimeTracker.json';
   const b=new Blob([JSON.stringify(exp)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='timedata.json';a.click();
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fname;a.click();
 }
 
 // ===== ГРАФИКИ =====
