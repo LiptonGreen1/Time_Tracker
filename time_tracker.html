@@ -175,9 +175,8 @@ resize:vertical;
 #noteText:focus{outline:none;border-color:#0a84ff}
 #noteText{overflow:hidden}
 
-.note-backdrop{
-min-height:50vh;
-flex-shrink:0;
+.note-content{
+min-height:0;
 }
 
 .note-close-bottom{
@@ -1163,17 +1162,18 @@ color:rgba(255,255,255,0.7);
 </div>
 
 <!-- ========== ОКНО "МИКРО-ЛОГ" ========== -->
-<div class="overlay" id="noteOverlay">
-  <div class="overlay-header">
-    <span>Микро-Лог Бизнеса (и др. Задач)</span>
-    <button class="overlay-close" onclick="closeNote()">Закрыть</button>
-  </div>
-  <div class="note-section">
-    <div class="note-info" id="noteInfo"></div>
-    <textarea id="noteText" placeholder="Опишите что делалось..."></textarea>
+<div class="overlay" id="noteOverlay" onclick="if(event.target===this)closeNote()">
+  <div class="note-content">
+    <div class="overlay-header">
+      <span>Микро-Лог Бизнеса (и др. Задач)</span>
+      <button class="overlay-close" onclick="closeNote()">Закрыть</button>
+    </div>
+    <div class="note-section">
+      <div class="note-info" id="noteInfo"></div>
+      <textarea id="noteText" placeholder="Опишите что делалось..."></textarea>
+    </div>
     <button class="note-close-bottom" id="noteCloseBottom" onclick="closeNote()">✕</button>
   </div>
-  <div class="note-backdrop" onclick="closeNote()"></div>
   <button class="note-close-fixed" id="noteCloseFixed" onclick="closeNote()">✕</button>
 </div>
 
@@ -1506,7 +1506,7 @@ function setupSmartClose(overlayId,bottomId,fixedId){
 }
 
 // ===== Auto-backup daily at 00:00 UTC+3 =====
-const BACKUP_HOUR=21, BACKUP_MIN=17; // ← ВРЕМЯ СРАБАТЫВАНИЯ (MSK ч:мин). Для полуночи: 0,0
+const BACKUP_HOUR=21, BACKUP_MIN=26; // ← ВРЕМЯ СРАБАТЫВАНИЯ (MSK ч:мин). Для полуночи: 0,0
 function doBackupNow(){
   const exp={customGroups:state.customGroups,customActivities:state.customActivities,records:state.records,active:state.active};
   const now=mskNow();
@@ -1541,7 +1541,7 @@ function scheduleAutoBackup(){
   if(next.getTime()<=now.getTime()){next.setUTCDate(next.getUTCDate()+1)}
   const msUntil=next.getTime()-now.getTime();
   setTimeout(()=>{
-    if(localStorage.getItem('lastAutoBackupDate')!==todayKey)showBackupNotify();
+    if(localStorage.getItem('lastAutoBackupDate')==todayKey)showBackupNotify();
     setInterval(()=>{
       const n=new Date(),m=new Date(n.getTime()+3*3600000);
       const k=m.getUTCFullYear()+'-'+String(m.getUTCMonth()+1).padStart(2,'0')+'-'+String(m.getUTCDate()).padStart(2,'0');
