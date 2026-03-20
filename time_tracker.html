@@ -36,6 +36,12 @@ padding:15px;
 background:#222;
 font-size:20px;
 text-align:center;
+font-family:'SF Pro Display',-apple-system,'Helvetica Neue',Arial,sans-serif;
+font-weight:300;
+letter-spacing:1.5px;
+text-transform:uppercase;
+font-size:15px;
+color:rgba(255,255,255,0.8);
 }
 
 /* =============================================
@@ -287,10 +293,10 @@ font-size:13px;
 .work-pctcol{text-align:right;color:rgba(255,255,255,0.4);font-size:11px}
 
 .work-week-val{
-text-decoration:underline;
-text-decoration-style:dotted;
-text-underline-offset:3px;
 cursor:pointer;
+border:1px solid rgba(255,255,255,0.4);
+border-radius:6px;
+padding:2px 8px;
 }
 
 /* =============================================
@@ -415,6 +421,21 @@ border-radius:8px;
    Столбцы: день | часы | из цель | %
    ============================================= */
 
+.week-overlay{background:rgba(0,0,0,0.96)}
+
+.week-close-circle{
+width:44px;height:44px;
+border-radius:50%;
+border:1px solid rgba(255,255,255,0.3);
+background:rgba(255,255,255,0.08);
+color:rgba(255,255,255,0.6);
+font-size:18px;
+display:inline-flex;
+align-items:center;
+justify-content:center;
+}
+.week-close-circle:active{background:rgba(255,255,255,0.15)}
+
 .week-detail{padding:15px}
 
 .week-detail-nav{
@@ -432,7 +453,13 @@ font-size:20px;
 padding:8px 12px;
 }
 
-.week-detail-dates{font-size:14px;color:rgba(255,255,255,0.7)}
+.week-detail-dates{
+font-size:14px;
+color:rgba(255,255,255,0.7);
+border:1px solid rgba(255,255,255,0.35);
+border-radius:8px;
+padding:4px 12px;
+}
 
 .wd-grid{
 display:grid;
@@ -895,12 +922,15 @@ color:rgba(255,255,255,0.7);
 </div>
 
 <!-- ========== ОКНО "РАБОЧИЕ ЧАСЫ" (детализация по дням) ========== -->
-<div class="overlay" id="weekOverlay">
+<div class="overlay week-overlay" id="weekOverlay">
   <div class="overlay-header">
     <span>Рабочие часы</span>
     <button class="overlay-close" onclick="closeWeekDetail()">Закрыть</button>
   </div>
   <div class="week-detail" id="weekDetail"></div>
+  <div style="text-align:center;padding:20px 0 40px">
+    <button class="week-close-circle" onclick="closeWeekDetail()">✕</button>
+  </div>
 </div>
 
 <!-- ========== МЕНЮ-БУРГЕР (☰) ========== -->
@@ -1455,7 +1485,9 @@ function openPicker(parallel){
   updateConfirmBtn();
   renderInlinePicker(document.getElementById('pickerList'),pickerSelected,parallel,onPickerSelect);
   lockScroll();
-  document.getElementById('picker').classList.add('open');
+  const pk=document.getElementById('picker');
+  pk.classList.add('open');
+  pk.scrollTop=0;
 }
 
 function onPickerSelect(actId){
