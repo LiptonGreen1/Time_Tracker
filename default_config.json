@@ -55,7 +55,8 @@
     {"id": 17, "name": "Философия",                           "group": 3, "isBusinessTime": false},
 
     {"id": 18, "name": "Тренировка: Силовая",                  "group": 4, "isBusinessTime": true},
-    {"id": 19, "name": "Тренировка: Кардио",                              "group": 4, "isBusinessTime": true},
+    {"id": 19, "name": "Тренировка: Кардио",                   "group": 4, "isBusinessTime": true},
+	{"id": 60, "name": "Зарядка/Разминка",                    "group": 4, "isBusinessTime": false},
     {"id": 20, "name": "Прогулка",                            "group": 4, "isBusinessTime": false},
 
     {"id": 21, "name": "Калибровка",                          "group": 5, "isBusinessTime": true},
@@ -79,6 +80,7 @@
     {"id": 35, "name": "Заметки структуризация",              "group": 8, "isBusinessTime": true},
 
     {"id": 36, "name": "Сон",                                 "group": 9, "isBusinessTime": false},
+	{"id": 59, "name": "Сон с откр. окном",                   "group": 9, "isBusinessTime": false},
     {"id": 37, "name": "Дневной сон",                         "group": 9, "isBusinessTime": false},
     {"id": 38, "name": "Прием пищи",                          "group": 9, "isBusinessTime": false},
 
