@@ -1238,11 +1238,13 @@ function unlockScroll(){
 
 // ===== IndexedDB (основное хранилище данных) =====
 const DB_NAME='timetracker', DB_STORE='state';
+let _dbInstance=null;
 function dbOpen(){
+  if(_dbInstance)return Promise.resolve(_dbInstance);
   return new Promise((res,rej)=>{
     const r=indexedDB.open(DB_NAME,1);
     r.onupgradeneeded=()=>r.result.createObjectStore(DB_STORE);
-    r.onsuccess=()=>res(r.result);
+    r.onsuccess=()=>{_dbInstance=r.result;_dbInstance.onclose=()=>{_dbInstance=null};res(_dbInstance)};
     r.onerror=()=>rej(r.error);
   });
 }
@@ -1250,43 +1252,130 @@ function dbSave(d){
   return dbOpen().then(db=>new Promise((res,rej)=>{
     const tx=db.transaction(DB_STORE,'readwrite');
     tx.objectStore(DB_STORE).put(d,'main');
-    tx.oncomplete=()=>{db.close();res()};
-    tx.onerror=()=>{db.close();rej(tx.error)};
+    tx.oncomplete=()=>res();
+    tx.onerror=()=>rej(tx.error);
+  }));
+}
+// Сохраняет резервную копию в отдельный ключ (до 3 ротаций)
+function dbSaveBackup(d){
+  return dbOpen().then(db=>new Promise((res,rej)=>{
+    const tx=db.transaction(DB_STORE,'readwrite');
+    const store=tx.objectStore(DB_STORE);
+    // Ротация: backup_2 -> backup_3, backup_1 -> backup_2, new -> backup_1
+    const gr=store.get('backup_2');
+    gr.onsuccess=()=>{
+      store.put(gr.result||null,'backup_3');
+      const gr2=store.get('backup_1');
+      gr2.onsuccess=()=>{
+        store.put(gr2.result||null,'backup_2');
+        store.put({...d,_backupTime:new Date().toISOString()},'backup_1');
+      };
+    };
+    tx.oncomplete=()=>res();
+    tx.onerror=()=>rej(tx.error);
   }));
 }
 function dbLoad(){
   return dbOpen().then(db=>new Promise((res,rej)=>{
     const tx=db.transaction(DB_STORE,'readonly');
     const r=tx.objectStore(DB_STORE).get('main');
-    r.onsuccess=()=>{db.close();res(r.result||null)};
-    r.onerror=()=>{db.close();rej(r.error)};
+    r.onsuccess=()=>res(r.result||null);
+    r.onerror=()=>rej(r.error);
+  }));
+}
+// Загрузка последнего бэкапа если основной стейт пуст/повреждён
+function dbLoadBackup(){
+  return dbOpen().then(db=>new Promise((res,rej)=>{
+    const tx=db.transaction(DB_STORE,'readonly');
+    const store=tx.objectStore(DB_STORE);
+    const r1=store.get('backup_1');
+    r1.onsuccess=()=>{
+      if(r1.result&&r1.result.records&&r1.result.records.length>0){res(r1.result);return}
+      const r2=store.get('backup_2');
+      r2.onsuccess=()=>{
+        if(r2.result&&r2.result.records&&r2.result.records.length>0){res(r2.result);return}
+        const r3=store.get('backup_3');
+        r3.onsuccess=()=>res(r3.result||null);
+        r3.onerror=()=>res(null);
+      };
+      r2.onerror=()=>res(null);
+    };
+    r1.onerror=()=>rej(r.error);
   }));
 }
 
 // ===== Обновление кеша (кнопка в меню-бургере) =====
 function checkUpdate(){
-  caches.keys().then(k=>Promise.all(k.map(x=>caches.delete(x)))).then(()=>{
+  // ЗАЩИТА: принудительно сохраняем все данные перед очисткой кеша
+  const doReload=()=>{
     if(navigator.serviceWorker&&navigator.serviceWorker.controller){
       navigator.serviceWorker.getRegistration().then(r=>{
         if(r)r.unregister().then(()=>location.reload());
         else location.reload();
       });
     } else location.reload();
-  });
+  };
+  if(state.records.length>0){
+    localStorage.setItem("timedata",JSON.stringify(state));
+    dbSave(state).then(()=>dbSaveBackup(state)).then(()=>{
+      caches.keys().then(k=>Promise.all(k.map(x=>caches.delete(x)))).then(doReload);
+    }).catch(()=>{
+      caches.keys().then(k=>Promise.all(k.map(x=>caches.delete(x)))).then(doReload);
+    });
+  } else {
+    caches.keys().then(k=>Promise.all(k.map(x=>caches.delete(x)))).then(doReload);
+  }
 }
 
 // ===== Service Worker (PWA, офлайн) =====
+// ЗАЩИТА: НЕ делаем автоматический reload — сохраняем данные перед любой перезагрузкой
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('./sw.js').then(reg=>{
     setInterval(()=>reg.update(),30000);
     reg.addEventListener('updatefound',()=>{
       const nw=reg.installing;
-      nw.addEventListener('statechange',()=>{if(nw.state==='activated')location.reload()});
+      nw.addEventListener('statechange',()=>{
+        if(nw.state==='activated'){
+          // Сохраняем перед reload
+          if(state.records.length>0){
+            localStorage.setItem("timedata",JSON.stringify(state));
+            dbSave(state).then(()=>location.reload()).catch(()=>location.reload());
+          } else location.reload();
+        }
+      });
     });
   });
-  navigator.serviceWorker.addEventListener('controllerchange',()=>location.reload());
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{
+    // Сохраняем перед reload
+    if(state.records.length>0){
+      localStorage.setItem("timedata",JSON.stringify(state));
+      dbSave(state).then(()=>location.reload()).catch(()=>location.reload());
+    } else location.reload();
+  });
 }
 if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();
+
+// ЗАЩИТА: сохраняем данные при уходе со страницы (visibilitychange, pagehide, beforeunload)
+function emergencySave(){
+  if(state.records.length>0){
+    try{localStorage.setItem("timedata",JSON.stringify(state))}catch(e){}
+    try{dbSave(state)}catch(e){}
+  }
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')emergencySave()});
+window.addEventListener('pagehide',emergencySave);
+window.addEventListener('beforeunload',emergencySave);
+
+// ЗАЩИТА от iOS shake-to-undo: блокируем undo/redo на уровне документа
+document.addEventListener('beforeinput',(e)=>{
+  if(e.inputType==='historyUndo'||e.inputType==='historyRedo'){
+    // Разрешаем undo только в текстовых полях
+    const tag=e.target&&e.target.tagName;
+    if(tag!=='INPUT'&&tag!=='TEXTAREA'&&!e.target.isContentEditable){
+      e.preventDefault();
+    }
+  }
+});
 
 // ===== Дефолтный конфиг (загружается из default_config.json) =====
 let defaultConfig={groups:[],activities:[]};
@@ -1467,18 +1556,67 @@ function migrateState(d){
     const resp=await fetch('./default_config.json');
     if(resp.ok)defaultConfig=await resp.json();
   }catch(e){console.warn('default_config.json not loaded',e)}
-  // 2. Load user data
+  // 2. Load user data (с многоуровневым fallback)
   let d=null;
-  try{d=await dbLoad()}catch(e){}
-  if(!d){const ls=localStorage.getItem("timedata");if(ls){d=JSON.parse(ls);try{await dbSave(d)}catch(e){}}}
+  // Попытка 1: IndexedDB main
+  try{d=await dbLoad()}catch(e){console.warn('IndexedDB load failed',e)}
+  // Попытка 2: localStorage
+  if(!d||!d.records){
+    const ls=localStorage.getItem("timedata");
+    if(ls){
+      try{
+        const lsData=JSON.parse(ls);
+        // Берём из localStorage только если там больше записей
+        if(!d||!d.records||lsData.records.length>d.records.length){
+          d=lsData;
+          console.log('[INIT] Loaded from localStorage, records:',d.records?d.records.length:0);
+        }
+      }catch(e){console.warn('localStorage parse failed',e)}
+    }
+  }
+  // Попытка 3: IndexedDB backup
+  if(!d||!d.records||d.records.length===0){
+    try{
+      const backup=await dbLoadBackup();
+      if(backup&&backup.records&&backup.records.length>0){
+        d=backup;
+        console.warn('[INIT] Восстановлено из бэкапа IndexedDB! Records:',d.records.length,'BackupTime:',d._backupTime);
+      }
+    }catch(e){}
+  }
   state=d?migrateState(d):JSON.parse(JSON.stringify(DEFAULT_STATE));
+  delete state._backupTime;
   state.active=state.records.filter(r=>r.end===null).map(r=>r.id);
+  _lastKnownRecordCount=state.records.length;
   if(physicalSplitAtMidnights())save();
+  // Синхронизируем все хранилища
+  if(state.records.length>0){
+    localStorage.setItem("timedata",JSON.stringify(state));
+    dbSave(state).catch(()=>{});
+  }
   renderMain();updateTimer();updateWorkTracker();
 })();
 
+let _lastKnownRecordCount=0;
 function save(){
   state.active=state.records.filter(r=>r.end===null).map(r=>r.id);
+  // ЗАЩИТА: не перезаписывать данные пустым стейтом
+  if(state.records.length===0&&_lastKnownRecordCount>0){
+    console.error('[GUARD] Попытка сохранить пустой state при наличии '+_lastKnownRecordCount+' записей — ЗАБЛОКИРОВАНО');
+    return;
+  }
+  // ЗАЩИТА: если количество записей резко уменьшилось (>50%), блокируем
+  if(_lastKnownRecordCount>5&&state.records.length<_lastKnownRecordCount*0.5){
+    console.error('[GUARD] Резкое уменьшение записей: '+_lastKnownRecordCount+' -> '+state.records.length+' — ЗАБЛОКИРОВАНО');
+    return;
+  }
+  // Бэкап перед сохранением (раз в 5 минут максимум)
+  const now=Date.now();
+  if(!save._lastBackup||now-save._lastBackup>300000){
+    save._lastBackup=now;
+    dbSaveBackup(state).catch(()=>{});
+  }
+  _lastKnownRecordCount=state.records.length;
   localStorage.setItem("timedata",JSON.stringify(state));
   dbSave(state).catch(()=>{});
 }
@@ -2503,13 +2641,44 @@ function buildStackChart(days){
 }
 
 function importData(){
-  const inp=document.createElement('input');inp.type='file';
+  const inp=document.createElement('input');inp.type='file';inp.accept='.json,application/json';
   inp.onchange=e=>{
+    if(!e.target.files||!e.target.files[0])return;
     const rd=new FileReader();
-    rd.onload=()=>{state=migrateState(JSON.parse(rd.result));state.active=state.records.filter(r=>r.end===null).map(r=>r.id);physicalSplitAtMidnights();save();renderMain()};
+    rd.onload=()=>{
+      try{
+        const parsed=JSON.parse(rd.result);
+        if(!parsed.records||!Array.isArray(parsed.records)){
+          alert('Ошибка: файл не содержит записей (records)');return;
+        }
+        // Бэкап текущего стейта перед импортом
+        if(state.records.length>0){
+          dbSaveBackup(state).catch(()=>{});
+        }
+        const imported=migrateState(parsed);
+        imported.active=imported.records.filter(r=>r.end===null).map(r=>r.id);
+        // Мержим: если в импорте есть записи которых нет в текущем стейте — добавляем
+        // Если пользователь хочет полную замену — заменяем целиком
+        state=imported;
+        _lastKnownRecordCount=state.records.length;
+        physicalSplitAtMidnights();
+        // Принудительное сохранение без guard (мы осознанно заменяем)
+        localStorage.setItem("timedata",JSON.stringify(state));
+        dbSave(state).catch(()=>{});
+        renderMain();
+        alert('Импортировано записей: '+state.records.length);
+      }catch(ex){
+        alert('Ошибка чтения файла: '+ex.message);
+      }
+    };
+    rd.onerror=()=>alert('Ошибка чтения файла');
     rd.readAsText(e.target.files[0]);
   };
+  // На iOS Safari нужно добавить input в DOM
+  inp.style.position='absolute';inp.style.opacity='0';inp.style.pointerEvents='none';
+  document.body.appendChild(inp);
   inp.click();
+  setTimeout(()=>inp.remove(),60000);
 }
 
 </script>

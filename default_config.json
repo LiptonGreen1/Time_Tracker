@@ -73,6 +73,7 @@
     {"id": 29, "name": "Уборка (полная)",                     "group": 8, "isBusinessTime": false},
     {"id": 30, "name": "Бритье",                              "group": 8, "isBusinessTime": false},
     {"id": 31, "name": "Душ",                                 "group": 8, "isBusinessTime": false},
+	{"id": 61, "name": "Умывание",                            "group": 8, "isBusinessTime": false},
     {"id": 56, "name": "Молитва + Библия",                    "group": 8, "isBusinessTime": false},
     {"id": 32, "name": "Служба в церкви",                     "group": 8, "isBusinessTime": true},
     {"id": 33, "name": "Планирование (тактическое)",          "group": 8, "isBusinessTime": true},
