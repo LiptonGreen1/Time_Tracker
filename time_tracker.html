@@ -1209,7 +1209,7 @@ color:rgba(255,255,255,0.7);
 
 <!-- ========== УВЕДОМЛЕНИЕ О БЕКАПЕ ========== -->
 <div class="backup-notify" id="backupNotify">
-  <div class="backup-notify-text">Наступило 00:00:00<br>Время сохранить<br>Бекап Кастомной конфигурации</div>
+  <div class="backup-notify-text" id="backupNotifyText">Сохрани бэкап<br>за сегодня</div>
   <button class="backup-notify-btn" onclick="doBackupNow()">OK</button>
 </div>
 
@@ -1328,30 +1328,33 @@ function checkUpdate(){
 }
 
 // ===== Service Worker (PWA, офлайн) =====
-// ЗАЩИТА: НЕ делаем автоматический reload — сохраняем данные перед любой перезагрузкой
+// ЗАЩИТА: один reload при SW-обновлении (дедупликация controllerchange + updatefound)
+let _swReloadPending=false;
+function swSaveAndReload(){
+  if(_swReloadPending)return;
+  _swReloadPending=true;
+  if(state.records.length>0){
+    // Синхронно в localStorage (надёжнее IDB на iOS), потом reload
+    try{localStorage.setItem("timedata",JSON.stringify(state))}catch(e){}
+    // Пытаемся записать в IDB, но не ждём — localStorage достаточно
+    try{dbSave(state)}catch(e){}
+    // Небольшая задержка чтобы IDB успел записать (iOS Safari)
+    setTimeout(()=>location.reload(),300);
+  } else {
+    location.reload();
+  }
+}
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('./sw.js').then(reg=>{
     setInterval(()=>reg.update(),30000);
     reg.addEventListener('updatefound',()=>{
       const nw=reg.installing;
       nw.addEventListener('statechange',()=>{
-        if(nw.state==='activated'){
-          // Сохраняем перед reload
-          if(state.records.length>0){
-            localStorage.setItem("timedata",JSON.stringify(state));
-            dbSave(state).then(()=>location.reload()).catch(()=>location.reload());
-          } else location.reload();
-        }
+        if(nw.state==='activated') swSaveAndReload();
       });
     });
   });
-  navigator.serviceWorker.addEventListener('controllerchange',()=>{
-    // Сохраняем перед reload
-    if(state.records.length>0){
-      localStorage.setItem("timedata",JSON.stringify(state));
-      dbSave(state).then(()=>location.reload()).catch(()=>location.reload());
-    } else location.reload();
-  });
+  navigator.serviceWorker.addEventListener('controllerchange',swSaveAndReload);
 }
 if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();
 
@@ -1556,33 +1559,28 @@ function migrateState(d){
     const resp=await fetch('./default_config.json');
     if(resp.ok)defaultConfig=await resp.json();
   }catch(e){console.warn('default_config.json not loaded',e)}
-  // 2. Load user data (с многоуровневым fallback)
-  let d=null;
-  // Попытка 1: IndexedDB main
-  try{d=await dbLoad()}catch(e){console.warn('IndexedDB load failed',e)}
-  // Попытка 2: localStorage
-  if(!d||!d.records){
-    const ls=localStorage.getItem("timedata");
-    if(ls){
-      try{
-        const lsData=JSON.parse(ls);
-        // Берём из localStorage только если там больше записей
-        if(!d||!d.records||lsData.records.length>d.records.length){
-          d=lsData;
-          console.log('[INIT] Loaded from localStorage, records:',d.records?d.records.length:0);
-        }
-      }catch(e){console.warn('localStorage parse failed',e)}
-    }
-  }
-  // Попытка 3: IndexedDB backup
-  if(!d||!d.records||d.records.length===0){
-    try{
-      const backup=await dbLoadBackup();
-      if(backup&&backup.records&&backup.records.length>0){
-        d=backup;
-        console.warn('[INIT] Восстановлено из бэкапа IndexedDB! Records:',d.records.length,'BackupTime:',d._backupTime);
-      }
-    }catch(e){}
+  // 2. Load user data — загружаем ВСЕ источники и берём лучший
+  let dIDB=null, dLS=null, dBackup=null;
+  // Источник 1: IndexedDB main
+  try{dIDB=await dbLoad()}catch(e){console.warn('IndexedDB load failed',e)}
+  // Источник 2: localStorage (всегда читаем, не только если IDB пустой)
+  const _ls=localStorage.getItem("timedata");
+  if(_ls){try{dLS=JSON.parse(_ls)}catch(e){console.warn('localStorage parse failed',e)}}
+  // Источник 3: IndexedDB backup
+  try{dBackup=await dbLoadBackup()}catch(e){}
+  // Выбираем источник с наибольшим числом записей (при равенстве — по timestamp)
+  const _cnt=x=>(x&&x.records)?x.records.length:0;
+  const _ts=x=>(x&&x._saveTs)?x._saveTs:0;
+  const _better=(a,b)=>{
+    const ca=_cnt(a),cb=_cnt(b);
+    if(ca!==cb)return ca>cb?a:b;
+    return _ts(a)>=_ts(b)?a:b;
+  };
+  const _best=[dIDB,dLS,dBackup].filter(Boolean).reduce((best,cur)=>_better(best,cur),null);
+  let d=_best;
+  console.log('[INIT] Sources — IDB:',_cnt(dIDB),'LS:',_cnt(dLS),'Backup:',_cnt(dBackup),'→ using:',_cnt(d));
+  if(dBackup&&dBackup.records&&dBackup.records.length>0&&d===dBackup){
+    console.warn('[INIT] Восстановлено из бэкапа! BackupTime:',dBackup._backupTime);
   }
   state=d?migrateState(d):JSON.parse(JSON.stringify(DEFAULT_STATE));
   delete state._backupTime;
@@ -1595,6 +1593,7 @@ function migrateState(d){
     dbSave(state).catch(()=>{});
   }
   renderMain();updateTimer();updateWorkTracker();
+  scheduleAutoBackup();
 })();
 
 let _lastKnownRecordCount=0;
@@ -1617,6 +1616,7 @@ function save(){
     dbSaveBackup(state).catch(()=>{});
   }
   _lastKnownRecordCount=state.records.length;
+  state._saveTs=Date.now();
   localStorage.setItem("timedata",JSON.stringify(state));
   dbSave(state).catch(()=>{});
 }
@@ -1657,34 +1657,35 @@ function doBackupNow(){
   hideBackupNotify();
 }
 function showBackupNotify(){
+  const msk=new Date(Date.now()+3*3600000);
+  const dd=String(msk.getUTCDate()).padStart(2,'0');
+  const mm=String(msk.getUTCMonth()+1).padStart(2,'0');
+  const el=document.getElementById('backupNotifyText');
+  if(el)el.innerHTML='Сохрани бэкап<br>за '+dd+'.'+mm;
   document.getElementById('backupNotify').classList.add('open');
 }
 function hideBackupNotify(){
   document.getElementById('backupNotify').classList.remove('open');
 }
-function scheduleAutoBackup(){
-  const now=new Date();
-  const msk=new Date(now.getTime()+3*3600000);
-  const todayKey=msk.getUTCFullYear()+'-'+String(msk.getUTCMonth()+1).padStart(2,'0')+'-'+String(msk.getUTCDate()).padStart(2,'0');
-  const lastBackup=localStorage.getItem('lastAutoBackupDate');
-  // If missed today's backup and past backup hour, show notification now
-  if(lastBackup!==todayKey&&state.records.length>0&&(msk.getUTCHours()>BACKUP_HOUR||(msk.getUTCHours()===BACKUP_HOUR&&msk.getUTCMinutes()>=BACKUP_MIN))){
-    showBackupNotify();
-  }
-  // Schedule next trigger
-  const next=new Date(Date.UTC(msk.getUTCFullYear(),msk.getUTCMonth(),msk.getUTCDate(),BACKUP_HOUR,BACKUP_MIN,0)-3*3600000);
-  if(next.getTime()<=now.getTime()){next.setUTCDate(next.getUTCDate()+1)}
-  const msUntil=next.getTime()-now.getTime();
-  setTimeout(()=>{
-    if(localStorage.getItem('lastAutoBackupDate')!==todayKey)showBackupNotify();
-    setInterval(()=>{
-      const n=new Date(),m=new Date(n.getTime()+3*3600000);
-      const k=m.getUTCFullYear()+'-'+String(m.getUTCMonth()+1).padStart(2,'0')+'-'+String(m.getUTCDate()).padStart(2,'0');
-      if(localStorage.getItem('lastAutoBackupDate')!==k)showBackupNotify();
-    },24*3600000);
-  },msUntil>0?msUntil:0);
+function getMskDayKey(){
+  const m=new Date(Date.now()+3*3600000);
+  return m.getUTCFullYear()+'-'+String(m.getUTCMonth()+1).padStart(2,'0')+'-'+String(m.getUTCDate()).padStart(2,'0');
 }
-scheduleAutoBackup();
+function isBackupNeeded(){
+  if(!state.records||state.records.length===0)return false;
+  const msk=new Date(Date.now()+3*3600000);
+  const pastTrigger=msk.getUTCHours()>BACKUP_HOUR||(msk.getUTCHours()===BACKUP_HOUR&&msk.getUTCMinutes()>=BACKUP_MIN);
+  if(!pastTrigger)return false;
+  return localStorage.getItem('lastAutoBackupDate')!==getMskDayKey();
+}
+function scheduleAutoBackup(){
+  // Проверка при открытии приложения
+  if(isBackupNeeded())showBackupNotify();
+  // Опрос каждую минуту — ловим полночь пока приложение открыто
+  setInterval(()=>{
+    if(isBackupNeeded())showBackupNotify();
+  },60000);
+}
 
 // ===== Строка записи (buildRecRow) — используется в логе на главной и в "Лог задач" =====
 function shortDate(iso){
