@@ -1346,7 +1346,7 @@ function swSaveAndReload(){
 }
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('./sw.js').then(reg=>{
-    setInterval(()=>reg.update(),30000);
+    setInterval(()=>reg.update(),3600000);
     reg.addEventListener('updatefound',()=>{
       const nw=reg.installing;
       nw.addEventListener('statechange',()=>{
