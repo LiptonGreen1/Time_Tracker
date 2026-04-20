@@ -380,6 +380,185 @@ display:inline-block;
 text-align:center;
 }
 
+.alarm-main-row{
+display:flex;
+justify-content:center;
+margin-top:12px;
+}
+
+.alarm-main-btn{
+background:none;
+border:1px solid rgba(255,255,255,0.4);
+border-radius:6px;
+color:white;
+font-size:13px;
+padding:5px 14px;
+font-family:inherit;
+}
+
+.alarm-main-btn:active{background:rgba(255,255,255,0.12)}
+
+/* =============================================
+   БУДИЛЬНИК (одноразовый утренний индикатор)
+   ============================================= */
+
+.alarm-settings-overlay{
+background:rgba(0,0,0,0.72);
+z-index:300;
+}
+
+.alarm-settings-panel{
+padding:78px 18px 110px;
+min-height:100%;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:flex-start;
+}
+
+.alarm-actions-row{
+display:flex;
+justify-content:center;
+align-items:stretch;
+gap:12px;
+width:100%;
+max-width:420px;
+}
+
+.alarm-action-btn{
+flex:1 1 0;
+max-width:190px;
+min-height:54px;
+border:1px solid rgba(255,255,255,0.46);
+border-radius:8px;
+background:rgba(0,0,0,0.52);
+color:white;
+font-size:13px;
+line-height:1.25;
+font-family:inherit;
+padding:10px 12px;
+}
+
+.alarm-actions-row.single .alarm-action-btn{
+flex:0 1 230px;
+max-width:230px;
+}
+
+.alarm-action-btn:active{background:rgba(255,255,255,0.12)}
+
+.alarm-create-panel{
+display:none;
+width:100%;
+max-width:300px;
+margin-top:18px;
+padding:16px;
+border:1px solid rgba(255,255,255,0.18);
+border-radius:8px;
+background:rgba(0,0,0,0.72);
+}
+
+.alarm-create-panel.open{display:block}
+
+.alarm-time-row{
+display:flex;
+justify-content:center;
+align-items:center;
+gap:10px;
+margin-bottom:14px;
+}
+
+.alarm-time-input{
+width:148px;
+height:44px;
+background:#111;
+border:1px solid rgba(255,255,255,0.35);
+border-radius:8px;
+color:white;
+font-size:22px;
+font-family:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif;
+font-weight:300;
+text-align:center;
+padding:4px 8px;
+}
+
+.alarm-time-input:focus{outline:none;border-color:rgba(255,255,255,0.65)}
+
+.alarm-ok-btn{
+width:100%;
+height:44px;
+border:1px solid rgba(255,255,255,0.46);
+border-radius:8px;
+background:white;
+color:#000;
+font-size:14px;
+font-weight:600;
+font-family:inherit;
+}
+
+.alarm-settings-close{
+position:fixed;
+bottom:calc(18px + env(safe-area-inset-bottom));
+left:50%;
+transform:translateX(-50%);
+width:42px;height:42px;
+border-radius:50%;
+border:1px solid rgba(255,255,255,0.35);
+background:rgba(0,0,0,0.72);
+color:rgba(255,255,255,0.7);
+font-size:18px;
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:302;
+}
+
+.alarm-screen-overlay{
+display:none;
+position:fixed;
+top:0;left:0;right:0;bottom:0;
+background:#000;
+z-index:310;
+overflow:hidden;
+}
+
+.alarm-screen-overlay.open{
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+.alarm-clock-face{
+display:none;
+font-family:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif;
+font-size:72px;
+font-weight:200;
+letter-spacing:0;
+font-variant-numeric:tabular-nums;
+color:white;
+line-height:1;
+}
+
+.alarm-clock-face.on{display:block}
+
+.alarm-screen-close{
+position:fixed;
+bottom:calc(20px + env(safe-area-inset-bottom));
+left:50%;
+transform:translateX(-50%);
+width:42px;height:42px;
+border-radius:50%;
+border:1px solid rgba(255,255,255,0.28);
+background:#000;
+color:rgba(255,255,255,0.58);
+font-size:18px;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+.alarm-screen-close:active,
+.alarm-settings-close:active{background:rgba(255,255,255,0.12)}
+
 /* =============================================
    ОВЕРЛЕИ (общие стили для всех всплывающих окон)
    ============================================= */
@@ -1025,7 +1204,33 @@ color:rgba(255,255,255,0.7);
       <span class="work-tgt"><span class="work-target">70ч</span></span>
       <span class="work-pctcol" id="workWeekPct"></span>
     </div>
+    <div class="alarm-main-row">
+      <button class="alarm-main-btn" onclick="openAlarmSettings()">Будильник</button>
+    </div>
   </div>
+</div>
+
+<!-- ========== БУДИЛЬНИК: НАСТРОЙКИ ========== -->
+<div class="overlay alarm-settings-overlay" id="alarmSettingsOverlay" onclick="if(event.target===this)closeAlarmSettings()">
+  <div class="alarm-settings-panel" onclick="if(event.target===this)closeAlarmSettings()">
+    <div class="alarm-actions-row" id="alarmActionsRow">
+      <button class="alarm-action-btn" id="alarmOpenCurrentBtn" onclick="openCurrentAlarm()">Открыть текущий будильник</button>
+      <button class="alarm-action-btn" onclick="toggleAlarmCreatePanel()">Создать новый будильник</button>
+    </div>
+    <div class="alarm-create-panel" id="alarmCreatePanel">
+      <div class="alarm-time-row">
+        <input class="alarm-time-input" id="alarmTimeInput" type="time" value="05:00">
+      </div>
+      <button class="alarm-ok-btn" onclick="createNewAlarm()">OK</button>
+    </div>
+  </div>
+  <button class="alarm-settings-close" onclick="closeAlarmSettings()">✕</button>
+</div>
+
+<!-- ========== БУДИЛЬНИК: ЧЕРНЫЙ ЭКРАН ========== -->
+<div class="alarm-screen-overlay" id="alarmScreenOverlay">
+  <div class="alarm-clock-face" id="alarmClockFace">05:00</div>
+  <button class="alarm-screen-close" onclick="closeAlarmScreen()">✕</button>
 </div>
 
 <!-- ========== ПИКЕР ЗАДАЧ (выбор при ПУСК / ПУСК ×2) ========== -->
@@ -1234,6 +1439,154 @@ function unlockScroll(){
   document.body.classList.remove('overlay-open');
   document.body.style.top='';
   window.scrollTo(0,scrollY);
+}
+
+// ===== Будильник (одноразовый утренний индикатор, отдельно от таймлайна) =====
+const ALARM_STORAGE_KEY='timetracker_alarm_state';
+let alarmState=null;
+let alarmScreenInterval=null;
+
+// Загружает сохраненный будильник из localStorage, чтобы PWA переживала перезапуск.
+function loadAlarmState(){
+  const raw=localStorage.getItem(ALARM_STORAGE_KEY);
+  if(!raw){alarmState=null;return null}
+  try{
+    const parsed=JSON.parse(raw);
+    if(!parsed||!parsed.targetISO||typeof parsed.targetHour!=='number'||typeof parsed.targetMinute!=='number'){
+      localStorage.removeItem(ALARM_STORAGE_KEY);
+      alarmState=null;
+      return null;
+    }
+    alarmState=parsed;
+    return alarmState;
+  }catch(e){
+    localStorage.removeItem(ALARM_STORAGE_KEY);
+    alarmState=null;
+    return null;
+  }
+}
+
+// Сохраняет состояние будильника отдельно от records, чтобы не трогать учет времени.
+function saveAlarmState(){
+  if(!alarmState)return;
+  localStorage.setItem(ALARM_STORAGE_KEY,JSON.stringify(alarmState));
+}
+
+// Полностью удаляет одноразовый будильник после срабатывания или замены новым.
+function clearAlarmState(){
+  alarmState=null;
+  localStorage.removeItem(ALARM_STORAGE_KEY);
+}
+
+// Открывает меню будильника и показывает доступные действия.
+function openAlarmSettings(){
+  loadAlarmState();
+  const hasAlarm=!!alarmState;
+  const row=document.getElementById('alarmActionsRow');
+  const openBtn=document.getElementById('alarmOpenCurrentBtn');
+  const createPanel=document.getElementById('alarmCreatePanel');
+  openBtn.style.display=hasAlarm?'block':'none';
+  row.classList.toggle('single',!hasAlarm);
+  createPanel.classList.remove('open');
+  document.getElementById('alarmTimeInput').value='05:00';
+  lockScroll();
+  document.getElementById('alarmSettingsOverlay').classList.add('open');
+}
+
+// Закрывает только меню настроек; сам экран будильника закрывается отдельно.
+function closeAlarmSettings(){
+  document.getElementById('alarmSettingsOverlay').classList.remove('open');
+  unlockScroll();
+}
+
+// Разворачивает микропанель выбора времени под кнопками.
+function toggleAlarmCreatePanel(){
+  const panel=document.getElementById('alarmCreatePanel');
+  panel.classList.toggle('open');
+  if(panel.classList.contains('open'))document.getElementById('alarmTimeInput').focus();
+}
+
+// Создает новый одноразовый будильник; старый при этом уничтожается.
+function createNewAlarm(){
+  const value=document.getElementById('alarmTimeInput').value||'05:00';
+  const parts=value.split(':');
+  const targetHour=Math.max(0,Math.min(23,parseInt(parts[0],10)||0));
+  const targetMinute=Math.max(0,Math.min(59,parseInt(parts[1],10)||0));
+  const now=mskNow();
+  let targetMs=mskDayStartUTC(now.getFullYear(),now.getMonth()+1,now.getDate())+
+    targetHour*3600000+targetMinute*60000;
+  if(targetMs<=Date.now())targetMs+=86400000;
+  alarmState={
+    targetISO:new Date(targetMs).toISOString(),
+    targetHour,
+    targetMinute,
+    triggered:false,
+    screenOpen:false,
+    createdAtISO:new Date().toISOString()
+  };
+  saveAlarmState();
+  openAlarmScreen();
+}
+
+// Открывает уже созданный будильник, если он есть.
+function openCurrentAlarm(){
+  if(!loadAlarmState())return;
+  openAlarmScreen();
+}
+
+// Открывает черный экран будильника поверх всех остальных слоев.
+function openAlarmScreen(){
+  document.getElementById('alarmSettingsOverlay').classList.remove('open');
+  if(alarmState){
+    alarmState.screenOpen=true;
+    saveAlarmState();
+  }
+  lockScroll();
+  document.getElementById('alarmScreenOverlay').classList.add('open');
+  updateAlarmScreen();
+  if(alarmScreenInterval)clearInterval(alarmScreenInterval);
+  alarmScreenInterval=setInterval(updateAlarmScreen,1000);
+}
+
+// Закрывает экран будильника: сработавший уничтожается, будущий остается активным.
+function closeAlarmScreen(){
+  if(alarmScreenInterval){clearInterval(alarmScreenInterval);alarmScreenInterval=null}
+  updateAlarmScreen();
+  const shouldClear=alarmState&&alarmState.triggered;
+  document.getElementById('alarmScreenOverlay').classList.remove('open');
+  document.getElementById('alarmClockFace').classList.remove('on');
+  if(shouldClear)clearAlarmState();
+  else if(alarmState){
+    alarmState.screenOpen=false;
+    saveAlarmState();
+  }
+  unlockScroll();
+}
+
+// Проверяет наступление времени и включает циферблат.
+function updateAlarmScreen(){
+  if(!loadAlarmState())return;
+  const targetMs=new Date(alarmState.targetISO).getTime();
+  if(Date.now()>=targetMs&&!alarmState.triggered){
+    alarmState.triggered=true;
+    saveAlarmState();
+  }
+  const face=document.getElementById('alarmClockFace');
+  const hh=String(alarmState.targetHour).padStart(2,'0');
+  const mm=String(alarmState.targetMinute).padStart(2,'0');
+  face.innerText=hh+':'+mm;
+  face.classList.toggle('on',!!alarmState.triggered);
+}
+
+// Поднимает экран будильника при срабатывании, даже если он был закрыт заранее.
+function checkAlarmTrigger(){
+  if(document.getElementById('alarmScreenOverlay').classList.contains('open'))return;
+  if(!loadAlarmState())return;
+  if(Date.now()>=new Date(alarmState.targetISO).getTime()){
+    alarmState.triggered=true;
+    saveAlarmState();
+    openAlarmScreen();
+  }
 }
 
 // ===== IndexedDB (основное хранилище данных) =====
@@ -1594,6 +1947,8 @@ function migrateState(d){
   }
   renderMain();updateTimer();updateWorkTracker();
   scheduleAutoBackup();
+  const restoredAlarm=loadAlarmState();
+  if(restoredAlarm&&(restoredAlarm.screenOpen||restoredAlarm.triggered))openAlarmScreen();
 })();
 
 let _lastKnownRecordCount=0;
@@ -1942,6 +2297,7 @@ function updateTimer(){
   updateWorkTracker();
 }
 setInterval(updateTimer,1000);
+setInterval(checkAlarmTrigger,1000);
 
 // ===== Авто-разрезка по полуночи MSK (live midnight split) =====
 let lastMskDay=mskDayKey(new Date().toISOString());
