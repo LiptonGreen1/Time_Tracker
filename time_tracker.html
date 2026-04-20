@@ -553,14 +553,14 @@ display:none;
 align-items:center;
 justify-content:center;
 font-family:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif;
-font-size:clamp(96px,26vw,240px);
-font-weight:520;
+font-size:clamp(132px,34vw,320px);
+font-weight:800;
 font-variant-numeric:tabular-nums;
 color:#fff;
-line-height:1;
+line-height:0.9;
 letter-spacing:0;
 width:100%;
-padding:0 4vw 72px;
+padding:0 1vw 78px;
 text-align:center;
 white-space:nowrap;
 }
@@ -1627,13 +1627,22 @@ function updateAlarmScreen(){
 
 // Поднимает экран будильника при срабатывании, даже если он был закрыт заранее.
 function checkAlarmTrigger(){
-  if(document.getElementById('alarmScreenOverlay').classList.contains('open'))return;
+  const alarmScreenOverlay=document.getElementById('alarmScreenOverlay');
+  if(!alarmScreenOverlay||alarmScreenOverlay.classList.contains('open'))return;
   if(!loadAlarmState())return;
   if(Date.now()>=new Date(alarmState.targetISO).getTime()){
     alarmState.triggered=true;
     saveAlarmState();
     openAlarmScreen();
   }
+}
+
+// Запускает несколько точек проверки, чтобы PWA не пропустила момент срабатывания.
+function startAlarmWatchdog(){
+  setInterval(checkAlarmTrigger,1000);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkAlarmTrigger()});
+  window.addEventListener('focus',checkAlarmTrigger);
+  window.addEventListener('pageshow',checkAlarmTrigger);
 }
 
 // ===== IndexedDB (основное хранилище данных) =====
@@ -2329,6 +2338,7 @@ function updateWorkTracker(){
 }
 
 function updateTimer(){
+  checkAlarmTrigger();
   const el=document.getElementById('timer');
   const active=getActive();
   if(!active.length){el.innerText='0ч 0м 0с';updateWorkTracker();return}
@@ -2344,7 +2354,7 @@ function updateTimer(){
   updateWorkTracker();
 }
 setInterval(updateTimer,1000);
-setInterval(checkAlarmTrigger,1000);
+startAlarmWatchdog();
 
 // ===== Авто-разрезка по полуночи MSK (live midnight split) =====
 let lastMskDay=mskDayKey(new Date().toISOString());
