@@ -552,26 +552,24 @@ justify-content:center;
 display:none;
 align-items:center;
 justify-content:center;
-gap:clamp(6px,1.7vw,18px);
+gap:clamp(4px,1.15vw,14px);
 font-family:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif;
-font-size:clamp(86px,24vw,230px);
-font-weight:560;
+font-size:clamp(112px,30vw,280px);
+font-weight:640;
 font-variant-numeric:tabular-nums;
 color:#fff;
 line-height:0.86;
 width:100vw;
-padding:0 4vw;
+padding:0 2vw;
 }
 
 .alarm-clock-face.on{display:flex}
 
 .alarm-flip-digit{
 position:relative;
-display:inline-flex;
-flex-direction:column;
-justify-content:center;
+display:inline-block;
 width:0.64em;
-height:1.04em;
+height:1em;
 border-radius:8px;
 overflow:hidden;
 background:#050505;
@@ -579,37 +577,47 @@ box-shadow:inset 0 0 0 1px rgba(255,255,255,0.08);
 }
 
 .alarm-flip-half{
-height:50%;
+position:absolute;
+inset:0;
 display:flex;
 align-items:center;
 justify-content:center;
 overflow:hidden;
 color:#fff;
-text-shadow:0 0 14px rgba(255,255,255,0.18);
+line-height:1;
+text-shadow:0 0 18px rgba(255,255,255,0.2);
 }
 
 .alarm-flip-half.top{
-align-items:flex-start;
-border-bottom:1px solid rgba(255,255,255,0.16);
+clip-path:inset(0 0 50% 0);
 background:linear-gradient(to bottom,#fff 0%,#e7e7e7 100%);
 -webkit-background-clip:text;
 color:transparent;
 }
 
 .alarm-flip-half.bottom{
-align-items:flex-end;
+clip-path:inset(50% 0 0 0);
 background:linear-gradient(to bottom,#d8d8d8 0%,#fff 100%);
 -webkit-background-clip:text;
 color:transparent;
+}
+
+.alarm-flip-digit:after{
+content:'';
+position:absolute;
+left:0;right:0;top:50%;
+height:1px;
+background:rgba(255,255,255,0.16);
+box-shadow:0 1px 0 rgba(0,0,0,0.9);
 }
 
 .alarm-flip-colon{
 display:inline-flex;
 align-items:center;
 justify-content:center;
-height:1.04em;
-font-size:0.78em;
-font-weight:520;
+height:1em;
+font-size:0.76em;
+font-weight:620;
 color:#f5f5f5;
 padding-bottom:0.05em;
 }
@@ -1285,8 +1293,8 @@ color:rgba(255,255,255,0.7);
 </div>
 
 <!-- ========== БУДИЛЬНИК: НАСТРОЙКИ ========== -->
-<div class="overlay alarm-settings-overlay" id="alarmSettingsOverlay" onclick="if(event.target===this)closeAlarmSettings()">
-  <div class="alarm-settings-panel" onclick="if(event.target===this)closeAlarmSettings()">
+<div class="overlay alarm-settings-overlay" id="alarmSettingsOverlay" onclick="handleAlarmSettingsBackdropClick(event)">
+  <div class="alarm-settings-panel" onclick="handleAlarmSettingsBackdropClick(event)">
     <div class="alarm-actions-row" id="alarmActionsRow">
       <button class="alarm-action-btn" id="alarmOpenCurrentBtn" onclick="openCurrentAlarm()">Открыть текущий будильник</button>
       <button class="alarm-action-btn" onclick="toggleAlarmCreatePanel()">Создать новый будильник</button>
@@ -1576,11 +1584,22 @@ function closeAlarmSettings(){
   unlockScroll();
 }
 
+// Клик по темному фону: если открыт барабан времени — закрываем только его.
+function handleAlarmSettingsBackdropClick(event){
+  if(event.target!==event.currentTarget)return;
+  const createPanel=document.getElementById('alarmCreatePanel');
+  if(createPanel.classList.contains('open')){
+    cancelAlarmCreatePanel();
+    return;
+  }
+  closeAlarmSettings();
+}
+
 // Разворачивает микропанель выбора времени под кнопками.
 function toggleAlarmCreatePanel(){
   const panel=document.getElementById('alarmCreatePanel');
-  panel.classList.toggle('open');
-  if(panel.classList.contains('open'))document.getElementById('alarmTimeInput').focus();
+  panel.classList.add('open');
+  document.getElementById('alarmTimeInput').focus();
 }
 
 // Закрывает микропанель выбора времени без изменения текущего будильника.
