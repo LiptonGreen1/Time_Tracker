@@ -383,7 +383,9 @@ text-align:center;
 .alarm-main-row{
 display:flex;
 justify-content:center;
-margin-top:12px;
+margin-top:14px;
+width:100%;
+max-width:400px;
 }
 
 .alarm-main-btn{
@@ -413,7 +415,8 @@ min-height:100%;
 display:flex;
 flex-direction:column;
 align-items:center;
-justify-content:flex-start;
+justify-content:center;
+position:relative;
 }
 
 .alarm-actions-row{
@@ -448,13 +451,18 @@ max-width:230px;
 
 .alarm-create-panel{
 display:none;
-width:100%;
+position:absolute;
+left:50%;
+top:50%;
+transform:translate(-50%,-50%);
+width:calc(100% - 36px);
 max-width:300px;
-margin-top:18px;
 padding:16px;
 border:1px solid rgba(255,255,255,0.18);
 border-radius:8px;
-background:rgba(0,0,0,0.72);
+background:rgba(0,0,0,0.94);
+box-shadow:0 18px 60px rgba(0,0,0,0.65);
+z-index:301;
 }
 
 .alarm-create-panel.open{display:block}
@@ -483,16 +491,29 @@ padding:4px 8px;
 
 .alarm-time-input:focus{outline:none;border-color:rgba(255,255,255,0.65)}
 
-.alarm-ok-btn{
-width:100%;
+.alarm-create-actions{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+}
+
+.alarm-panel-btn{
 height:44px;
 border:1px solid rgba(255,255,255,0.46);
 border-radius:8px;
-background:white;
-color:#000;
 font-size:14px;
 font-weight:600;
 font-family:inherit;
+}
+
+.alarm-cancel-btn{
+background:none;
+color:white;
+}
+
+.alarm-create-btn{
+background:white;
+color:#000;
 }
 
 .alarm-settings-close{
@@ -529,16 +550,69 @@ justify-content:center;
 
 .alarm-clock-face{
 display:none;
+align-items:center;
+justify-content:center;
+gap:clamp(6px,1.7vw,18px);
 font-family:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif;
-font-size:72px;
-font-weight:200;
-letter-spacing:0;
+font-size:clamp(86px,24vw,230px);
+font-weight:560;
 font-variant-numeric:tabular-nums;
-color:white;
-line-height:1;
+color:#fff;
+line-height:0.86;
+width:100vw;
+padding:0 4vw;
 }
 
-.alarm-clock-face.on{display:block}
+.alarm-clock-face.on{display:flex}
+
+.alarm-flip-digit{
+position:relative;
+display:inline-flex;
+flex-direction:column;
+justify-content:center;
+width:0.64em;
+height:1.04em;
+border-radius:8px;
+overflow:hidden;
+background:#050505;
+box-shadow:inset 0 0 0 1px rgba(255,255,255,0.08);
+}
+
+.alarm-flip-half{
+height:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+overflow:hidden;
+color:#fff;
+text-shadow:0 0 14px rgba(255,255,255,0.18);
+}
+
+.alarm-flip-half.top{
+align-items:flex-start;
+border-bottom:1px solid rgba(255,255,255,0.16);
+background:linear-gradient(to bottom,#fff 0%,#e7e7e7 100%);
+-webkit-background-clip:text;
+color:transparent;
+}
+
+.alarm-flip-half.bottom{
+align-items:flex-end;
+background:linear-gradient(to bottom,#d8d8d8 0%,#fff 100%);
+-webkit-background-clip:text;
+color:transparent;
+}
+
+.alarm-flip-colon{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+height:1.04em;
+font-size:0.78em;
+font-weight:520;
+color:#f5f5f5;
+padding-bottom:0.05em;
+}
 
 .alarm-screen-close{
 position:fixed;
@@ -1204,9 +1278,9 @@ color:rgba(255,255,255,0.7);
       <span class="work-tgt"><span class="work-target">70ч</span></span>
       <span class="work-pctcol" id="workWeekPct"></span>
     </div>
-    <div class="alarm-main-row">
-      <button class="alarm-main-btn" onclick="openAlarmSettings()">Будильник</button>
-    </div>
+  </div>
+  <div class="alarm-main-row">
+    <button class="alarm-main-btn" onclick="openAlarmSettings()">Будильник</button>
   </div>
 </div>
 
@@ -1221,7 +1295,10 @@ color:rgba(255,255,255,0.7);
       <div class="alarm-time-row">
         <input class="alarm-time-input" id="alarmTimeInput" type="time" value="05:00">
       </div>
-      <button class="alarm-ok-btn" onclick="createNewAlarm()">OK</button>
+      <div class="alarm-create-actions">
+        <button class="alarm-panel-btn alarm-cancel-btn" onclick="cancelAlarmCreatePanel()">Отмена</button>
+        <button class="alarm-panel-btn alarm-create-btn" onclick="createNewAlarm()">Создать</button>
+      </div>
     </div>
   </div>
   <button class="alarm-settings-close" onclick="closeAlarmSettings()">✕</button>
@@ -1229,7 +1306,7 @@ color:rgba(255,255,255,0.7);
 
 <!-- ========== БУДИЛЬНИК: ЧЕРНЫЙ ЭКРАН ========== -->
 <div class="alarm-screen-overlay" id="alarmScreenOverlay">
-  <div class="alarm-clock-face" id="alarmClockFace">05:00</div>
+  <div class="alarm-clock-face" id="alarmClockFace"></div>
   <button class="alarm-screen-close" onclick="closeAlarmScreen()">✕</button>
 </div>
 
@@ -1506,6 +1583,12 @@ function toggleAlarmCreatePanel(){
   if(panel.classList.contains('open'))document.getElementById('alarmTimeInput').focus();
 }
 
+// Закрывает микропанель выбора времени без изменения текущего будильника.
+function cancelAlarmCreatePanel(){
+  document.getElementById('alarmCreatePanel').classList.remove('open');
+  document.getElementById('alarmTimeInput').value='05:00';
+}
+
 // Создает новый одноразовый будильник; старый при этом уничтожается.
 function createNewAlarm(){
   const value=document.getElementById('alarmTimeInput').value||'05:00';
@@ -1574,8 +1657,24 @@ function updateAlarmScreen(){
   const face=document.getElementById('alarmClockFace');
   const hh=String(alarmState.targetHour).padStart(2,'0');
   const mm=String(alarmState.targetMinute).padStart(2,'0');
-  face.innerText=hh+':'+mm;
+  renderAlarmClockFace(hh+':'+mm);
   face.classList.toggle('on',!!alarmState.triggered);
+}
+
+// Рисует крупные цифры из верхней и нижней половинок.
+function renderAlarmClockFace(timeText){
+  const face=document.getElementById('alarmClockFace');
+  const html=timeText.split('').map(ch=>{
+    if(ch===':')return '<span class="alarm-flip-colon">:</span>';
+    return '<span class="alarm-flip-digit">'+
+      '<span class="alarm-flip-half top">'+ch+'</span>'+
+      '<span class="alarm-flip-half bottom">'+ch+'</span>'+
+      '</span>';
+  }).join('');
+  if(face.dataset.timeText!==timeText){
+    face.dataset.timeText=timeText;
+    face.innerHTML=html;
+  }
 }
 
 // Поднимает экран будильника при срабатывании, даже если он был закрыт заранее.
