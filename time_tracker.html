@@ -560,7 +560,7 @@ color:#fff;
 line-height:0.9;
 letter-spacing:0;
 width:100%;
-padding:0 1vw 78px;
+padding:0 1vw;
 text-align:center;
 white-space:nowrap;
 }
@@ -1625,26 +1625,6 @@ function updateAlarmScreen(){
   face.classList.toggle('on',!!alarmState.triggered);
 }
 
-// Поднимает экран будильника при срабатывании, даже если он был закрыт заранее.
-function checkAlarmTrigger(){
-  const alarmScreenOverlay=document.getElementById('alarmScreenOverlay');
-  if(!alarmScreenOverlay||alarmScreenOverlay.classList.contains('open'))return;
-  if(!loadAlarmState())return;
-  if(Date.now()>=new Date(alarmState.targetISO).getTime()){
-    alarmState.triggered=true;
-    saveAlarmState();
-    openAlarmScreen();
-  }
-}
-
-// Запускает несколько точек проверки, чтобы PWA не пропустила момент срабатывания.
-function startAlarmWatchdog(){
-  setInterval(checkAlarmTrigger,1000);
-  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkAlarmTrigger()});
-  window.addEventListener('focus',checkAlarmTrigger);
-  window.addEventListener('pageshow',checkAlarmTrigger);
-}
-
 // ===== IndexedDB (основное хранилище данных) =====
 const DB_NAME='timetracker', DB_STORE='state';
 let _dbInstance=null;
@@ -2338,7 +2318,6 @@ function updateWorkTracker(){
 }
 
 function updateTimer(){
-  checkAlarmTrigger();
   const el=document.getElementById('timer');
   const active=getActive();
   if(!active.length){el.innerText='0ч 0м 0с';updateWorkTracker();return}
@@ -2354,7 +2333,6 @@ function updateTimer(){
   updateWorkTracker();
 }
 setInterval(updateTimer,1000);
-startAlarmWatchdog();
 
 // ===== Авто-разрезка по полуночи MSK (live midnight split) =====
 let lastMskDay=mskDayKey(new Date().toISOString());
