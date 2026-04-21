@@ -579,7 +579,7 @@ display:none;
 align-items:center;
 justify-content:center;
 font-family:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif;
-font-size:clamp(132px,34vw,320px);
+font-size:clamp(144px,36vw,340px);
 font-weight:800;
 font-variant-numeric:tabular-nums;
 color:#fff;
@@ -594,11 +594,13 @@ white-space:nowrap;
 .alarm-clock-face.on{display:flex}
 
 .alarm-clock-face.gradient{
-background:linear-gradient(90deg,#ffc8ec 0%,#e8d0ff 22%,#c9ddff 44%,#c8fff2 68%,#fff1b8 100%);
+background:linear-gradient(115deg,#ffc8ec 0%,#ffd9bd 14%,#e8d0ff 32%,#c9ddff 50%,#c8fff2 68%,#fff1b8 84%,#ffc8ec 100%);
+background-size:220% 220%;
 -webkit-background-clip:text;
 background-clip:text;
 -webkit-text-fill-color:transparent;
 color:transparent;
+animation:alarmGradientFlow 14s ease-in-out infinite alternate;
 }
 
 .alarm-clock-face.white{
@@ -618,11 +620,19 @@ transition:opacity 0.15s linear;
 .alarm-clock-colon.on{opacity:1}
 
 .alarm-clock-face.gradient .alarm-clock-colon{
-background:linear-gradient(180deg,#fff5fb 0%,#d9f5ff 100%);
+background:linear-gradient(180deg,#fff5fb 0%,#d9f5ff 45%,#fff2bd 100%);
+background-size:180% 180%;
 -webkit-background-clip:text;
 background-clip:text;
 -webkit-text-fill-color:transparent;
 color:transparent;
+animation:alarmGradientFlow 10s ease-in-out infinite alternate;
+}
+
+@keyframes alarmGradientFlow{
+0%{background-position:0% 50%}
+50%{background-position:100% 50%}
+100%{background-position:35% 100%}
 }
 
 .alarm-screen-close{
