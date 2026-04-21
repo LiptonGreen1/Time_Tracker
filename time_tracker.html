@@ -579,7 +579,7 @@ display:none;
 align-items:center;
 justify-content:center;
 font-family:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif;
-font-size:clamp(144px,36vw,340px);
+font-size:340px;
 font-weight:800;
 font-variant-numeric:tabular-nums;
 color:#fff;
@@ -1675,6 +1675,7 @@ function openAlarmScreen(){
   lockScroll();
   document.getElementById('alarmScreenOverlay').classList.add('open');
   updateAlarmScreen();
+  fitAlarmClockFace();
   if(alarmScreenInterval)clearInterval(alarmScreenInterval);
   alarmScreenInterval=setInterval(updateAlarmScreen,1000);
 }
@@ -1715,6 +1716,27 @@ function updateAlarmScreen(){
     face.innerText=hh+':'+mm;
   }
   face.classList.toggle('on',!!alarmState.triggered);
+}
+
+// Подгоняет размер цифр под фактическую ширину экрана, чтобы любые цифры точно влезали.
+function fitAlarmClockFace(){
+  const face=document.getElementById('alarmClockFace');
+  if(!face)return;
+  const maxPx=340,minPx=120;
+  const targetWidth=Math.max(120,window.innerWidth-10);
+  let low=minPx,high=maxPx,best=minPx;
+  face.style.fontSize=maxPx+'px';
+  while(low<=high){
+    const mid=Math.floor((low+high)/2);
+    face.style.fontSize=mid+'px';
+    if(face.scrollWidth<=targetWidth){
+      best=mid;
+      low=mid+1;
+    } else {
+      high=mid-1;
+    }
+  }
+  face.style.fontSize=best+'px';
 }
 
 // ===== IndexedDB (основное хранилище данных) =====
@@ -1838,6 +1860,8 @@ if('serviceWorker' in navigator){
   navigator.serviceWorker.addEventListener('controllerchange',swSaveAndReload);
 }
 if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();
+window.addEventListener('resize',fitAlarmClockFace);
+window.addEventListener('orientationchange',fitAlarmClockFace);
 
 // ЗАЩИТА: сохраняем данные при уходе со страницы (visibilitychange, pagehide, beforeunload)
 function emergencySave(){
