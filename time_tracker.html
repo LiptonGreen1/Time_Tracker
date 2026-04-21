@@ -491,6 +491,32 @@ padding:4px 8px;
 
 .alarm-time-input:focus{outline:none;border-color:rgba(255,255,255,0.65)}
 
+.alarm-style-row{
+display:flex;
+justify-content:center;
+gap:8px;
+margin-bottom:14px;
+}
+
+.alarm-style-btn{
+min-width:112px;
+height:36px;
+padding:0 14px;
+border:1px solid rgba(255,255,255,0.32);
+border-radius:8px;
+background:none;
+color:rgba(255,255,255,0.78);
+font-size:13px;
+font-weight:600;
+font-family:inherit;
+}
+
+.alarm-style-btn.active{
+border-color:rgba(255,255,255,0.62);
+background:rgba(255,255,255,0.12);
+color:#fff;
+}
+
 .alarm-create-actions{
 display:grid;
 grid-template-columns:1fr 1fr;
@@ -566,6 +592,38 @@ white-space:nowrap;
 }
 
 .alarm-clock-face.on{display:flex}
+
+.alarm-clock-face.gradient{
+background:linear-gradient(90deg,#ffc8ec 0%,#e8d0ff 22%,#c9ddff 44%,#c8fff2 68%,#fff1b8 100%);
+-webkit-background-clip:text;
+background-clip:text;
+-webkit-text-fill-color:transparent;
+color:transparent;
+}
+
+.alarm-clock-face.white{
+color:#fff;
+background:none;
+-webkit-text-fill-color:initial;
+}
+
+.alarm-clock-colon{
+display:inline-block;
+opacity:0.25;
+min-width:0.24em;
+text-align:center;
+transition:opacity 0.15s linear;
+}
+
+.alarm-clock-colon.on{opacity:1}
+
+.alarm-clock-face.gradient .alarm-clock-colon{
+background:linear-gradient(180deg,#fff5fb 0%,#d9f5ff 100%);
+-webkit-background-clip:text;
+background-clip:text;
+-webkit-text-fill-color:transparent;
+color:transparent;
+}
 
 .alarm-screen-close{
 position:fixed;
@@ -1248,6 +1306,10 @@ color:rgba(255,255,255,0.7);
       <div class="alarm-time-row">
         <input class="alarm-time-input" id="alarmTimeInput" type="time" value="05:00">
       </div>
+      <div class="alarm-style-row">
+        <button class="alarm-style-btn active" id="alarmStyleGradientBtn" onclick="selectAlarmStyle('gradient')">Градиент</button>
+        <button class="alarm-style-btn" id="alarmStyleWhiteBtn" onclick="selectAlarmStyle('white')">Белый</button>
+      </div>
       <div class="alarm-create-actions">
         <button class="alarm-panel-btn alarm-cancel-btn" onclick="cancelAlarmCreatePanel()">Отмена</button>
         <button class="alarm-panel-btn alarm-create-btn" onclick="createNewAlarm()">Создать</button>
@@ -1475,6 +1537,7 @@ function unlockScroll(){
 const ALARM_STORAGE_KEY='timetracker_alarm_state';
 let alarmState=null;
 let alarmScreenInterval=null;
+let alarmSelectedStyle='gradient';
 
 // Загружает сохраненный будильник из localStorage, чтобы PWA переживала перезапуск.
 function loadAlarmState(){
@@ -1487,6 +1550,7 @@ function loadAlarmState(){
       alarmState=null;
       return null;
     }
+    if(parsed.colorStyle!=='white'&&parsed.colorStyle!=='gradient')parsed.colorStyle='gradient';
     alarmState=parsed;
     return alarmState;
   }catch(e){
@@ -1519,6 +1583,7 @@ function openAlarmSettings(){
   row.classList.toggle('single',!hasAlarm);
   createPanel.classList.remove('open');
   document.getElementById('alarmTimeInput').value='05:00';
+  selectAlarmStyle('gradient');
   lockScroll();
   document.getElementById('alarmSettingsOverlay').classList.add('open');
 }
@@ -1547,10 +1612,18 @@ function toggleAlarmCreatePanel(){
   document.getElementById('alarmTimeInput').focus();
 }
 
+// Выбирает визуальный стиль цифр для нового будильника.
+function selectAlarmStyle(styleName){
+  alarmSelectedStyle=styleName==='white'?'white':'gradient';
+  document.getElementById('alarmStyleGradientBtn').classList.toggle('active',alarmSelectedStyle==='gradient');
+  document.getElementById('alarmStyleWhiteBtn').classList.toggle('active',alarmSelectedStyle==='white');
+}
+
 // Закрывает микропанель выбора времени без изменения текущего будильника.
 function cancelAlarmCreatePanel(){
   document.getElementById('alarmCreatePanel').classList.remove('open');
   document.getElementById('alarmTimeInput').value='05:00';
+  selectAlarmStyle('gradient');
 }
 
 // Создает новый одноразовый будильник; старый при этом уничтожается.
@@ -1567,6 +1640,7 @@ function createNewAlarm(){
     targetISO:new Date(targetMs).toISOString(),
     targetHour,
     targetMinute,
+    colorStyle:alarmSelectedStyle,
     triggered:false,
     screenOpen:false,
     createdAtISO:new Date().toISOString()
@@ -1619,10 +1693,17 @@ function updateAlarmScreen(){
     saveAlarmState();
   }
   const face=document.getElementById('alarmClockFace');
-  const shownTime=alarmState.triggered?mskNow():{getHours:()=>alarmState.targetHour,getMinutes:()=>alarmState.targetMinute};
+  face.classList.remove('gradient','white');
+  face.classList.add(alarmState.colorStyle==='white'?'white':'gradient');
+  const shownTime=alarmState.triggered?mskNow():{getHours:()=>alarmState.targetHour,getMinutes:()=>alarmState.targetMinute,getSeconds:()=>0};
   const hh=String(shownTime.getHours()).padStart(2,'0');
   const mm=String(shownTime.getMinutes()).padStart(2,'0');
-  face.innerText=hh+':'+mm;
+  if(alarmState.triggered){
+    const colonClass=shownTime.getSeconds()%2===0?'alarm-clock-colon on':'alarm-clock-colon';
+    face.innerHTML=hh+'<span class="'+colonClass+'">:</span>'+mm;
+  } else {
+    face.innerText=hh+':'+mm;
+  }
   face.classList.toggle('on',!!alarmState.triggered);
 }
 
