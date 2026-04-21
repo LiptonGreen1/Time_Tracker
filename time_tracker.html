@@ -1619,8 +1619,9 @@ function updateAlarmScreen(){
     saveAlarmState();
   }
   const face=document.getElementById('alarmClockFace');
-  const hh=String(alarmState.targetHour).padStart(2,'0');
-  const mm=String(alarmState.targetMinute).padStart(2,'0');
+  const shownTime=alarmState.triggered?mskNow():{getHours:()=>alarmState.targetHour,getMinutes:()=>alarmState.targetMinute};
+  const hh=String(shownTime.getHours()).padStart(2,'0');
+  const mm=String(shownTime.getMinutes()).padStart(2,'0');
   face.innerText=hh+':'+mm;
   face.classList.toggle('on',!!alarmState.triggered);
 }
