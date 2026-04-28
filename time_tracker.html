@@ -1332,6 +1332,7 @@ color:rgba(255,255,255,0.7);
 <!-- ========== БУДИЛЬНИК: ЧЕРНЫЙ ЭКРАН ========== -->
 <div class="alarm-screen-overlay" id="alarmScreenOverlay">
   <div class="alarm-clock-face" id="alarmClockFace"></div>
+  <audio id="alarmAudio" src="Ambient.mp3" preload="auto" loop playsinline></audio>
   <button class="alarm-screen-close" onclick="closeAlarmScreen()">✕</button>
 </div>
 
@@ -1548,6 +1549,8 @@ const ALARM_STORAGE_KEY='timetracker_alarm_state';
 let alarmState=null;
 let alarmScreenInterval=null;
 let alarmSelectedStyle='gradient';
+let alarmAudioPrepared=false;
+let alarmAudioStartWarningShown=false;
 
 // Загружает сохраненный будильник из localStorage, чтобы PWA переживала перезапуск.
 function loadAlarmState(){
@@ -1580,6 +1583,59 @@ function saveAlarmState(){
 function clearAlarmState(){
   alarmState=null;
   localStorage.removeItem(ALARM_STORAGE_KEY);
+}
+
+// Подготавливает аудио после ручного входа в будильник; это повышает шанс старта звука в iOS PWA.
+function prepareAlarmAudio(){
+  const audio=document.getElementById('alarmAudio');
+  if(!audio)return;
+  audio.loop=true;
+  audio.load();
+  if(alarmAudioPrepared)return;
+  const previousMuted=audio.muted;
+  audio.muted=true;
+  const playPromise=audio.play();
+  if(playPromise&&playPromise.then){
+    playPromise.then(()=>{
+      audio.pause();
+      audio.currentTime=0;
+      audio.muted=previousMuted;
+      alarmAudioPrepared=true;
+    }).catch(()=>{
+      audio.muted=previousMuted;
+    });
+  } else {
+    audio.pause();
+    audio.currentTime=0;
+    audio.muted=previousMuted;
+    alarmAudioPrepared=true;
+  }
+}
+
+// Запускает мелодию будильника в loop после срабатывания.
+function startAlarmAudio(){
+  const audio=document.getElementById('alarmAudio');
+  if(!audio||!audio.paused)return;
+  audio.loop=true;
+  audio.muted=false;
+  audio.volume=1;
+  const playPromise=audio.play();
+  if(playPromise&&playPromise.catch){
+    playPromise.catch(e=>{
+      if(alarmAudioStartWarningShown)return;
+      alarmAudioStartWarningShown=true;
+      console.warn('Alarm audio start failed',e);
+    });
+  }
+}
+
+// Останавливает мелодию при выключении экрана будильника.
+function stopAlarmAudio(){
+  const audio=document.getElementById('alarmAudio');
+  if(!audio)return;
+  audio.pause();
+  alarmAudioStartWarningShown=false;
+  try{audio.currentTime=0}catch(e){}
 }
 
 // Открывает меню будильника и показывает доступные действия.
@@ -1638,6 +1694,7 @@ function cancelAlarmCreatePanel(){
 
 // Создает новый одноразовый будильник; старый при этом уничтожается.
 function createNewAlarm(){
+  stopAlarmAudio();
   const value=document.getElementById('alarmTimeInput').value||'05:00';
   const parts=value.split(':');
   const targetHour=Math.max(0,Math.min(23,parseInt(parts[0],10)||0));
@@ -1674,6 +1731,7 @@ function openAlarmScreen(){
   }
   lockScroll();
   document.getElementById('alarmScreenOverlay').classList.add('open');
+  prepareAlarmAudio();
   updateAlarmScreen();
   if(alarmScreenInterval)clearInterval(alarmScreenInterval);
   alarmScreenInterval=setInterval(updateAlarmScreen,1000);
@@ -1683,6 +1741,7 @@ function openAlarmScreen(){
 function closeAlarmScreen(){
   if(alarmScreenInterval){clearInterval(alarmScreenInterval);alarmScreenInterval=null}
   updateAlarmScreen();
+  stopAlarmAudio();
   const shouldClear=alarmState&&alarmState.triggered;
   document.getElementById('alarmScreenOverlay').classList.remove('open');
   document.getElementById('alarmClockFace').classList.remove('on');
@@ -1701,7 +1760,9 @@ function updateAlarmScreen(){
   if(Date.now()>=targetMs&&!alarmState.triggered){
     alarmState.triggered=true;
     saveAlarmState();
+    startAlarmAudio();
   }
+  if(alarmState.triggered)startAlarmAudio();
   const face=document.getElementById('alarmClockFace');
   face.classList.remove('gradient','white');
   face.classList.add(alarmState.colorStyle==='white'?'white':'gradient');
