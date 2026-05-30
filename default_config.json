@@ -18,13 +18,13 @@
   ],
 
   "groups": [
-    {"id": 1,  "name": "[⬆️⬆️⬆️]#4 Бизнес", "isKeyGroup": true, "color": "#F8A8FA"},
-    {"id": 2,  "name": "[⬆️⬆️]#0 Сферы | Проекты", "isKeyGroup": true, "color": "linear-gradient(to bottom, #F8A8FA 45%, #73E981 70%)"},
+    {"id": 1,  "name": "[⬆️⬆️⬆️]#4 Бизнес", "isKeyGroup": true, "isBusinessTime_KeyGroup": true, "color": "#F8A8FA"},
+    {"id": 2,  "name": "[⬆️⬆️]#0 Сферы | Проекты", "isKeyGroup": true, "isBusinessTime_KeyGroup": true, "color": "linear-gradient(to bottom, #F8A8FA 45%, #73E981 70%)"},
     {"id": 3,  "name": "[⬆️⬆️]#0 Сферы | Обучение", "isKeyGroup": true, "color": "linear-gradient(to bottom, #F8A8FA 45%, #73E981 70%)"},
     {"id": 4,  "name": "[⬆️⬆️]#1 Тело", "isKeyGroup": true, "color": "linear-gradient(to bottom, #F8A8FA 45%, #73E981 70%)"},
     {"id": 5,  "name": "[⬆️⬆️]#2 Психика", "isKeyGroup": true, "color": "linear-gradient(to bottom, #F8A8FA 45%, #73E981 70%)"},
     {"id": 6,  "name": "[⬆️⬆️]#3 Интеллект", "isKeyGroup": true, "color": "linear-gradient(to bottom, #F8A8FA 45%, #73E981 70%)"},
-    {"id": 7,  "name": "[⬆️]#4 Будущ. Бизнес", "isKeyGroup": true, "color": "#73E981"},
+    {"id": 7,  "name": "[⬆️]#4 Будущ. Бизнес", "isKeyGroup": true, "isBusinessTime_KeyGroup": true, "color": "#73E981"},
     {"id": 8,  "name": "[⬆️] Очищение", "color": "#73E981"},
     {"id": 9,  "name": "[⬆️] Восполнение ресурсов", "color": "#73E981"},
     {"id": 10, "name": "[↗️] Общение", "color": "#91F7E8"},

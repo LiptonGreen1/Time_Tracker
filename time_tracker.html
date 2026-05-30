@@ -366,6 +366,7 @@ font-size:13px;
 
 .work-lbl{color:rgba(255,255,255,0.5);font-size:12px}
 .work-val{font-variant-numeric:tabular-nums;text-align:center}
+.work-val-key{color:#FFB3D9;font-variant-numeric:tabular-nums;text-align:center}
 .work-from{color:rgba(255,255,255,0.35);font-size:11px}
 .work-tgt{}
 .work-target{color:#FF2FFF;font-weight:700}
@@ -1289,12 +1290,12 @@ color:rgba(255,255,255,0.7);
     <div class="week-days" id="weekDays"></div>
     <div class="work-grid">
       <span class="work-lbl">Сегодня</span>
-      <span class="work-val" id="workToday">0ч 0м</span>
+      <span class="work-val"><span class="work-val-key" id="workTodayKey">0ч 0м</span> | <span id="workToday">0ч 0м</span></span>
       <span class="work-from">из</span>
       <span class="work-tgt"><span class="work-target">10ч</span></span>
       <span class="work-pctcol" id="workTodayPct"></span>
       <span class="work-lbl">Неделя</span>
-      <span class="work-val"><span class="work-week-val" id="workWeek" onclick="openWeekDetail(0)">0ч 0м</span></span>
+      <span class="work-val"><span class="work-val-key work-week-val" id="workWeekKey" onclick="openWeekDetail(0)">0ч 0м</span> | <span class="work-week-val" id="workWeek" onclick="openWeekDetail(0)">0ч 0м</span></span>
       <span class="work-from">из</span>
       <span class="work-tgt"><span class="work-target">70ч</span></span>
       <span class="work-pctcol" id="workWeekPct"></span>
@@ -1999,6 +2000,7 @@ function getGrp(actId){const a=getAct(actId);if(!a)return null;return getAllGrou
 function getGrpName(actId){const g=getGrp(actId);return g?g.name:'?'}
 function getGrpColor(actId){const g=getGrp(actId);return g&&g.color?g.color:null}
 function isWork(actId){const a=getAct(actId);if(!a)return false;return !!a.isBusinessTime}
+function isKeyBusinessWork(actId){const a=getAct(actId);if(!a||!a.isBusinessTime)return false;const g=getGrp(actId);return g&&g.isBusinessTime_KeyGroup===true}
 
 function getActive(){return state.records.filter(r=>r.end===null)}
 function closeAll(now){state.records.forEach(r=>{if(r.end===null)r.end=now});state.active=[]}
@@ -2007,6 +2009,21 @@ function calcWorkMs(from,to){
   const iv=[];
   state.records.forEach(r=>{
     if(!isWork(r.activity))return;
+    const rs=new Date(r.start).getTime(),re=r.end?new Date(r.end).getTime():Date.now();
+    const s=Math.max(rs,from),e=Math.min(re,to);
+    if(e>s)iv.push([s,e]);
+  });
+  if(!iv.length)return 0;
+  iv.sort((a,b)=>a[0]-b[0]);
+  const mg=[[...iv[0]]];
+  for(let i=1;i<iv.length;i++){const l=mg[mg.length-1];if(iv[i][0]<=l[1])l[1]=Math.max(l[1],iv[i][1]);else mg.push([...iv[i]])}
+  let t=0;mg.forEach(x=>t+=x[1]-x[0]);return t;
+}
+
+function calcKeyBusinessMs(from,to){
+  const iv=[];
+  state.records.forEach(r=>{
+    if(!isKeyBusinessWork(r.activity))return;
     const rs=new Date(r.start).getTime(),re=r.end?new Date(r.end).getTime():Date.now();
     const s=Math.max(rs,from),e=Math.min(re,to);
     if(e>s)iv.push([s,e]);
@@ -2460,13 +2477,17 @@ function updateWorkTracker(){
   const now=mskNow();
   const ts=mskDayStartUTC(now.getFullYear(),now.getMonth()+1,now.getDate());
   const todayMs=calcWorkMs(ts,ts+86400000);
+  const todayKeyMs=calcKeyBusinessMs(ts,ts+86400000);
   document.getElementById('workToday').innerText=hmFromMs(todayMs);
+  document.getElementById('workTodayKey').innerText=hmFromMs(todayKeyMs);
   document.getElementById('workTodayPct').innerText='('+(todayMs/36000000*100).toFixed(1)+'%)';
 
   const mon=getMondayMSK(now);
   const ws=mskDayStartUTC(mon.getFullYear(),mon.getMonth()+1,mon.getDate());
   const weekMs=calcWorkMs(ws,ws+604800000);
+  const weekKeyMs=calcKeyBusinessMs(ws,ws+604800000);
   document.getElementById('workWeek').innerText=hmFromMs(weekMs);
+  document.getElementById('workWeekKey').innerText=hmFromMs(weekKeyMs);
   document.getElementById('workWeekPct').innerText='('+(weekMs/252000000*100).toFixed(1)+'%)';
 }
 
