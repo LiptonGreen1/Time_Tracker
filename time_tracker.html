@@ -1290,7 +1290,7 @@ color:rgba(255,255,255,0.7);
     <div class="week-days" id="weekDays"></div>
     <div class="work-grid">
       <span class="work-lbl">Сегодня</span>
-      <span class="work-val"><span class="work-val-key" id="workTodayKey">0ч 0м</span>   |   <span id="workToday">0ч 0м</span></span>
+      <span class="work-val"><span class="work-val-key" id="workTodayKey">0ч 0м</span>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<span id="workToday">0ч 0м</span></span>
       <span class="work-from">из</span>
       <span class="work-tgt"><span class="work-target">10ч</span></span>
       <span class="work-pctcol" id="workTodayPct"></span>
@@ -1653,7 +1653,7 @@ function openAlarmSettings(){
   openBtn.style.display=hasAlarm?'block':'none';
   row.classList.toggle('single',!hasAlarm);
   createPanel.classList.remove('open');
-  document.getElementById('alarmTimeInput').value='05:00';
+  document.getElementById('alarmTimeInput').value='06:30';
   selectAlarmStyle('gradient');
   lockScroll();
   document.getElementById('alarmSettingsOverlay').classList.add('open');
@@ -1693,14 +1693,14 @@ function selectAlarmStyle(styleName){
 // Закрывает микропанель выбора времени без изменения текущего будильника.
 function cancelAlarmCreatePanel(){
   document.getElementById('alarmCreatePanel').classList.remove('open');
-  document.getElementById('alarmTimeInput').value='05:00';
+  document.getElementById('alarmTimeInput').value='06:30';
   selectAlarmStyle('gradient');
 }
 
 // Создает новый одноразовый будильник; старый при этом уничтожается.
 function createNewAlarm(){
   stopAlarmAudio();
-  const value=document.getElementById('alarmTimeInput').value||'05:00';
+  const value=document.getElementById('alarmTimeInput').value||'06:30';
   const parts=value.split(':');
   const targetHour=Math.max(0,Math.min(23,parseInt(parts[0],10)||0));
   const targetMinute=Math.max(0,Math.min(59,parseInt(parts[1],10)||0));
