@@ -1552,6 +1552,7 @@ let alarmScreenInterval=null;
 let alarmSelectedStyle='gradient';
 let alarmAudioPrepared=false;
 let alarmAudioStartWarningShown=false;
+let alarmAudioStarted=false;
 
 // Загружает сохраненный будильник из localStorage, чтобы PWA переживала перезапуск.
 function loadAlarmState(){
@@ -1617,6 +1618,7 @@ function prepareAlarmAudio(){
 function startAlarmAudio(){
   const audio=document.getElementById('alarmAudio');
   if(!audio||!audio.paused)return;
+  if(alarmAudioStarted)return;
   audio.loop=true;
   audio.muted=false;
   audio.volume=1;
@@ -1628,6 +1630,7 @@ function startAlarmAudio(){
       console.warn('Alarm audio start failed',e);
     });
   }
+  alarmAudioStarted=true;
 }
 
 // Останавливает мелодию при выключении экрана будильника.
@@ -1636,6 +1639,7 @@ function stopAlarmAudio(){
   if(!audio)return;
   audio.pause();
   alarmAudioStartWarningShown=false;
+  alarmAudioStarted=false;
   try{audio.currentTime=0}catch(e){}
 }
 
@@ -1730,6 +1734,7 @@ function openAlarmScreen(){
     alarmState.screenOpen=true;
     saveAlarmState();
   }
+  alarmAudioStarted=false;
   lockScroll();
   document.getElementById('alarmScreenOverlay').classList.add('open');
   prepareAlarmAudio();
@@ -1763,7 +1768,6 @@ function updateAlarmScreen(){
     saveAlarmState();
     startAlarmAudio();
   }
-  if(alarmState.triggered)startAlarmAudio();
   const face=document.getElementById('alarmClockFace');
   face.classList.remove('gradient','white');
   face.classList.add(alarmState.colorStyle==='white'?'white':'gradient');
