@@ -41,7 +41,7 @@
     {"id": 4,  "name": "Ремонт",                              "group": 2, "isBusinessTime": false},
     {"id": 5,  "name": "Микология",                           "group": 2, "isBusinessTime": true},
     {"id": 6,  "name": "Труды",                               "group": 2, "isBusinessTime": false},
-    {"id": 7,  "name": "Кибернетизация деятельности",         "group": 2, "isBusinessTime": true},
+    {"id": 7,  "name": "Кибернетизация деятельности",         "group": 2, "isBusinessTime": true, "isBusinessTime_KeyGroup": true},
     {"id": 8,  "name": "Психика (Формула един.) | Соц. интеллект", "group": 2, "isBusinessTime": true},
 
     {"id": 9,  "name": "Духовное",                            "group": 3, "isBusinessTime": false},
@@ -65,7 +65,7 @@
     {"id": 23, "name": "Тренировка IQ: Шахматы",             "group": 6, "isBusinessTime": true},
     {"id": 24, "name": "Медитация",                           "group": 6, "isBusinessTime": true},
 
-    {"id": 25, "name": "Система №3",                          "group": 7, "isBusinessTime": false, "isBusinessTime_KeyGroup": true},
+    {"id": 25, "name": "Система №3",                          "group": 7, "isBusinessTime": false},
     {"id": 26, "name": "Система №4",                          "group": 7, "isBusinessTime": false},
     {"id": 27, "name": "Система №5",                          "group": 7, "isBusinessTime": false},
 
