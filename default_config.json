@@ -18,13 +18,13 @@
   ],
 
   "groups": [
-    {"id": 1,  "name": "[⬆️⬆️⬆️]#4 Бизнес", "isKeyGroup": true, "isBusinessTime_KeyGroup": true, "color": "#F8A8FA"},
-    {"id": 2,  "name": "[⬆️⬆️]#0 Сферы | Проекты", "isKeyGroup": true, "isBusinessTime_KeyGroup": true, "color": "linear-gradient(to bottom, #F8A8FA 45%, #73E981 70%)"},
+    {"id": 1,  "name": "[⬆️⬆️⬆️]#4 Бизнес", "isKeyGroup": true, "color": "#F8A8FA"},
+    {"id": 2,  "name": "[⬆️⬆️]#0 Сферы | Проекты", "isKeyGroup": true, "color": "linear-gradient(to bottom, #F8A8FA 45%, #73E981 70%)"},
     {"id": 3,  "name": "[⬆️⬆️]#0 Сферы | Обучение", "isKeyGroup": true, "color": "linear-gradient(to bottom, #F8A8FA 45%, #73E981 70%)"},
     {"id": 4,  "name": "[⬆️⬆️]#1 Тело", "isKeyGroup": true, "color": "linear-gradient(to bottom, #F8A8FA 45%, #73E981 70%)"},
     {"id": 5,  "name": "[⬆️⬆️]#2 Психика", "isKeyGroup": true, "color": "linear-gradient(to bottom, #F8A8FA 45%, #73E981 70%)"},
     {"id": 6,  "name": "[⬆️⬆️]#3 Интеллект", "isKeyGroup": true, "color": "linear-gradient(to bottom, #F8A8FA 45%, #73E981 70%)"},
-    {"id": 7,  "name": "[⬆️]#4 Будущ. Бизнес", "isKeyGroup": true, "isBusinessTime_KeyGroup": true, "color": "#73E981"},
+    {"id": 7,  "name": "[⬆️]#4 Будущ. Бизнес", "isKeyGroup": true, "color": "#73E981"},
     {"id": 8,  "name": "[⬆️] Очищение", "color": "#73E981"},
     {"id": 9,  "name": "[⬆️] Восполнение ресурсов", "color": "#73E981"},
     {"id": 10, "name": "[↗️] Общение", "color": "#91F7E8"},
@@ -34,8 +34,8 @@
   ],
 
   "activities": [
-    {"id": 1,  "name": "Система №1",                          "group": 1, "isBusinessTime": true},
-    {"id": 2,  "name": "Система №2",                          "group": 1, "isBusinessTime": true},
+    {"id": 1,  "name": "Система №1",                          "group": 1, "isBusinessTime": true, "isBusinessTime_KeyGroup": true},
+    {"id": 2,  "name": "Система №2",                          "group": 1, "isBusinessTime": true, "isBusinessTime_KeyGroup": true},
     {"id": 3,  "name": "Моделирование систем",                "group": 1, "isBusinessTime": true},
 
     {"id": 4,  "name": "Ремонт",                              "group": 2, "isBusinessTime": false},
@@ -65,7 +65,7 @@
     {"id": 23, "name": "Тренировка IQ: Шахматы",             "group": 6, "isBusinessTime": true},
     {"id": 24, "name": "Медитация",                           "group": 6, "isBusinessTime": true},
 
-    {"id": 25, "name": "Система №3",                          "group": 7, "isBusinessTime": false},
+    {"id": 25, "name": "Система №3",                          "group": 7, "isBusinessTime": false, "isBusinessTime_KeyGroup": true},
     {"id": 26, "name": "Система №4",                          "group": 7, "isBusinessTime": false},
     {"id": 27, "name": "Система №5",                          "group": 7, "isBusinessTime": false},
 

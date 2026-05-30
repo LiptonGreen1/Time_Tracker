@@ -366,7 +366,7 @@ font-size:13px;
 
 .work-lbl{color:rgba(255,255,255,0.5);font-size:12px}
 .work-val{font-variant-numeric:tabular-nums;text-align:center}
-.work-val-key{color:#FFB3D9;font-variant-numeric:tabular-nums;text-align:center}
+.work-val-key{color:#73E981;font-variant-numeric:tabular-nums;text-align:center}
 .work-from{color:rgba(255,255,255,0.35);font-size:11px}
 .work-tgt{}
 .work-target{color:#FF2FFF;font-weight:700}
@@ -2000,7 +2000,7 @@ function getGrp(actId){const a=getAct(actId);if(!a)return null;return getAllGrou
 function getGrpName(actId){const g=getGrp(actId);return g?g.name:'?'}
 function getGrpColor(actId){const g=getGrp(actId);return g&&g.color?g.color:null}
 function isWork(actId){const a=getAct(actId);if(!a)return false;return !!a.isBusinessTime}
-function isKeyBusinessWork(actId){const a=getAct(actId);if(!a||!a.isBusinessTime)return false;const g=getGrp(actId);return g&&g.isBusinessTime_KeyGroup===true}
+function isKeyBusinessWork(actId){const a=getAct(actId);if(!a)return false;return a.isBusinessTime_KeyGroup===true}
 
 function getActive(){return state.records.filter(r=>r.end===null)}
 function closeAll(now){state.records.forEach(r=>{if(r.end===null)r.end=now});state.active=[]}
