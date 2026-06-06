@@ -59,7 +59,7 @@
 	{"id": 60, "name": "Зарядка/Разминка",                    "group": 4, "isBusinessTime": false},
     {"id": 20, "name": "Прогулка",                            "group": 4, "isBusinessTime": false},
 
-    {"id": 21, "name": "Калибровка",                          "group": 5, "isBusinessTime": true},
+    {"id": 21, "name": "Калибровка",                          "group": 5, "isBusinessTime": true "isBusinessTime_KeyGroup": true},
 
     {"id": 22, "name": "Тренировка IQ: N-back",              "group": 6, "isBusinessTime": true},
     {"id": 23, "name": "Тренировка IQ: Шахматы",             "group": 6, "isBusinessTime": true},
