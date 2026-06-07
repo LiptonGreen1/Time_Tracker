@@ -62,7 +62,6 @@
     {"id": 21, "name": "Калибровка",                          "group": 5, "isBusinessTime": true, "isBusinessTime_KeyGroup": true},
 
     {"id": 22, "name": "Тренировка IQ",              "group": 6, "isBusinessTime": true},
-    ## {"id": 23, "name": "Тренировка IQ: Шахматы",             "group": 6, "isBusinessTime": true},
     {"id": 24, "name": "Медитация",                           "group": 6, "isBusinessTime": true},
 
     {"id": 25, "name": "Система №3",                          "group": 7, "isBusinessTime": false},
