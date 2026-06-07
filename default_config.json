@@ -46,8 +46,8 @@
 
     {"id": 9,  "name": "Духовное",                            "group": 3, "isBusinessTime": false},
     {"id": 10, "name": "Математика",                          "group": 3, "isBusinessTime": true},
-    {"id": 11, "name": "Экономика",                           "group": 3, "isBusinessTime": true},
-    {"id": 12, "name": "Бизнес",                              "group": 3, "isBusinessTime": true},
+    {"id": 11, "name": "Экономика",                           "group": 3, "isBusinessTime": true, "isBusinessTime_KeyGroup": true},
+    {"id": 12, "name": "Бизнес",                              "group": 3, "isBusinessTime": true, "isBusinessTime_KeyGroup": true},
     {"id": 13, "name": "Химия",                               "group": 3, "isBusinessTime": false},
     {"id": 14, "name": "Биология",                            "group": 3, "isBusinessTime": false},
     {"id": 15, "name": "Физика",                              "group": 3, "isBusinessTime": false},
@@ -61,8 +61,8 @@
 
     {"id": 21, "name": "Калибровка",                          "group": 5, "isBusinessTime": true, "isBusinessTime_KeyGroup": true},
 
-    {"id": 22, "name": "Тренировка IQ: N-back",              "group": 6, "isBusinessTime": true},
-    {"id": 23, "name": "Тренировка IQ: Шахматы",             "group": 6, "isBusinessTime": true},
+    {"id": 22, "name": "Тренировка IQ",              "group": 6, "isBusinessTime": true},
+    ## {"id": 23, "name": "Тренировка IQ: Шахматы",             "group": 6, "isBusinessTime": true},
     {"id": 24, "name": "Медитация",                           "group": 6, "isBusinessTime": true},
 
     {"id": 25, "name": "Система №3",                          "group": 7, "isBusinessTime": false},
